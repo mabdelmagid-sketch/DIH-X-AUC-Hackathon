@@ -23,7 +23,7 @@ Each use case below presents a client with a real business problem. The business
 1. Frame the business problem and understand the value proposition
 2. Identify which business questions your solution will address
 3. Design and implement technical features that deliver measurable business impact
-4. Document how your solution creates value for the client
+4. Document how your solution creates value for the client (feel free to name your proposed product something creative)
 
 Remember: clients look for measurable impact, scalability, and competitive advantages. Think like a consultant, build like an engineer.
 
@@ -59,6 +59,7 @@ To ensure optimal performance and manageability of the dataset, we have processe
 - Must be present at the root of your repository
 - Should include a clear project description and the problem it solves
 - List all features and functionalities
+- Include screenshots from your UI for different features
 - Document all technologies, frameworks, and external APIs used
 - Provide step-by-step installation instructions
 - Include usage guidelines and examples
