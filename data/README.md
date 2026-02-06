@@ -10,6 +10,10 @@ This directory contains datasets organized by their primary use cases. The data 
   1. Platform Revenue: Found in fct_invoices (B2B bills) and fct_payments (Transaction fees)
   2. Merchant Revenue: Found in fct_orders (People buying food/goods)
 
+## Processed Data
+
+The cleaned outputs live under data/processed/clean. The raw source files remain in data/Inventory Management. A manifest of the raw files (name, size, modified time) is written to data/processed/raw/manifest.csv.
+
 ## Inventory Management
 
 The following datasets support inventory management operations:
