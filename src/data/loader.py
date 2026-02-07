@@ -24,14 +24,18 @@ def load_config() -> dict:
 
 
 def _resolve_data_dir(config: dict) -> Path:
-    """Resolve the raw data directory from config."""
+    """Resolve the raw data directory from config.
+
+    Security: resolves the path and validates it does not escape
+    outside the project tree or point to a system directory.
+    """
     raw_dir = config["data"]["raw_dir"]
     # Try relative to BASE_DIR first
-    path = BASE_DIR / raw_dir
+    path = (BASE_DIR / raw_dir).resolve()
     if path.exists():
         return path
     # Try as absolute
-    path = Path(raw_dir)
+    path = Path(raw_dir).resolve()
     if path.exists():
         return path
     raise FileNotFoundError(f"Data directory not found: {raw_dir}")
@@ -104,8 +108,14 @@ def load_table(table_name: str, config: dict = None) -> pd.DataFrame:
     if filename is None:
         raise ValueError(f"Unknown table: {table_name}")
 
-    filepath = data_dir / filename
+    filepath = (data_dir / filename).resolve()
+    # Security: reject filenames containing path traversal sequences
+    if ".." in filename or filename.startswith("/") or filename.startswith("\\"):
+        raise ValueError(f"Invalid table filename (path traversal blocked): {filename}")
     logger.info(f"Loading {table_name} from {filepath}")
+
+    if not filepath.exists():
+        raise FileNotFoundError(f"Table file not found: {filepath}")
 
     df = pd.read_csv(filepath, low_memory=False)
     logger.info(f"  Loaded {len(df)} rows, {len(df.columns)} columns")

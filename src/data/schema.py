@@ -122,7 +122,13 @@ def validate_table(df: pd.DataFrame, table_name: str) -> pd.DataFrame:
 
     Returns:
         DataFrame with validated/casted types.
+
+    Raises:
+        ValueError: If the DataFrame is empty after loading.
     """
+    if df.empty:
+        raise ValueError(f"Table '{table_name}' is empty — aborting to prevent silent errors")
+
     if table_name not in SCHEMAS:
         logger.warning(f"No schema defined for '{table_name}', returning as-is")
         return df
@@ -143,5 +149,11 @@ def validate_table(df: pd.DataFrame, table_name: str) -> pd.DataFrame:
     missing = set(schema.keys()) - set(df.columns)
     if missing:
         logger.warning(f"Table '{table_name}' missing columns: {missing}")
+
+    # Warn on high null percentage in key ID column
+    if "id" in df.columns:
+        null_pct = df["id"].isna().mean() * 100
+        if null_pct > 5:
+            logger.warning(f"Table '{table_name}' has {null_pct:.1f}% null IDs")
 
     return df
