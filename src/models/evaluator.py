@@ -46,6 +46,16 @@ def wmape(actual: np.ndarray, predicted: np.ndarray) -> float:
 # Business-impact metrics (DKK-denominated)
 # ---------------------------------------------------------------------------
 
+def _sanitize_arrays(*arrays):
+    """Replace NaN/inf with 0 in numeric arrays for safe arithmetic."""
+    out = []
+    for a in arrays:
+        a = np.asarray(a, dtype=float)
+        a = np.where(np.isfinite(a), a, 0.0)
+        out.append(a)
+    return out
+
+
 def waste_cost_dkk(actual: np.ndarray, predicted: np.ndarray,
                    prices: np.ndarray, waste_fraction: float = 0.3) -> float:
     """Estimated waste cost in DKK from over-forecasting.
@@ -64,8 +74,10 @@ def waste_cost_dkk(actual: np.ndarray, predicted: np.ndarray,
     Returns:
         Total waste cost in DKK.
     """
+    actual, predicted, prices = _sanitize_arrays(actual, predicted, prices)
+    prices = np.clip(prices, 0, None)
     overstock = np.maximum(predicted - actual, 0)
-    return (overstock * prices * waste_fraction).sum()
+    return float((overstock * prices * waste_fraction).sum())
 
 
 def stockout_cost_dkk(actual: np.ndarray, predicted: np.ndarray,
@@ -83,8 +95,10 @@ def stockout_cost_dkk(actual: np.ndarray, predicted: np.ndarray,
     Returns:
         Total lost revenue in DKK.
     """
+    actual, predicted, prices = _sanitize_arrays(actual, predicted, prices)
+    prices = np.clip(prices, 0, None)
     understock = np.maximum(actual - predicted, 0)
-    return (understock * prices).sum()
+    return float((understock * prices).sum())
 
 
 def total_business_cost_dkk(actual: np.ndarray, predicted: np.ndarray,
