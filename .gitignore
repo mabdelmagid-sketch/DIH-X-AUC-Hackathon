@@ -1,21 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+
+# Data (too large for git)
+data/Inventory Management/
+data/Menu Engineering Part 1/
+data/Menu Engineering Part 2/
+data/Shift Planning/
 *.csv
 
-# Virtual environment
-.venv/
-venv/
-env/
-
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Model files (large)
+# Models
+models/
+*.joblib
+*.pkl
 *.pt
 *.h5
-*.pkl
+
+# ChromaDB
+chroma_db/
+
+# Node / Frontend
+node_modules/
+.next/
+.turbo/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test artifacts
+test-screenshots/
+config/
