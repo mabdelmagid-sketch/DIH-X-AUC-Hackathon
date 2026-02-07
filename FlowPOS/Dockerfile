@@ -18,6 +18,9 @@ COPY --from=deps /app/packages/db/node_modules ./packages/db/node_modules
 COPY --from=deps /app/packages/ui/node_modules ./packages/ui/node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+ARG FORECASTING_API_URL=http://localhost:8002
+ENV FORECASTING_API_URL=$FORECASTING_API_URL
+RUN mkdir -p apps/web/public
 RUN pnpm --filter @pos/web build
 
 # Run
