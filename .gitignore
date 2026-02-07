@@ -1,21 +1,22 @@
-*.csv
-
-# Virtual environment
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.env
 .venv/
 venv/
-env/
-
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Model files (large)
-*.pt
-*.h5
-*.pkl
-
-# IDE
-.vscode/
+ENV/
+data/raw/*.csv
+data/cache/
+data/predictions/*.csv
+# Model .pkl files are intentionally tracked (small enough for GitHub)
+*.log
+.DS_Store
+Thumbs.db
 .idea/
+.vscode/
+*.ipynb_checkpoints/
