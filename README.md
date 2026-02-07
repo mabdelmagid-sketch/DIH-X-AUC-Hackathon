@@ -4,10 +4,19 @@
 
 FlowPOS is a full-stack POS and inventory intelligence system for restaurants, cafes, and grocery stores. It combines a production-grade point-of-sale terminal with AI-driven demand forecasting, real-time context awareness, and an LLM-powered assistant that helps managers make smarter prep, ordering, and waste-reduction decisions every day.
 
+### Live Demo
+
+| Service | URL |
+|---------|-----|
+| **POS Dashboard** | [https://pos-frontend-production-56bb.up.railway.app](https://pos-frontend-production-56bb.up.railway.app) |
+| **Forecasting API** | [https://hopeful-elegance-production-c09a.up.railway.app](https://hopeful-elegance-production-c09a.up.railway.app) |
+| **API Health Check** | [https://hopeful-elegance-production-c09a.up.railway.app/api/health](https://hopeful-elegance-production-c09a.up.railway.app/api/health) |
+
 ---
 
 ## Table of Contents
 
+- [Live Demo](#live-demo)
 - [Problem Statement](#problem-statement)
 - [Solution Overview](#solution-overview)
 - [System Architecture](#system-architecture)
