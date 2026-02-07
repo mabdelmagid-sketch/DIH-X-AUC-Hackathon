@@ -89,7 +89,9 @@ def build_inference_features(daily_sales_df: pd.DataFrame) -> pd.DataFrame:
     df["month_cos"] = np.cos(2 * np.pi * df["month"] / 12)
 
     # --- Lag features (per item) ---
-    group = ["place_id", "item_id"] if "place_id" in df.columns else ["item"]
+    # Determine grouping columns based on what's available
+    item_col = "item_id" if "item_id" in df.columns else "item"
+    group = ["place_id", item_col] if "place_id" in df.columns else [item_col]
     target = "quantity_sold"
 
     for lag in [1, 7, 14, 28]:
@@ -180,7 +182,8 @@ def predict_dual(
 
     # Get the latest row per item (most recent data point)
     # This is what we use for "predict next day"
-    group_cols = ["place_id", "item_id"] if "place_id" in feature_df.columns else ["item"]
+    item_col = "item_id" if "item_id" in feature_df.columns else "item"
+    group_cols = ["place_id", item_col] if "place_id" in feature_df.columns else [item_col]
     latest = feature_df.sort_values("date").groupby(group_cols, observed=True).last().reset_index()
 
     if latest.empty:

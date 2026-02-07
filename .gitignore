@@ -70,6 +70,10 @@ Thumbs.db
 
 # Test artifacts
 test-screenshots/
+.pytest_cache/
+
+# Pen design files
+*.pen
 
 # Allow specific config directories
 !config/settings.yaml
