@@ -52,7 +52,14 @@ class HybridForecaster:
             ma_window: Moving average window in days.
             round_predictions: Whether to round predictions to nearest integer.
             xgb_params: Optional XGBoost hyperparameters.
+
+        Raises:
+            ValueError: If xgb_weight is outside [0, 1] or ma_window < 1.
         """
+        if not 0.0 <= xgb_weight <= 1.0:
+            raise ValueError(f"xgb_weight must be between 0 and 1, got {xgb_weight}")
+        if ma_window < 1:
+            raise ValueError(f"ma_window must be >= 1, got {ma_window}")
         self.xgb_weight = xgb_weight
         self.ma_weight = 1.0 - xgb_weight
         self.ma_window = ma_window
@@ -85,12 +92,18 @@ class HybridForecaster:
             target_col: Target column (needed by MA model for rolling calc).
 
         Returns:
-            Series of blended predictions, clipped to >= 0.
+            Series of blended predictions, clipped to >= 0 with NaN/inf guards.
         """
         xgb_preds = self.xgboost.predict(df)
         ma_preds = self.ma_model.predict(df, target_col)
 
         blended = self.xgb_weight * xgb_preds + self.ma_weight * ma_preds
+
+        # Guard against NaN/inf leaking into predictions
+        nan_count = blended.isna().sum() + np.isinf(blended).sum()
+        if nan_count > 0:
+            logger.warning(f"HybridForecaster: {nan_count} NaN/inf predictions replaced with 0")
+            blended = blended.replace([np.inf, -np.inf], np.nan).fillna(0)
 
         if self.round_predictions:
             blended = blended.round()
@@ -166,7 +179,12 @@ class WasteOptimizedForecaster:
             xgb_weight: XGBoost weight in the underlying hybrid blend.
             ma_window: Moving average window.
             xgb_params: Optional XGBoost hyperparameters.
+
+        Raises:
+            ValueError: If shrink is outside (0, 1].
         """
+        if not 0.0 < shrink <= 1.0:
+            raise ValueError(f"shrink must be between 0 (exclusive) and 1, got {shrink}")
         self.shrink = shrink
         self.hybrid = HybridForecaster(
             xgb_weight=xgb_weight, ma_window=ma_window,

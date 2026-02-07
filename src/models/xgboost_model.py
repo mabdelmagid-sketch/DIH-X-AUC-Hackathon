@@ -130,7 +130,7 @@ class XGBoostForecaster:
             df: Feature DataFrame.
 
         Returns:
-            Series of predictions (clipped to >= 0).
+            Series of predictions (clipped to >= 0, NaN/inf replaced with 0).
         """
         if self.model is None:
             raise RuntimeError("Model not fitted. Call fit() first.")
@@ -138,6 +138,10 @@ class XGBoostForecaster:
         df = self._encode_categoricals(df, fit=False)
         X = df[self.feature_cols].fillna(0)
         predictions = self.model.predict(X)
+
+        # Guard: replace any NaN/inf from XGBoost with 0
+        predictions = np.where(np.isfinite(predictions), predictions, 0)
+
         return pd.Series(np.clip(predictions, 0, None), index=df.index)
 
     def get_feature_importance(self, top_n: int = 20) -> pd.DataFrame:
