@@ -8,7 +8,10 @@ __pycache__/
 env/
 venv/
 .venv/
+ENV/
 *.egg-info/
+*.eggs/
+*.egg
 dist/
 build/
 
@@ -21,6 +24,9 @@ data/Inventory Management/
 data/Menu Engineering Part 1/
 data/Menu Engineering Part 2/
 data/Shift Planning/
+data/raw/*.csv
+data/cache/
+data/predictions/*.csv
 *.csv
 
 # Models (generic)
@@ -58,6 +64,9 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Jupyter
+*.ipynb_checkpoints/
 
 # Test artifacts
 test-screenshots/

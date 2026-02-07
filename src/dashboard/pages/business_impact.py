@@ -1,8 +1,9 @@
-"""Business Impact page: two cost equations, interactive weight slider, dual-model comparison.
+"""Business Impact page: three business-goal presets + custom weights, dual-model comparison.
 
-Two models evaluated under two equations:
-  - Profit-Oriented Model  + Equation: Total = 1.0 x Waste + 2.0 x Stockout
-  - Sustainability Model   + Equation: Total = 2.0 x Waste + 1.0 x Stockout
+Three preset equations mapped to business goals:
+  - Balanced (Equal Weight):          Total = 1.0 x Waste + 1.0 x Stockout  (default)
+  - Maximize Revenue (Avoid Stockouts): Total = 1.0 x Waste + 2.0 x Stockout
+  - Minimize Waste (Sustainability):  Total = 2.0 x Waste + 1.0 x Stockout
 
 Users can also set custom weights via sidebar sliders.
 """
@@ -82,23 +83,36 @@ def render(df: pd.DataFrame):
 
     # ── Sidebar: equation controls ───────────────────────────────────────
     with st.sidebar:
-        st.subheader("Cost Equation Settings")
+        st.subheader("Business Goal")
 
         preset = st.radio(
-            "Preset",
-            ["Profit-Oriented", "Sustainability", "Custom"],
+            "Select your priority",
+            [
+                "Balanced (Equal Weight)",
+                "Maximize Revenue (Avoid Stockouts)",
+                "Minimize Waste (Sustainability)",
+                "Custom Weights",
+            ],
             index=0,
             key="eq_preset",
-            help="Choose a preset or set custom weights below.",
+            help=(
+                "Choose how to weigh food-waste cost vs. stockout (lost-sales) cost. "
+                "This changes which model looks best for your business goals."
+            ),
         )
 
-        if preset == "Profit-Oriented":
+        if preset == "Balanced (Equal Weight)":
+            wm, sm = 1.0, 1.0
+            st.caption("Both waste and stockout costs are weighted equally.")
+        elif preset == "Maximize Revenue (Avoid Stockouts)":
             wm, sm = 1.0, 2.0
-        elif preset == "Sustainability":
+            st.caption("Stockout cost is weighted 2x — prioritises never running out.")
+        elif preset == "Minimize Waste (Sustainability)":
             wm, sm = 2.0, 1.0
+            st.caption("Waste cost is weighted 2x — prioritises reducing food waste.")
         else:
             wm = st.slider("Waste cost weight", 0.5, 3.0, 1.0, 0.1, key="wm_slider")
-            sm = st.slider("Stockout cost weight", 0.5, 3.0, 2.0, 0.1, key="sm_slider")
+            sm = st.slider("Stockout cost weight", 0.5, 3.0, 1.0, 0.1, key="sm_slider")
 
         st.markdown(f"**Active equation:**")
         st.code(f"Total = {wm}x Waste + {sm}x Stockout", language=None)
@@ -129,30 +143,51 @@ def render(df: pd.DataFrame):
     sust_stockout = stockout_cost_dkk(actual, sust_pred, prices)
     sust_total    = _cost(actual, sust_pred, prices, wm, sm)
 
-    # Also compute under BOTH preset equations for head-to-head
+    # Also compute under ALL three preset equations for head-to-head
+    # Balanced (1x, 1x)
+    prof_total_eq0 = _cost(actual, prof_pred, prices, 1.0, 1.0)
+    sust_total_eq0 = _cost(actual, sust_pred, prices, 1.0, 1.0)
+    bl_total_eq0   = _cost(actual, bl_pred, prices, 1.0, 1.0)
+    # Maximize Revenue (1x, 2x)
     prof_total_eq1 = _cost(actual, prof_pred, prices, 1.0, 2.0)
-    prof_total_eq2 = _cost(actual, prof_pred, prices, 2.0, 1.0)
     sust_total_eq1 = _cost(actual, sust_pred, prices, 1.0, 2.0)
-    sust_total_eq2 = _cost(actual, sust_pred, prices, 2.0, 1.0)
     bl_total_eq1   = _cost(actual, bl_pred, prices, 1.0, 2.0)
+    # Minimize Waste (2x, 1x)
+    prof_total_eq2 = _cost(actual, prof_pred, prices, 2.0, 1.0)
+    sust_total_eq2 = _cost(actual, sust_pred, prices, 2.0, 1.0)
     bl_total_eq2   = _cost(actual, bl_pred, prices, 2.0, 1.0)
 
     # ════════════════════════════════════════════════════════════════════════
-    # SECTION 0 – The Two Equations (prominent display)
+    # SECTION 0 – The Three Business-Goal Equations (prominent display)
     # ════════════════════════════════════════════════════════════════════════
     st.divider()
-    eq1, eq2 = st.columns(2)
+    eq0, eq1, eq2 = st.columns(3)
 
+    _BALANCED_COLOR = "#42A5F5"  # blue – balanced
+
+    with eq0:
+        st.markdown(
+            f"<div style='border:2px solid {_BALANCED_COLOR};border-radius:12px;"
+            f"padding:20px;text-align:center;'>"
+            f"<div style='font-size:1.1rem;font-weight:700;color:{_BALANCED_COLOR};'>"
+            f"Balanced (Equal Weight)</div>"
+            f"<div style='font-size:1.4rem;font-weight:600;margin:10px 0;'>"
+            f"Total = 1.0 x Waste + 1.0 x Stockout</div>"
+            f"<div style='font-size:0.85rem;color:#757575;'>"
+            f"No bias &rarr; waste and stockout costs treated equally</div>"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
     with eq1:
         st.markdown(
             f"<div style='border:2px solid {_PROFIT_COLOR};border-radius:12px;"
             f"padding:20px;text-align:center;'>"
-            f"<div style='font-size:1.2rem;font-weight:700;color:{_PROFIT_COLOR};'>"
-            f"Profit-Oriented Equation</div>"
-            f"<div style='font-size:1.6rem;font-weight:600;margin:10px 0;'>"
+            f"<div style='font-size:1.1rem;font-weight:700;color:{_PROFIT_COLOR};'>"
+            f"Maximize Revenue</div>"
+            f"<div style='font-size:1.4rem;font-weight:600;margin:10px 0;'>"
             f"Total = 1.0 x Waste + 2.0 x Stockout</div>"
-            f"<div style='font-size:0.9rem;color:#757575;'>"
-            f"Penalises missed sales 2x &rarr; stocks more &rarr; higher revenue, some waste</div>"
+            f"<div style='font-size:0.85rem;color:#757575;'>"
+            f"Penalises missed sales 2x &rarr; stocks more &rarr; higher revenue</div>"
             f"</div>",
             unsafe_allow_html=True,
         )
@@ -160,12 +195,12 @@ def render(df: pd.DataFrame):
         st.markdown(
             f"<div style='border:2px solid {_SUSTAIN_COLOR};border-radius:12px;"
             f"padding:20px;text-align:center;'>"
-            f"<div style='font-size:1.2rem;font-weight:700;color:{_SUSTAIN_COLOR};'>"
-            f"Sustainability Equation</div>"
-            f"<div style='font-size:1.6rem;font-weight:600;margin:10px 0;'>"
+            f"<div style='font-size:1.1rem;font-weight:700;color:{_SUSTAIN_COLOR};'>"
+            f"Minimize Waste</div>"
+            f"<div style='font-size:1.4rem;font-weight:600;margin:10px 0;'>"
             f"Total = 2.0 x Waste + 1.0 x Stockout</div>"
-            f"<div style='font-size:0.9rem;color:#757575;'>"
-            f"Penalises food waste 2x &rarr; stocks less &rarr; less waste, some missed sales</div>"
+            f"<div style='font-size:0.85rem;color:#757575;'>"
+            f"Penalises food waste 2x &rarr; less waste, more sustainable</div>"
             f"</div>",
             unsafe_allow_html=True,
         )
@@ -206,21 +241,25 @@ def render(df: pd.DataFrame):
     _gap()
 
     # ════════════════════════════════════════════════════════════════════════
-    # SECTION 2 – Head-to-Head: both models x both equations
+    # SECTION 2 – Head-to-Head: both models x all three equations
     # ════════════════════════════════════════════════════════════════════════
-    st.subheader("Head-to-Head: Both Models x Both Equations")
-    st.caption("Each model evaluated under both cost equations to show the trade-off")
+    st.subheader("Head-to-Head: Models x Business Goals")
+    st.caption("Each model evaluated under all three business-goal equations")
 
     h2h_data = {
         "Scenario": [
             "No Model (MA28)",
             "Profit-Oriented Model",
         ],
-        "Profit Eq (1x W + 2x S)": [
+        "Balanced (1x W + 1x S)": [
+            _dkk(bl_total_eq0),
+            _dkk(prof_total_eq0),
+        ],
+        "Max Revenue (1x W + 2x S)": [
             _dkk(bl_total_eq1),
             _dkk(prof_total_eq1),
         ],
-        "Sustainability Eq (2x W + 1x S)": [
+        "Min Waste (2x W + 1x S)": [
             _dkk(bl_total_eq2),
             _dkk(prof_total_eq2),
         ],
@@ -235,8 +274,9 @@ def render(df: pd.DataFrame):
     }
     if has_wo:
         h2h_data["Scenario"].append("Sustainability Model")
-        h2h_data["Profit Eq (1x W + 2x S)"].append(_dkk(sust_total_eq1))
-        h2h_data["Sustainability Eq (2x W + 1x S)"].append(_dkk(sust_total_eq2))
+        h2h_data["Balanced (1x W + 1x S)"].append(_dkk(sust_total_eq0))
+        h2h_data["Max Revenue (1x W + 2x S)"].append(_dkk(sust_total_eq1))
+        h2h_data["Min Waste (2x W + 1x S)"].append(_dkk(sust_total_eq2))
         h2h_data["Waste Cost"].append(_dkk(sust_waste))
         h2h_data["Stockout Cost"].append(_dkk(sust_stockout))
 
@@ -598,8 +638,9 @@ def render(df: pd.DataFrame):
         "Waste Cost (raw)",
         "Stockout Cost (raw)",
         f"Total Cost ({wm}x W + {sm}x S)",
-        "Cost under Profit Eq (1x W + 2x S)",
-        "Cost under Sustain Eq (2x W + 1x S)",
+        "Balanced Eq (1x W + 1x S)",
+        "Max Revenue Eq (1x W + 2x S)",
+        "Min Waste Eq (2x W + 1x S)",
         "Forecast Accuracy",
         "MAE (units)",
         "Overstock Units",
@@ -607,11 +648,12 @@ def render(df: pd.DataFrame):
         "Projected Annual Savings",
     ]
 
-    def _col(pred, total, eq1, eq2):
+    def _col(pred, total, eq0, eq1, eq2):
         return [
             _dkk(waste_cost_dkk(actual, pred, prices)),
             _dkk(stockout_cost_dkk(actual, pred, prices)),
             _dkk(total),
+            _dkk(eq0),
             _dkk(eq1),
             _dkk(eq2),
             f"{forecast_accuracy(actual, pred):.1f}%",
@@ -623,11 +665,11 @@ def render(df: pd.DataFrame):
 
     data = {
         "Metric": rows,
-        "No Model (MA28)": _col(bl_pred, bl_total, bl_total_eq1, bl_total_eq2),
-        "Profit-Oriented": _col(prof_pred, prof_total, prof_total_eq1, prof_total_eq2),
+        "No Model (MA28)": _col(bl_pred, bl_total, bl_total_eq0, bl_total_eq1, bl_total_eq2),
+        "Profit-Oriented": _col(prof_pred, prof_total, prof_total_eq0, prof_total_eq1, prof_total_eq2),
     }
     if has_wo:
-        data["Sustainability"] = _col(sust_pred, sust_total, sust_total_eq1, sust_total_eq2)
+        data["Sustainability"] = _col(sust_pred, sust_total, sust_total_eq0, sust_total_eq1, sust_total_eq2)
 
     st.dataframe(pd.DataFrame(data), use_container_width=True, hide_index=True)
 
