@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+:root {
+  /* Primary */
+  --primary: #16a34a;
+  --primary-foreground: #FFFFFF;
+
+  /* Destructive */
+  --destructive: #D93C15;
+
+  /* Background & Surface */
+  --background: #F2F3F0;
+  --foreground: #111111;
+  --card: #FFFFFF;
+  --card-foreground: #111111;
+  --popover: #FFFFFF;
+  --popover-foreground: #111111;
+
+  /* Secondary & Accent */
+  --secondary: #E7E8E5;
+  --secondary-foreground: #111111;
+  --accent: #F2F3F0;
+  --accent-foreground: #111111;
+
+  /* Muted */
+  --muted: #F2F3F0;
+  --muted-foreground: #666666;
+
+  /* Borders & Input */
+  --border: #CBCCC9;
+  --input: #CBCCC9;
+  --ring: #666666;
+
+  /* Sidebar */
+  --sidebar: #F7F7F6;
+  --sidebar-accent: #EBEBEA;
+  --sidebar-accent-foreground: #111111;
+  --sidebar-border: #E0E0DE;
+  --sidebar-foreground: #555555;
+  --sidebar-primary: #111111;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-ring: #71717a;
+
+  /* Status */
+  --color-success: #DCFCE7;
+  --color-success-foreground: #15803D;
+  --color-warning: #E9E3D8;
+  --color-warning-foreground: #804200;
+  --color-error: #E5DCDA;
+  --color-error-foreground: #8C1C00;
+  --color-info: #DFDFE6;
+  --color-info-foreground: #000066;
+
+  /* Radius */
+  --radius-m: 16px;
+  --radius-pill: 999px;
+}
+
+@layer base {
+  .font-brand {
+    font-family: var(--font-jetbrains-mono), "JetBrains Mono", monospace;
+  }
+
+  .font-body {
+    font-family: var(--font-geist), "Geist", sans-serif;
+  }
+
+  [dir="rtl"] .font-body {
+    font-family: var(--font-noto-arabic), "Noto Sans Arabic", var(--font-geist), "Geist", sans-serif;
+  }
+
+  .material-icon {
+    font-family: "Material Symbols Sharp";
+    font-weight: 100;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "liga";
+  }
+
+  html, body {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+}
