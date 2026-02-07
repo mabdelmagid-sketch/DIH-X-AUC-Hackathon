@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     data_path: Path = Path("../data/Inventory Management")
     model_path: Path = Path("./models")
     chroma_path: Path = Path("./chroma_db")
+    trained_models_dir: Path = Path("./data/models")
 
     # Model settings
     default_llm: str = "anthropic/claude-3.5-sonnet"

@@ -23,12 +23,17 @@ data/Menu Engineering Part 2/
 data/Shift Planning/
 *.csv
 
-# Models
-models/
+# Models (generic)
 *.joblib
-*.pkl
 *.pt
 *.h5
+# Allow trained model .pkl files and model source code
+!FlowPOS/services/forecasting/data/models/*.pkl
+!data/models/*.pkl
+!FlowPOS/services/forecasting/src/models/
+!FlowPOS/services/forecasting/src/models/**
+!inventory-forecasting/src/models/
+!inventory-forecasting/src/models/**
 
 # ChromaDB
 chroma_db/
@@ -56,4 +61,7 @@ Thumbs.db
 
 # Test artifacts
 test-screenshots/
-config/
+
+# Allow specific config directories
+!config/settings.yaml
+!inventory-forecasting/settings.yaml

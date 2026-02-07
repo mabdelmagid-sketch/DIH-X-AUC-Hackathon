@@ -530,12 +530,131 @@ class ToolExecutor:
     ) -> str:
         """Get forecasts from both models for comparison.
 
-        Returns waste-optimized and stockout-optimized predictions
-        side by side so the LLM can pick per item.
+        Tries trained HybridForecaster/WasteOptimizedForecaster first.
+        Falls back to SQL-based averages with shrink/buffer multipliers.
         """
         self._ensure_tables()
 
-        # Get recent sales data to compute base forecast
+        # ── Try trained models first ──────────────────────────────────
+        try:
+            model_results = self._dual_forecast_trained_models(
+                item_name, days_ahead, place_id
+            )
+            if model_results:
+                return json.dumps(model_results, default=str)
+        except Exception as e:
+            logger.warning(f"Trained model prediction failed, using SQL fallback: {e}")
+
+        # ── SQL-based fallback ────────────────────────────────────────
+        return self._dual_forecast_sql_fallback(item_name, days_ahead, place_id)
+
+    def _dual_forecast_trained_models(
+        self,
+        item_name: Optional[str] = None,
+        days_ahead: int = 7,
+        place_id: Optional[int] = None,
+    ) -> list[dict]:
+        """Use trained .pkl models for dual predictions."""
+        from ..models.model_service import load_trained_models, build_inference_features
+
+        models = load_trained_models()
+        if not models:
+            return []
+
+        # Fetch raw daily sales from DuckDB
+        params = []
+        filters = []
+        if item_name:
+            filters.append(f"LOWER(oi.title) LIKE LOWER('%' || ${len(params) + 1} || '%')")
+            params.append(item_name)
+        if place_id is not None:
+            filters.append(f"o.place_id = ${len(params) + 1}")
+            params.append(place_id)
+        where = f"AND {' AND '.join(filters)}" if filters else ""
+
+        sql = f"""
+        SELECT
+            oi.title as item,
+            o.place_id as place_id,
+            oi.title as item_id,
+            DATE_TRUNC('day', to_timestamp(o.created))::DATE as date,
+            SUM(oi.quantity) as quantity_sold
+        FROM fct_orders o
+        JOIN fct_order_items oi ON o.id = oi.order_id
+        WHERE o.created IS NOT NULL
+          AND to_timestamp(o.created) >= CURRENT_DATE - INTERVAL '90' DAY
+          {where}
+        GROUP BY 1, 2, 3, 4
+        ORDER BY item, date
+        """
+        raw_df = self.loader.query(sql, params if params else None)
+        if raw_df.empty:
+            return []
+
+        # Build features and predict
+        import pandas as pd
+        feature_df = build_inference_features(raw_df)
+        if feature_df.empty:
+            return []
+
+        balanced_model = models.get("balanced")
+        waste_model = models.get("waste_optimized")
+        if not balanced_model:
+            return []
+
+        # Use latest row per item for next-day prediction
+        latest = feature_df.sort_values("date").groupby("item", observed=True).last().reset_index()
+
+        try:
+            balanced_preds = balanced_model.predict(latest, "quantity_sold")
+            waste_preds = waste_model.predict(latest, "quantity_sold") if waste_model else balanced_preds * 0.85
+        except Exception as e:
+            logger.warning(f"Model predict() failed: {e}")
+            return []
+
+        results = []
+        for i, (_, row) in enumerate(latest.iterrows()):
+            avg = float(row.get("rolling_mean_7d", row.get("quantity_sold", 0)))
+            std = float(row.get("rolling_std_14d", row.get("rolling_std_7d", 0))) or 0
+            cv = std / avg if avg > 0 else 0
+
+            bp = float(balanced_preds.iloc[i]) if i < len(balanced_preds) else avg
+            wp = float(waste_preds.iloc[i]) if i < len(waste_preds) else avg * 0.85
+            safety = round(1.65 * std, 1)
+
+            item_lower = str(row.get("item", "")).lower()
+            perishable_kw = ["salad", "juice", "shake", "fresh", "smoothie",
+                             "sandwich", "bowl", "wrap", "sushi", "bread"]
+
+            if cv > 1.0:
+                risk = "high"
+            elif cv > 0.5:
+                risk = "medium"
+            else:
+                risk = "low"
+
+            results.append({
+                "item": row.get("item"),
+                "avg_daily_demand": round(avg, 1),
+                "demand_cv": round(cv, 3),
+                "demand_risk": risk,
+                "is_perishable": any(kw in item_lower for kw in perishable_kw),
+                "forecast_waste_optimized": round(wp, 1),
+                "forecast_stockout_optimized": round(bp * 1.20, 1),
+                "forecast_balanced": round(bp, 1),
+                "safety_stock_units": safety,
+                "model_source": "trained_hybrid_30xgb_70ma7",
+            })
+
+        return results
+
+    def _dual_forecast_sql_fallback(
+        self,
+        item_name: Optional[str] = None,
+        days_ahead: int = 7,
+        place_id: Optional[int] = None,
+    ) -> str:
+        """SQL-based average fallback when trained models aren't available."""
         params = []
         filters = []
 
@@ -593,25 +712,12 @@ class ToolExecutor:
             std = float(row.get("std_daily", 0))
             cv = float(row.get("cv", 0))
 
-            # Balanced model: base prediction (MA-like)
-            balanced = round(avg, 1)
-
-            # Waste-optimized: shrink by 15% (matches friend's 0.85 factor)
-            waste_opt = round(avg * 0.85, 1)
-
-            # Stockout-optimized: buffer by 20%
-            stockout_opt = round(avg * 1.20, 1)
-
-            # Safety stock at 95% service level (z=1.65)
             safety_stock = round(1.65 * std, 1)
 
-            # Perishability heuristic
             item_lower = str(row.get("item", "")).lower()
             perishable_kw = ["salad", "juice", "shake", "fresh", "smoothie",
                              "sandwich", "bowl", "wrap", "sushi", "bread"]
-            is_perishable = any(kw in item_lower for kw in perishable_kw)
 
-            # Risk classification
             if cv > 1.0:
                 risk = "high"
             elif cv > 0.5:
@@ -621,15 +727,16 @@ class ToolExecutor:
 
             results.append({
                 "item": row.get("item"),
-                "avg_daily_demand": balanced,
+                "avg_daily_demand": round(avg, 1),
                 "demand_cv": round(cv, 3),
                 "demand_risk": risk,
-                "is_perishable": is_perishable,
-                "forecast_waste_optimized": waste_opt,
-                "forecast_stockout_optimized": stockout_opt,
-                "forecast_balanced": balanced,
+                "is_perishable": any(kw in item_lower for kw in perishable_kw),
+                "forecast_waste_optimized": round(avg * 0.85, 1),
+                "forecast_stockout_optimized": round(avg * 1.20, 1),
+                "forecast_balanced": round(avg, 1),
                 "safety_stock_units": safety_stock,
                 "active_days_last_60": int(row.get("active_days", 0)),
+                "model_source": "sql_average_fallback",
             })
 
         return json.dumps(results, default=str)

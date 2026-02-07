@@ -42,6 +42,17 @@ def get_forecaster() -> DemandForecaster:
     return _instances["forecaster"]
 
 
+def preload_trained_models():
+    """Pre-load the trained HybridForecaster + WasteOptimizedForecaster .pkl files."""
+    from ..models.model_service import load_trained_models
+    models = load_trained_models()
+    loaded = list(models.keys())
+    if loaded:
+        print(f"Trained models loaded: {loaded}")
+    else:
+        print("No trained .pkl models found in data/models/ - dual forecast will use SQL fallback")
+
+
 def get_llm_client() -> Optional[LLMClient]:
     """Return singleton LLMClient (None if API key missing)."""
     if "llm_client" not in _instances:
