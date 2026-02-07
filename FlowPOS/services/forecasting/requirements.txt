@@ -16,6 +16,11 @@ openai>=1.12.0
 chromadb>=0.4.22
 sentence-transformers>=2.3.1
 
+# Context Signals (weather, holidays, daylight)
+astral>=3.2
+workalendar>=17.0.0
+holidays>=0.40
+
 # Utils
 python-dotenv>=1.0.0
 pydantic>=2.6.0

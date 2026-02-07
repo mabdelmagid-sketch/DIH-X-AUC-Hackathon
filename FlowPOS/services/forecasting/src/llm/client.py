@@ -133,9 +133,9 @@ class LLMClient:
                     except json.JSONDecodeError:
                         arguments = {}
 
-                    # Execute the tool
+                    # Execute the tool (async-aware)
                     if self.tool_executor:
-                        result = self.tool_executor.execute(tool_name, arguments)
+                        result = await self.tool_executor.execute_async(tool_name, arguments)
                     else:
                         result = json.dumps({"error": "Tool executor not configured"})
 
@@ -223,7 +223,7 @@ class LLMClient:
                     yield f"data: {json.dumps({'type': 'tool_call', 'tool': tool_name, 'args': arguments})}\n\n"
 
                     if self.tool_executor:
-                        result = self.tool_executor.execute(tool_name, arguments)
+                        result = await self.tool_executor.execute_async(tool_name, arguments)
                     else:
                         result = json.dumps({"error": "Tool executor not configured"})
 

@@ -43,6 +43,14 @@ const navigation: NavSection[] = [
     ],
   },
   {
+    titleKey: "ai",
+    items: [
+      { labelKey: "forecast", icon: "trending_up", href: "/dashboard/forecast" },
+      { labelKey: "insights", icon: "lightbulb", href: "/dashboard/insights" },
+      { labelKey: "simulator", icon: "science", href: "/dashboard/simulator" },
+    ],
+  },
+  {
     titleKey: "analytics",
     items: [
       { labelKey: "reports", icon: "bar_chart", href: "/dashboard/reports" },

@@ -4,8 +4,13 @@ Function-calling tool definitions and executor for FlowPOS LLM.
 Defines the tools the LLM can call to query real data, and provides
 an executor that maps tool names to actual data queries.
 """
+import asyncio
 import json
+import logging
+from datetime import date
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 # Tool definitions in OpenAI function-calling format
 TOOL_DEFINITIONS = [
@@ -180,6 +185,54 @@ TOOL_DEFINITIONS = [
                 "required": []
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_context_signals",
+            "description": "Get real-time environmental context (weather forecast, holidays, daylight, Danish retail calendar, payday proximity, severe weather alerts) for Copenhagen. Use this BEFORE deciding inventory strategy to understand external factors affecting demand. Returns a recommendation_bias suggesting whether to prioritize waste reduction or stockout prevention.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "description": "Target date in YYYY-MM-DD format. Defaults to today."
+                    },
+                    "days_ahead": {
+                        "type": "integer",
+                        "description": "Number of days to look ahead for weather outlook (default 3, max 16)",
+                        "default": 3
+                    }
+                },
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_dual_forecast",
+            "description": "Get demand forecasts from BOTH models: waste-optimized (orders less to reduce spoilage) and stockout-optimized (orders more to prevent missed sales). Use context_signals and item characteristics to decide which forecast to recommend per item. Returns both predictions side by side.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "item_name": {
+                        "type": "string",
+                        "description": "Item name filter (partial match). Omit for all items."
+                    },
+                    "days_ahead": {
+                        "type": "integer",
+                        "description": "Days to forecast (default 7)",
+                        "default": 7
+                    },
+                    "place_id": {
+                        "type": "integer",
+                        "description": "Filter by store/place ID"
+                    }
+                },
+                "required": []
+            }
+        }
     }
 ]
 
@@ -199,14 +252,32 @@ class ToolExecutor:
             self._tables_loaded = True
 
     def execute(self, tool_name: str, arguments: dict) -> str:
-        """Execute a tool call and return the result as a string."""
+        """Execute a sync tool call and return the result as a string."""
         try:
             handler = getattr(self, f"_tool_{tool_name}", None)
             if handler is None:
                 return json.dumps({"error": f"Unknown tool: {tool_name}"})
+            return handler(**arguments)
+        except Exception as e:
+            logger.exception(f"Tool execution failed: {tool_name}")
+            return json.dumps({"error": str(e)})
+
+    async def execute_async(self, tool_name: str, arguments: dict) -> str:
+        """Execute a tool call, awaiting async handlers if needed."""
+        try:
+            handler = getattr(self, f"_tool_{tool_name}", None)
+            if handler is None:
+                return json.dumps({"error": f"Unknown tool: {tool_name}"})
+
             result = handler(**arguments)
+
+            # Await if the handler returned a coroutine
+            if asyncio.iscoroutine(result):
+                result = await result
+
             return result
         except Exception as e:
+            logger.exception(f"Tool execution failed: {tool_name}")
             return json.dumps({"error": str(e)})
 
     def _tool_query_inventory(
@@ -431,3 +502,134 @@ class ToolExecutor:
         """
         df = self.loader.query(sql, params if params else None)
         return df.to_json(orient="records", date_format="iso")
+
+    # ------------------------------------------------------------------
+    # Context-aware tools for dual-model arbitration
+    # ------------------------------------------------------------------
+
+    async def _tool_get_context_signals(
+        self,
+        date: Optional[str] = None,
+        days_ahead: int = 3,
+    ) -> str:
+        """Fetch real-time environmental context for LLM arbitration."""
+        from .context_signals import get_all_context_signals
+        from datetime import date as date_type
+
+        target = date_type.fromisoformat(date) if date else date_type.today()
+        days_ahead = min(max(days_ahead, 1), 16)
+
+        signals = await get_all_context_signals(target, days_ahead)
+        return json.dumps(signals, default=str)
+
+    def _tool_get_dual_forecast(
+        self,
+        item_name: Optional[str] = None,
+        days_ahead: int = 7,
+        place_id: Optional[int] = None,
+    ) -> str:
+        """Get forecasts from both models for comparison.
+
+        Returns waste-optimized and stockout-optimized predictions
+        side by side so the LLM can pick per item.
+        """
+        self._ensure_tables()
+
+        # Get recent sales data to compute base forecast
+        params = []
+        filters = []
+
+        if item_name:
+            filters.append(
+                f"LOWER(oi.title) LIKE LOWER('%' || ${len(params) + 1} || '%')"
+            )
+            params.append(item_name)
+        if place_id is not None:
+            filters.append(f"o.place_id = ${len(params) + 1}")
+            params.append(place_id)
+
+        where = f"AND {' AND '.join(filters)}" if filters else ""
+
+        sql = f"""
+        WITH daily AS (
+            SELECT
+                oi.title as item,
+                DATE_TRUNC('day', to_timestamp(o.created))::DATE as sale_date,
+                SUM(oi.quantity) as qty
+            FROM fct_orders o
+            JOIN fct_order_items oi ON o.id = oi.order_id
+            WHERE o.created IS NOT NULL
+              AND to_timestamp(o.created) >= CURRENT_DATE - INTERVAL '60' DAY
+              {where}
+            GROUP BY 1, 2
+        ),
+        stats AS (
+            SELECT
+                item,
+                AVG(qty) as avg_daily,
+                STDDEV(qty) as std_daily,
+                MAX(qty) as max_daily,
+                MIN(qty) as min_daily,
+                COUNT(*) as active_days,
+                CASE WHEN AVG(qty) > 0
+                     THEN STDDEV(qty) / AVG(qty)
+                     ELSE 0
+                END as cv
+            FROM daily
+            GROUP BY item
+        )
+        SELECT * FROM stats
+        ORDER BY avg_daily DESC
+        LIMIT 30
+        """
+        df = self.loader.query(sql, params if params else None)
+
+        if df.empty:
+            return json.dumps({"error": "No sales data found for the given filters."})
+
+        results = []
+        for _, row in df.iterrows():
+            avg = float(row.get("avg_daily", 0))
+            std = float(row.get("std_daily", 0))
+            cv = float(row.get("cv", 0))
+
+            # Balanced model: base prediction (MA-like)
+            balanced = round(avg, 1)
+
+            # Waste-optimized: shrink by 15% (matches friend's 0.85 factor)
+            waste_opt = round(avg * 0.85, 1)
+
+            # Stockout-optimized: buffer by 20%
+            stockout_opt = round(avg * 1.20, 1)
+
+            # Safety stock at 95% service level (z=1.65)
+            safety_stock = round(1.65 * std, 1)
+
+            # Perishability heuristic
+            item_lower = str(row.get("item", "")).lower()
+            perishable_kw = ["salad", "juice", "shake", "fresh", "smoothie",
+                             "sandwich", "bowl", "wrap", "sushi", "bread"]
+            is_perishable = any(kw in item_lower for kw in perishable_kw)
+
+            # Risk classification
+            if cv > 1.0:
+                risk = "high"
+            elif cv > 0.5:
+                risk = "medium"
+            else:
+                risk = "low"
+
+            results.append({
+                "item": row.get("item"),
+                "avg_daily_demand": balanced,
+                "demand_cv": round(cv, 3),
+                "demand_risk": risk,
+                "is_perishable": is_perishable,
+                "forecast_waste_optimized": waste_opt,
+                "forecast_stockout_optimized": stockout_opt,
+                "forecast_balanced": balanced,
+                "safety_stock_units": safety_stock,
+                "active_days_last_60": int(row.get("active_days", 0)),
+            })
+
+        return json.dumps(results, default=str)

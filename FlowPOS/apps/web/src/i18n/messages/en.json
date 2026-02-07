@@ -61,7 +61,11 @@
     "suppliers": "Suppliers",
     "reports": "Reports",
     "settings": "Settings",
-    "platformAdmin": "Platform Admin"
+    "platformAdmin": "Platform Admin",
+    "ai": "AI Intelligence",
+    "forecast": "Demand Forecast",
+    "insights": "AI Insights",
+    "simulator": "Simulator"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -492,6 +496,35 @@
       "egp": "EGP (ج.م)",
       "try": "TRY (₺)"
     }
+  },
+  "forecast": {
+    "title": "Demand Forecast",
+    "description": "AI-powered demand predictions",
+    "daysAhead": "Days Ahead",
+    "itemFilter": "Item Filter",
+    "generate": "Generate Forecast",
+    "generating": "Forecasting...",
+    "predicted": "Predicted",
+    "lowerBound": "Lower",
+    "upperBound": "Upper"
+  },
+  "insights": {
+    "title": "AI Insights",
+    "description": "AI-generated inventory analysis and daily briefings",
+    "generateBriefing": "Generate Daily Briefing",
+    "askQuestion": "Ask a Specific Question",
+    "placeholder": "e.g. What are the biggest risks in our inventory?",
+    "ask": "Ask",
+    "emptyState": "Click \"Generate Daily Briefing\" to get your morning inventory report"
+  },
+  "simulator": {
+    "title": "What-If Simulator",
+    "description": "Simulate business scenarios and see projected impact",
+    "describeScenario": "Describe your scenario",
+    "simulate": "Simulate",
+    "simulating": "Simulating...",
+    "tryExample": "Try an example:",
+    "results": "Simulation Results"
   },
   "admin": {
     "organizations": "Organizations",
