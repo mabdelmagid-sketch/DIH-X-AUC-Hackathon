@@ -67,6 +67,10 @@ def _gap():
 # ── main render ─────────────────────────────────────────────────────────────
 
 def render(df: pd.DataFrame):
+    if df is None or df.empty:
+        st.error("No data available. Run `python scripts/train_and_save.py` first.")
+        return
+
     st.markdown(
         "<h1 style='text-align:center;'>Business Impact of Demand Forecasting</h1>"
         "<p style='text-align:center;color:#757575;font-size:1.1rem;'>"
@@ -78,6 +82,11 @@ def render(df: pd.DataFrame):
     if "predicted" not in df.columns:
         st.warning("Model predictions not available. Run `python scripts/train_and_save.py` first.")
         return
+
+    # Ensure prediction columns have no NaN (defensive)
+    for col in ["predicted", "predicted_waste_opt"]:
+        if col in df.columns:
+            df[col] = df[col].fillna(0)
 
     has_wo = "predicted_waste_opt" in df.columns
 

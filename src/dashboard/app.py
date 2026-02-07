@@ -32,7 +32,26 @@ def load_saved_predictions():
     """Load pre-computed predictions from CSV (fast, ~10 seconds)."""
     logger.info(f"Loading saved predictions from {PREDICTIONS_PATH}")
     df = pd.read_csv(PREDICTIONS_PATH, low_memory=False)
+
+    if df.empty:
+        raise ValueError("Predictions CSV is empty — re-run scripts/train_and_save.py")
+
     df["date"] = pd.to_datetime(df["date"])
+
+    # Validate critical columns exist
+    required = ["date", "quantity_sold", "predicted", "place_id"]
+    missing = [c for c in required if c not in df.columns]
+    if missing:
+        raise ValueError(f"Predictions CSV missing required columns: {missing}")
+
+    # Replace any NaN predictions with 0 to prevent downstream errors
+    for col in ["predicted", "predicted_waste_opt"]:
+        if col in df.columns:
+            nan_count = df[col].isna().sum()
+            if nan_count > 0:
+                logger.warning(f"{nan_count} NaN values in '{col}' replaced with 0")
+                df[col] = df[col].fillna(0)
+
     logger.info(f"Loaded {df.shape[0]:,} rows x {df.shape[1]} cols")
     return df
 
