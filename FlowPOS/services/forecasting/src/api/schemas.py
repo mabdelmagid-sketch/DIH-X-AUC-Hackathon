@@ -71,3 +71,11 @@ class DailySalesResponse(BaseModel):
 
 class SimulateRequest(BaseModel):
     scenario: str
+
+
+# === Prep Recommendation ===
+
+class PrepRecommendationRequest(BaseModel):
+    item_name: Optional[str] = None
+    place_id: Optional[int] = None
+    date: Optional[str] = None  # YYYY-MM-DD, defaults to today

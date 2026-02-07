@@ -8,7 +8,7 @@ from datetime import datetime
 from .api.data_routes import router as data_router
 from .api.model_routes import router as model_router
 from .api.chat_routes import router as chat_router
-from .api.dependencies import get_forecaster, get_llm_client, get_tool_executor
+from .api.dependencies import get_forecaster, get_llm_client, get_tool_executor, preload_trained_models
 
 
 app = FastAPI(
@@ -32,6 +32,12 @@ app.include_router(model_router, prefix="/api")
 app.include_router(chat_router, prefix="/api")
 
 
+@app.on_event("startup")
+async def startup_event():
+    """Pre-load trained models on startup."""
+    preload_trained_models()
+
+
 @app.get("/")
 async def root():
     """Root endpoint"""
@@ -50,10 +56,14 @@ async def health_check():
     llm_client = get_llm_client()
     tool_executor = get_tool_executor()
 
+    from .models.model_service import load_trained_models
+    trained = load_trained_models()
+
     return {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
         "model_loaded": forecaster.model is not None if forecaster else False,
+        "trained_models": list(trained.keys()),
         "llm_available": llm_client is not None,
         "tools_available": tool_executor is not None
     }

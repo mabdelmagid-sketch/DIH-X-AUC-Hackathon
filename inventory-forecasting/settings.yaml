@@ -1,0 +1,68 @@
+data:
+  raw_dir: "../Inventory.Management/Inventory Management"
+  cache_dir: "data/cache"
+  timezone: "Europe/Copenhagen"
+
+tables:
+  fct_orders: "fct_orders.csv"
+  fct_order_items: "fct_order_items.csv"
+  dim_items: "dim_items.csv"
+  dim_places: "dim_places.csv"
+  fct_campaigns: "fct_campaigns.csv"
+  dim_campaigns: "dim_campaigns.csv"
+  dim_skus: "dim_skus.csv"
+  dim_add_ons: "dim_add_ons.csv"
+  dim_bill_of_materials: "dim_bill_of_materials.csv"
+  dim_menu_items: "dim_menu_items.csv"
+  dim_menu_item_add_ons: "dim_menu_item_add_ons.csv"
+  dim_stock_categories: "dim_stock_categories.csv"
+  dim_taxonomy_terms: "dim_taxonomy_terms.csv"
+  dim_users: "dim_users.csv"
+  fct_bonus_codes: "fct_bonus_codes.csv"
+  fct_cash_balances: "fct_cash_balances.csv"
+  fct_inventory_reports: "fct_inventory_reports.csv"
+  fct_invoice_items: "fct_invoice_items.csv"
+  most_ordered: "most_ordered.csv"
+
+timestamp_columns:
+  - created
+  - updated
+  - start_date_time
+  - end_date_time
+
+weather:
+  api_url: "https://archive-api.open-meteo.com/v1/archive"
+  latitude: 55.68
+  longitude: 12.57
+  variables:
+    - temperature_2m_max
+    - temperature_2m_min
+    - precipitation_sum
+
+model:
+  xgboost:
+    n_estimators: 500
+    max_depth: 6
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+    min_child_weight: 5
+  prophet:
+    changepoint_prior_scale: 0.05
+    seasonality_prior_scale: 10.0
+    yearly_seasonality: true
+    weekly_seasonality: true
+  ensemble:
+    prophet_weight: 0.3
+    xgboost_weight: 0.7
+
+inventory:
+  service_level: 0.95
+  z_score: 1.65
+  default_lead_time_days: 1
+  stockout_cost_multiplier: 1.5
+
+train_test:
+  train_months: 30
+  val_months: 3
+  test_months: 3

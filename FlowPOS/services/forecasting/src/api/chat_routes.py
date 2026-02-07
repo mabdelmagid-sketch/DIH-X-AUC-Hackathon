@@ -20,7 +20,7 @@ from .dependencies import (
 from .schemas import (
     ChatRequest, ChatResponse,
     InsightRequest, InsightResponse,
-    SimulateRequest
+    SimulateRequest, PrepRecommendationRequest
 )
 
 router = APIRouter(tags=["chat"])
@@ -200,3 +200,95 @@ async def run_simulation(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/prep-recommendation")
+async def prep_recommendation(
+    request: PrepRecommendationRequest,
+    llm_client: Optional[LLMClient] = Depends(get_llm_client),
+):
+    """Get AI-powered prep/order recommendations using dual-model arbitration.
+
+    The LLM calls get_context_signals (weather, holidays, etc.) and
+    get_dual_forecast (both models), then decides per item which
+    forecast to use based on context + item characteristics.
+    """
+    if llm_client is None:
+        raise HTTPException(status_code=503, detail="LLM client not available")
+
+    from ..llm.prompts import SYSTEM_PROMPTS
+
+    # Build the user message
+    parts = ["Generate today's prep/order recommendations."]
+    if request.item_name:
+        parts.append(f"Focus on items matching: {request.item_name}")
+    if request.place_id:
+        parts.append(f"For store/place ID: {request.place_id}")
+    if request.date:
+        parts.append(f"Target date: {request.date}")
+    else:
+        parts.append(f"Target date: {datetime.now().strftime('%Y-%m-%d')}")
+
+    user_message = " ".join(parts)
+
+    try:
+        response = await llm_client.chat_with_tools(
+            user_message=user_message,
+            system_prompt=SYSTEM_PROMPTS["inventory_advisor"],
+            temperature=0.3,
+            max_tokens=4096,
+        )
+
+        return {
+            "recommendation": response,
+            "generated_at": datetime.now().isoformat(),
+            "model": "inventory_advisor",
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/prep-recommendation/stream")
+async def prep_recommendation_stream(
+    request: PrepRecommendationRequest,
+    llm_client: Optional[LLMClient] = Depends(get_llm_client),
+):
+    """Streaming version of prep recommendations via SSE."""
+    if llm_client is None:
+        raise HTTPException(status_code=503, detail="LLM client not available")
+
+    from ..llm.prompts import SYSTEM_PROMPTS
+
+    parts = ["Generate today's prep/order recommendations."]
+    if request.item_name:
+        parts.append(f"Focus on items matching: {request.item_name}")
+    if request.place_id:
+        parts.append(f"For store/place ID: {request.place_id}")
+    if request.date:
+        parts.append(f"Target date: {request.date}")
+    else:
+        parts.append(f"Target date: {datetime.now().strftime('%Y-%m-%d')}")
+
+    user_message = " ".join(parts)
+
+    async def event_generator():
+        try:
+            async for event in llm_client.chat_with_tools_stream(
+                user_message=user_message,
+                system_prompt=SYSTEM_PROMPTS["inventory_advisor"],
+                temperature=0.3,
+                max_tokens=4096,
+            ):
+                yield event
+        except Exception as e:
+            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
