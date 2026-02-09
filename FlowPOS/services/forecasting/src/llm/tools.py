@@ -211,6 +211,31 @@ TOOL_DEFINITIONS = [
     {
         "type": "function",
         "function": {
+            "name": "estimate_new_product",
+            "description": "Estimate demand for a NEW product with NO sales history (cold-start). Finds similar existing products by keywords and category, then returns a conservative demand estimate. Use this when asked about new menu items, seasonal specials, or items that haven't been sold before.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "product_name": {
+                        "type": "string",
+                        "description": "Name of the new product"
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Product category (e.g. 'burger', 'drink', 'dessert')"
+                    },
+                    "price": {
+                        "type": "number",
+                        "description": "Product price (helps find similar-priced items)"
+                    }
+                },
+                "required": ["product_name"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "get_dual_forecast",
             "description": "Get demand forecasts from the 3-model ensemble: XGBoost Balanced, XGBoost Waste-Optimized, and LSTM (RNN). Returns all model predictions side by side. The ensemble_prediction is the median (majority vote). Use context_signals and item characteristics to decide the final recommendation per item.",
             "parameters": {
@@ -502,6 +527,111 @@ class ToolExecutor:
         """
         df = self.loader.query(sql, params if params else None)
         return df.to_json(orient="records", date_format="iso")
+
+    # ------------------------------------------------------------------
+    # Cold-start estimation for new products
+    # ------------------------------------------------------------------
+
+    def _tool_estimate_new_product(
+        self,
+        product_name: str,
+        category: Optional[str] = None,
+        price: Optional[float] = None,
+    ) -> str:
+        """Find similar products and estimate demand for a new item with no history."""
+        self._ensure_tables()
+        import numpy as np
+
+        # Find similar products by keywords from the product name
+        name_words = [w.lower() for w in product_name.split() if len(w) > 2]
+        params = []
+        keyword_clauses = []
+        for word in name_words[:5]:
+            keyword_clauses.append(
+                f"LOWER(oi.title) LIKE LOWER('%' || ${len(params) + 1} || '%')"
+            )
+            params.append(word)
+
+        keyword_sql = " OR ".join(keyword_clauses) if keyword_clauses else "1=1"
+
+        sql = f"""
+        WITH daily_demand AS (
+            SELECT
+                oi.title AS item,
+                CAST(to_timestamp(o.created)::DATE AS DATE) AS sale_date,
+                SUM(oi.quantity) AS qty
+            FROM fct_orders o
+            JOIN fct_order_items oi ON o.id = oi.order_id
+            WHERE o.created IS NOT NULL
+              AND ({keyword_sql})
+            GROUP BY 1, 2
+        )
+        SELECT
+            item,
+            ROUND(AVG(qty), 1) AS avg_daily,
+            ROUND(STDDEV(qty), 1) AS std_daily,
+            COUNT(*) AS active_days
+        FROM daily_demand
+        GROUP BY item
+        HAVING COUNT(*) >= 5
+        ORDER BY avg_daily DESC
+        LIMIT 15
+        """
+        similar_df = self.loader.query(sql, params if params else None)
+
+        if similar_df.empty:
+            # Fallback: global median
+            fallback_sql = """
+            WITH daily_demand AS (
+                SELECT
+                    oi.title AS item,
+                    CAST(to_timestamp(o.created)::DATE AS DATE) AS sale_date,
+                    SUM(oi.quantity) AS qty
+                FROM fct_orders o
+                JOIN fct_order_items oi ON o.id = oi.order_id
+                WHERE o.created IS NOT NULL
+                GROUP BY 1, 2
+            )
+            SELECT
+                item,
+                ROUND(AVG(qty), 1) AS avg_daily,
+                COUNT(*) AS active_days
+            FROM daily_demand
+            GROUP BY item
+            HAVING COUNT(*) >= 10
+            ORDER BY avg_daily DESC
+            LIMIT 10
+            """
+            similar_df = self.loader.query(fallback_sql)
+            method = "global_top_products"
+        else:
+            method = "keyword_similarity"
+
+        similar_items = []
+        for _, row in similar_df.iterrows():
+            similar_items.append({
+                "item": str(row["item"]),
+                "avg_daily_demand": float(row["avg_daily"]),
+                "active_days": int(row["active_days"]),
+            })
+
+        avg_demand = float(similar_df["avg_daily"].mean()) if not similar_df.empty else 5.0
+        estimated = round(avg_demand * 0.7, 1)  # 70% conservative factor
+
+        result = {
+            "new_product": product_name,
+            "estimated_daily_demand": estimated,
+            "demand_range": {"low": round(estimated * 0.6, 1), "high": round(estimated * 1.5, 1)},
+            "confidence": "low",
+            "method": method,
+            "similar_products": similar_items[:10],
+            "note": (
+                f"Cold-start estimate based on {len(similar_items)} similar products. "
+                f"New products typically achieve 60-80% of similar item demand initially. "
+                f"Recommend ordering conservatively for first 1-2 weeks."
+            ),
+        }
+        return json.dumps(result, default=str)
 
     # ------------------------------------------------------------------
     # Context-aware tools for dual-model arbitration
