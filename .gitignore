@@ -1,22 +1,81 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+.Python
+env/
+venv/
+.venv/
+ENV/
+*.egg-info/
+*.eggs/
+*.egg
+dist/
+build/
+
+# Environment
+.env
+.env.local
+
+# Data (too large for git)
+data/Inventory Management/
+data/Menu Engineering Part 1/
+data/Menu Engineering Part 2/
+data/Shift Planning/
+data/raw/*.csv
+data/cache/
+data/predictions/*.csv
 *.csv
 
-# Virtual environment
-.venv/
-venv/
-env/
-
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Model files (large)
+# Models (generic)
+*.joblib
 *.pt
 !docs/forecast/*.pt
 *.h5
-*.pkl
+# Allow trained model .pkl files and model source code
+!FlowPOS/services/forecasting/data/models/*.pkl
+!data/models/*.pkl
+!FlowPOS/services/forecasting/src/models/
+!FlowPOS/services/forecasting/src/models/**
+!inventory-forecasting/src/models/
+!inventory-forecasting/src/models/**
+
+# ChromaDB
+chroma_db/
+
+# Node / Frontend
+node_modules/
+.next/
+.turbo/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Jupyter
+*.ipynb_checkpoints/
+
+# Test artifacts
+test-screenshots/
+.pytest_cache/
+
+# Pen design files
+*.pen
+
+# Allow specific config directories
+!config/settings.yaml
+!inventory-forecasting/settings.yaml

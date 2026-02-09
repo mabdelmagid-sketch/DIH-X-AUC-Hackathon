@@ -1,0 +1,31 @@
+{
+  "name": "swift-pos",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "test:watch": "turbo test:watch",
+    "db:generate": "turbo db:generate",
+    "db:push": "turbo db:push",
+    "db:studio": "pnpm --filter @pos/db studio"
+  },
+  "devDependencies": {
+    "next": "15.5.9",
+    "turbo": "^2.3.0",
+    "typescript": "^5.7.2"
+  },
+  "packageManager": "pnpm@10.27.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp",
+      "@parcel/watcher",
+      "@swc/core",
+      "@sentry/cli"
+    ]
+  }
+}
