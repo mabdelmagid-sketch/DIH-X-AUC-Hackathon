@@ -1,0 +1,44 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Next.js
+.next
+out
+
+# Build
+dist
+build
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Turbo
+.turbo
+
+# Misc
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.vercel
+
+# Claude Code (skills, configs, commands)
+.claude/
+.claude-skills/
+claude_skills/
+*.skill.md
+SKILL.md
+.mcp.json
+.playwright-mcp/
