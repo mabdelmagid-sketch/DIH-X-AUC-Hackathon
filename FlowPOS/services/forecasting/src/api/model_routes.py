@@ -25,7 +25,7 @@ def _df_to_records(df) -> list:
     return json.loads(df.to_json(orient="records", date_format="iso"))
 
 
-def _get_sales_for_forecast(loader: DataLoader, item_filter: str | None = None) -> pd.DataFrame:
+def _get_sales_for_forecast(loader: DataLoader, item_filter: str | None = None, top_n: int | None = None) -> pd.DataFrame:
     """Pull daily sales data from loaded DuckDB tables for the trained models."""
     loader.load_all_tables()
 
@@ -34,6 +34,19 @@ def _get_sales_for_forecast(loader: DataLoader, item_filter: str | None = None) 
     if item_filter:
         item_clause = f"AND LOWER(oi.title) LIKE LOWER('%' || ${len(params) + 1} || '%')"
         params.append(item_filter)
+
+    # If top_n specified, pre-filter to only top-selling items for performance
+    top_items_clause = ""
+    if top_n and top_n > 0 and not item_filter:
+        top_items_clause = f"""AND oi.title IN (
+            SELECT title FROM (
+                SELECT oi2.title, SUM(oi2.quantity) AS total_qty
+                FROM fct_order_items oi2
+                GROUP BY oi2.title
+                ORDER BY total_qty DESC
+                LIMIT {int(top_n)}
+            )
+        )"""
 
     sql = f"""
     SELECT
@@ -45,6 +58,7 @@ def _get_sales_for_forecast(loader: DataLoader, item_filter: str | None = None) 
     JOIN fct_order_items oi ON o.id = oi.order_id
     WHERE o.created IS NOT NULL
       {item_clause}
+      {top_items_clause}
     GROUP BY oi.title, o.place_id, CAST(to_timestamp(o.created)::DATE AS DATE)
     ORDER BY oi.title, CAST(to_timestamp(o.created)::DATE AS DATE)
     """
@@ -101,7 +115,7 @@ async def generate_forecast(
     trained = load_trained_models()
     if trained:
         try:
-            daily_sales = _get_sales_for_forecast(loader, request.item_filter)
+            daily_sales = _get_sales_for_forecast(loader, request.item_filter, request.top_n)
             if daily_sales.empty:
                 raise HTTPException(status_code=404, detail="No sales data found for the given filter.")
 
