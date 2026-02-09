@@ -292,6 +292,8 @@ class LLMClient:
             context_parts.append(f"**Low Stock Alerts:**\n{context['low_stock_alerts']}")
         if "recent_sales" in context:
             context_parts.append(f"**Recent Sales Trends:**\n{context['recent_sales']}")
+        if "store_info" in context:
+            context_parts.append(f"**Store Menu & Products (IMPORTANT - focus on these):**\n{context['store_info']}")
         if "business_rules" in context:
             context_parts.append(f"**Business Rules:**\n{context['business_rules']}")
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { DashboardLayout, PageHeader } from "@/components/layout";
 import { getForecast } from "@/lib/forecasting-api";
@@ -14,13 +14,26 @@ export default function ForecastPage() {
   const [itemFilter, setItemFilter] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const autoLoaded = useRef(false);
+
+  // Auto-load top forecasts on mount
+  useEffect(() => {
+    if (!autoLoaded.current) {
+      autoLoaded.current = true;
+      handleForecast();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleForecast() {
     setLoading(true);
     setError(null);
     setMessage(null);
     try {
-      const result = await getForecast(daysAhead, itemFilter || undefined);
+      const result = await getForecast(
+        daysAhead,
+        itemFilter || undefined,
+        15,
+      );
       setForecasts(result.forecasts);
       setMessage(
         `Generated ${result.forecasts.length} forecasts at ${new Date(result.generated_at).toLocaleString()}`,

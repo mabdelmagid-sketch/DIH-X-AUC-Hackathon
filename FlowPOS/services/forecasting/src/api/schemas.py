@@ -22,6 +22,7 @@ class ChatResponse(BaseModel):
 class ForecastRequest(BaseModel):
     days_ahead: int = 7
     item_filter: Optional[str] = None
+    top_n: Optional[int] = None  # Limit to top N items by predicted volume
 
 
 class ForecastResponse(BaseModel):
@@ -45,6 +46,7 @@ class TrainResponse(BaseModel):
 
 class InsightRequest(BaseModel):
     query: Optional[str] = None
+    store_context: Optional[str] = None  # Override context with store-specific info
 
 
 class InsightResponse(BaseModel):
