@@ -112,6 +112,10 @@ async def generate_insights(
         if rag_engine and request.query:
             context["business_rules"] = rag_engine.get_context_for_query(request.query)
 
+        # Include store-specific context if provided
+        if request.store_context:
+            context["store_info"] = request.store_context
+
         response = await llm_client.generate_insights(context, query=request.query)
 
         return InsightResponse(

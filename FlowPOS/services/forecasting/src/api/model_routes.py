@@ -126,6 +126,15 @@ async def generate_forecast(
                             "model_source": r["model_source"],
                         })
 
+                # Apply top_n filter if specified
+                if request.top_n and request.top_n > 0:
+                    item_totals = {}
+                    for f in forecasts:
+                        item = f["item_title"]
+                        item_totals[item] = item_totals.get(item, 0) + abs(f["predicted_quantity"])
+                    top_items = set(sorted(item_totals, key=item_totals.get, reverse=True)[:request.top_n])
+                    forecasts = [f for f in forecasts if f["item_title"] in top_items]
+
                 return ForecastResponse(
                     forecasts=forecasts,
                     generated_at=datetime.now().isoformat()

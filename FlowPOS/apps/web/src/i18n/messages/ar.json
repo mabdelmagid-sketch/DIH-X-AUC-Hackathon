@@ -41,7 +41,9 @@
     "type": "النوع",
     "value": "القيمة",
     "none": "لا يوجد",
-    "flowPos": "Flow POS"
+    "flowPos": "Flow POS",
+    "sku": "رمز المنتج",
+    "location": "الموقع"
   },
   "nav": {
     "main": "الرئيسية",

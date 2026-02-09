@@ -41,7 +41,9 @@
     "type": "Type",
     "value": "Value",
     "none": "None",
-    "flowPos": "Flow POS"
+    "flowPos": "Flow POS",
+    "sku": "SKU",
+    "location": "Location"
   },
   "nav": {
     "main": "Main",

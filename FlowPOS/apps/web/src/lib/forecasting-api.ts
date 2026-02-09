@@ -66,7 +66,11 @@ export async function getMenu(limit = 100) {
 
 // --- Model ---
 
-export async function getForecast(daysAhead = 7, itemFilter?: string) {
+export async function getForecast(
+  daysAhead = 7,
+  itemFilter?: string,
+  topN?: number,
+) {
   return fetcher<{
     forecasts: Record<string, unknown>[];
     generated_at: string;
@@ -75,6 +79,7 @@ export async function getForecast(daysAhead = 7, itemFilter?: string) {
     body: JSON.stringify({
       days_ahead: daysAhead,
       item_filter: itemFilter || null,
+      top_n: topN || null,
     }),
   });
 }
@@ -143,13 +148,16 @@ export async function* streamChat(
 
 // --- Insights ---
 
-export async function getInsights(query?: string) {
+export async function getInsights(query?: string, storeContext?: string) {
   return fetcher<{
     insight: string;
     generated_at: string;
   }>("/insights", {
     method: "POST",
-    body: JSON.stringify({ query: query || null }),
+    body: JSON.stringify({
+      query: query || null,
+      store_context: storeContext || null,
+    }),
   });
 }
 

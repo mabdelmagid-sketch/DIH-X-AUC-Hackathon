@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { router, protectedProcedure, adminProcedure } from "../trpc";
+import { createAdminDb } from "../db";
 import { TRPCError } from "@trpc/server";
 
 const inventoryIdSchema = z.object({
@@ -192,8 +193,11 @@ export const inventoryRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Use admin client to bypass RLS for inventory mutations
+      const adminDb = createAdminDb();
+
       // Check if inventory item exists
-      const { data: existing } = await ctx.db
+      const { data: existing } = await adminDb
         .from("inventory_items")
         .select("id")
         .eq("product_id", input.productId)
@@ -209,7 +213,7 @@ export const inventoryRouter = router({
           updatePayload.low_stock = input.lowStock;
         }
 
-        const { data, error } = await ctx.db
+        const { data, error } = await adminDb
           .from("inventory_items")
           .update(updatePayload)
           .eq("id", existing.id)
@@ -226,7 +230,7 @@ export const inventoryRouter = router({
         return data;
       } else {
         // Create new
-        const { data, error } = await ctx.db
+        const { data, error } = await adminDb
           .from("inventory_items")
           .insert({
             product_id: input.productId,
@@ -259,8 +263,11 @@ export const inventoryRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Use admin client to bypass RLS for inventory mutations
+      const adminDb = createAdminDb();
+
       // Get current inventory
-      const { data: existing, error: fetchError } = await ctx.db
+      const { data: existing, error: fetchError } = await adminDb
         .from("inventory_items")
         .select("id, quantity")
         .eq("product_id", input.productId)
@@ -276,7 +283,7 @@ export const inventoryRouter = router({
           });
         }
 
-        const { data, error } = await ctx.db
+        const { data, error } = await adminDb
           .from("inventory_items")
           .insert({
             product_id: input.productId,
@@ -305,7 +312,7 @@ export const inventoryRouter = router({
         });
       }
 
-      const { data, error } = await ctx.db
+      const { data, error } = await adminDb
         .from("inventory_items")
         .update({ quantity: newQuantity })
         .eq("id", existing.id)
@@ -375,7 +382,8 @@ export const inventoryRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { data, error } = await ctx.db
+      const adminDb = createAdminDb();
+      const { data, error } = await adminDb
         .from("inventory_items")
         .update({ low_stock: input.lowStock })
         .eq("id", input.id)
