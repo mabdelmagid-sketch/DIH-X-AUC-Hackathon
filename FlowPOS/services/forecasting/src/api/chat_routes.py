@@ -107,9 +107,27 @@ async def generate_insights(
             sales = loader.get_daily_sales()
             context["recent_sales"] = sales.tail(50).to_string()
 
-        if forecaster.model is not None:
+        # Add forecast data from trained ensemble models
+        try:
+            from ..models.model_service import load_trained_models, predict_multi_day
+            trained = load_trained_models()
+            if trained:
+                from ..api.model_routes import _get_sales_for_forecast
+                daily_sales = _get_sales_for_forecast(loader, top_n=15)
+                if not daily_sales.empty:
+                    results = predict_multi_day(daily_sales, days_ahead=7)
+                    if results:
+                        import pandas as pd
+                        forecast_df = pd.DataFrame(results)[
+                            ["item", "date", "forecast_balanced", "forecast_waste_optimized", "demand_risk"]
+                        ].head(50)
+                        context["forecasts"] = forecast_df.to_string(index=False)
+        except Exception:
+            pass
+
+        # Fallback: old DemandForecaster
+        if "forecasts" not in context and forecaster.model is not None:
             try:
-                trainer = ModelTrainer()
                 forecasts = trainer.generate_forecasts(days_ahead=7)
                 context["forecasts"] = forecasts.head(20).to_string()
             except Exception:

@@ -150,7 +150,29 @@ class LLMClient:
                 continue
 
             # No tool calls - return the text response
-            return message.get("content", "")
+            content = message.get("content") or ""
+            if content:
+                return content
+
+            # DeepSeek sometimes returns content=null after tool rounds;
+            # retry once without tools to force a text response
+            messages.append(message)
+            messages.append({"role": "user", "content": "Please provide your analysis based on the data you gathered."})
+            retry_payload = {
+                "model": self.model,
+                "messages": messages,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+            }
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                retry_resp = await client.post(
+                    f"{self.base_url}/chat/completions",
+                    headers=self._get_headers(),
+                    json=retry_payload
+                )
+                retry_resp.raise_for_status()
+                retry_data = retry_resp.json()
+            return retry_data["choices"][0]["message"].get("content") or "Unable to generate analysis. Please try again."
 
         # Exhausted rounds
         return "I gathered a lot of data but couldn't fully synthesize an answer. Could you ask a more specific question?"
