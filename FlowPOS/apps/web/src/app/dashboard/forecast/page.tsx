@@ -102,15 +102,6 @@ export default function ForecastPage() {
     return { total: items.length, highRisk, medRisk, totalDemand, perishable };
   }, [byItem, forecasts]);
 
-  // Global max for bar scaling
-  const globalMax = useMemo(() => {
-    let max = 0;
-    for (const f of forecasts) {
-      if (f.predicted_quantity > max) max = f.predicted_quantity;
-    }
-    return max || 1;
-  }, [forecasts]);
-
   function toggleExpand(item: string) {
     setExpanded((prev) => {
       const next = new Set(prev);
@@ -273,10 +264,10 @@ export default function ForecastPage() {
                       )}
                     </div>
 
-                    {/* Mini daily bars */}
+                    {/* Mini daily bars – scaled per item so low-demand items are still visible */}
                     <div className="hidden items-end gap-1 sm:flex">
                       {dailyForecasts.slice(0, 7).map((f, i) => (
-                        <DayBar key={i} value={f.predicted_quantity} max={globalMax} />
+                        <DayBar key={i} value={f.predicted_quantity} max={maxQty} />
                       ))}
                     </div>
 
