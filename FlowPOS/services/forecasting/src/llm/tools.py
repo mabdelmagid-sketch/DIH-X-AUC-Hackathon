@@ -212,7 +212,7 @@ TOOL_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "get_dual_forecast",
-            "description": "Get demand forecasts from BOTH models: waste-optimized (orders less to reduce spoilage) and stockout-optimized (orders more to prevent missed sales). Use context_signals and item characteristics to decide which forecast to recommend per item. Returns both predictions side by side.",
+            "description": "Get demand forecasts from the 3-model ensemble: XGBoost Balanced, XGBoost Waste-Optimized, and LSTM (RNN). Returns all model predictions side by side. The ensemble_prediction is the median (majority vote). Use context_signals and item characteristics to decide the final recommendation per item.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -554,8 +554,9 @@ class ToolExecutor:
         days_ahead: int = 7,
         place_id: Optional[int] = None,
     ) -> list[dict]:
-        """Use trained .pkl models for dual predictions."""
-        from ..models.model_service import load_trained_models, build_inference_features
+        """Use 3-model ensemble (XGBoost + LSTM) for predictions."""
+        from ..models.model_service import load_trained_models, build_inference_features, load_rnn_model
+        import numpy as np
 
         models = load_trained_models()
         if not models:
@@ -602,7 +603,6 @@ class ToolExecutor:
         if not balanced_model:
             return []
 
-        # Use latest row per item for next-day prediction
         latest = feature_df.sort_values("date").groupby("item", observed=True).last().reset_index()
 
         try:
@@ -612,17 +612,35 @@ class ToolExecutor:
             logger.warning(f"Model predict() failed: {e}")
             return []
 
+        # LSTM predictions
+        rnn = load_rnn_model()
+        lstm_preds: dict[str, float] = {}
+        if rnn is not None:
+            try:
+                agg_sales = raw_df.groupby(["item", "date"], as_index=False)["quantity_sold"].sum()
+                lstm_preds = rnn.predict_items(agg_sales)
+            except Exception as e:
+                logger.warning(f"LSTM prediction failed: {e}")
+
         results = []
         for i, (_, row) in enumerate(latest.iterrows()):
+            item = str(row.get("item", ""))
             avg = float(row.get("rolling_mean_7d", row.get("quantity_sold", 0)))
             std = float(row.get("rolling_std_14d", row.get("rolling_std_7d", 0))) or 0
             cv = std / avg if avg > 0 else 0
 
             bp = float(balanced_preds.iloc[i]) if i < len(balanced_preds) else avg
             wp = float(waste_preds.iloc[i]) if i < len(waste_preds) else avg * 0.85
+            lp = lstm_preds.get(item)
             safety = round(1.65 * std, 1)
 
-            item_lower = str(row.get("item", "")).lower()
+            # Ensemble: median of available models
+            votes = [bp, wp]
+            if lp is not None:
+                votes.append(lp)
+            ensemble = float(np.median(votes))
+
+            item_lower = item.lower()
             perishable_kw = ["salad", "juice", "shake", "fresh", "smoothie",
                              "sandwich", "bowl", "wrap", "sushi", "bread"]
 
@@ -633,18 +651,23 @@ class ToolExecutor:
             else:
                 risk = "low"
 
-            results.append({
-                "item": row.get("item"),
+            r = {
+                "item": item,
                 "avg_daily_demand": round(avg, 1),
                 "demand_cv": round(cv, 3),
                 "demand_risk": risk,
                 "is_perishable": any(kw in item_lower for kw in perishable_kw),
+                "forecast_xgboost_balanced": round(bp, 1),
                 "forecast_waste_optimized": round(wp, 1),
                 "forecast_stockout_optimized": round(bp * 1.20, 1),
-                "forecast_balanced": round(bp, 1),
+                "ensemble_prediction": round(ensemble, 1),
                 "safety_stock_units": safety,
-                "model_source": "trained_hybrid_30xgb_70ma7",
-            })
+                "model_source": "ensemble_3model" if lp is not None else "ensemble_2model",
+            }
+            if lp is not None:
+                r["forecast_lstm"] = round(lp, 1)
+
+            results.append(r)
 
         return results
 

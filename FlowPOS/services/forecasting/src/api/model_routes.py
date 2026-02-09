@@ -11,7 +11,7 @@ import pandas as pd
 from ..data.loader import DataLoader
 from ..models.forecaster import DemandForecaster
 from ..models.trainer import ModelTrainer
-from ..models.model_service import load_trained_models, predict_dual
+from ..models.model_service import load_trained_models, predict_dual, predict_multi_day
 from ..llm.tools import ToolExecutor
 from ..config import settings
 from .dependencies import get_forecaster, get_tool_executor, get_data_loader
@@ -119,26 +119,30 @@ async def generate_forecast(
             if daily_sales.empty:
                 raise HTTPException(status_code=404, detail="No sales data found for the given filter.")
 
-            dual_results = predict_dual(daily_sales)
+            # Use multi-day prediction so each future day gets distinct
+            # time features (day_of_week, is_weekend, etc.) → different predictions
+            multi_results = predict_multi_day(daily_sales, days_ahead=request.days_ahead)
 
-            if dual_results:
-                # Convert dual results to the forecast format the frontend expects
+            if multi_results:
                 forecasts = []
-                target_date = date.today() + timedelta(days=1)
-                for r in dual_results:
-                    for d in range(request.days_ahead):
-                        forecast_date = target_date + timedelta(days=d)
-                        forecasts.append({
-                            "item_title": r["item"],
-                            "date": forecast_date.isoformat(),
-                            "predicted_quantity": r["forecast_balanced"],
-                            "lower_bound": r["forecast_waste_optimized"],
-                            "upper_bound": r["forecast_stockout_optimized"],
-                            "demand_risk": r["demand_risk"],
-                            "is_perishable": r["is_perishable"],
-                            "safety_stock": r["safety_stock_units"],
-                            "model_source": r["model_source"],
-                        })
+                for r in multi_results:
+                    entry = {
+                        "item_title": r["item"],
+                        "date": r["date"],
+                        "predicted_quantity": r["forecast_balanced"],
+                        "lower_bound": r["forecast_waste_optimized"],
+                        "upper_bound": r["forecast_stockout_optimized"],
+                        "demand_risk": r["demand_risk"],
+                        "is_perishable": r["is_perishable"],
+                        "safety_stock": r["safety_stock_units"],
+                        "model_source": r["model_source"],
+                    }
+                    # Include individual model predictions when available
+                    if "forecast_lstm" in r:
+                        entry["forecast_lstm"] = r["forecast_lstm"]
+                    if "forecast_xgboost" in r:
+                        entry["forecast_xgboost"] = r["forecast_xgboost"]
+                    forecasts.append(entry)
 
                 # Apply top_n filter if specified
                 if request.top_n and request.top_n > 0:
