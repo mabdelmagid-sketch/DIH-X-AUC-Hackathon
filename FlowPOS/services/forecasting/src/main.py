@@ -34,8 +34,32 @@ app.include_router(chat_router, prefix="/api")
 
 @app.on_event("startup")
 async def startup_event():
-    """Pre-load trained models on startup."""
+    """Pre-load everything + warm the forecast cache so first page load is instant."""
+    import asyncio
     preload_trained_models()
+
+    # Warm the forecast cache in background (default params the frontend uses)
+    async def _warm_cache():
+        try:
+            from .api.model_routes import _run_pkl_forecast_sync, _set_cached_forecast, _forecast_cache_key
+            from .api.schemas import ForecastRequest
+            from .api.dependencies import get_data_loader, get_forecaster
+
+            req = ForecastRequest(days_ahead=7, top_n=15)
+            key = _forecast_cache_key(req)
+            loader = get_data_loader()
+            forecaster = get_forecaster()
+
+            result = await asyncio.to_thread(
+                _run_pkl_forecast_sync,
+                loader, forecaster, 7, None, 15,
+            )
+            _set_cached_forecast(key, result)
+            print(f"Forecast cache warmed ({len(result.get('forecasts', []))} forecasts)")
+        except Exception as e:
+            print(f"Cache warm-up failed (non-fatal): {e}")
+
+    asyncio.create_task(_warm_cache())
 
 
 @app.get("/")
