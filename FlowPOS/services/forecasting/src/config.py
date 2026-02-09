@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     default_llm: str = "anthropic/claude-3.5-sonnet"
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
 
+    # Supabase (for real POS store data)
+    supabase_url: str = ""
+    supabase_service_key: str = ""
+
     # Forecasting
     forecast_horizon_days: int = 7
 

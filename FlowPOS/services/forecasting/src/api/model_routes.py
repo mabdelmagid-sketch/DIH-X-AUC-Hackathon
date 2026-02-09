@@ -101,6 +101,129 @@ async def train_model(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+async def _forecast_from_supabase(days_ahead: int, item_filter: str | None, top_n: int | None) -> dict:
+    """Generate forecasts using real POS data from Supabase."""
+    import httpx
+
+    supa_url = settings.supabase_url
+    supa_key = settings.supabase_service_key
+    if not supa_url or not supa_key:
+        raise HTTPException(status_code=400, detail="Supabase not configured. Set SUPABASE_URL and SUPABASE_SERVICE_KEY.")
+
+    headers = {"apikey": supa_key, "Authorization": f"Bearer {supa_key}"}
+    rest_url = f"{supa_url}/rest/v1"
+
+    async with httpx.AsyncClient(timeout=15.0) as client:
+        # Fetch order items with order dates
+        oi_resp = await client.get(
+            f"{rest_url}/order_items?select=name,quantity,created_at,order_id",
+            headers=headers,
+        )
+        oi_resp.raise_for_status()
+        order_items = oi_resp.json()
+
+    if not order_items:
+        raise HTTPException(status_code=404, detail="No order data in Supabase.")
+
+    # Build daily sales DataFrame
+    rows = []
+    for oi in order_items:
+        name = (oi.get("name") or "").strip()
+        if not name:
+            continue
+        if item_filter and item_filter.lower() not in name.lower():
+            continue
+        rows.append({
+            "item": name,
+            "date": oi["created_at"][:10],
+            "quantity_sold": float(oi.get("quantity", 1)),
+        })
+
+    if not rows:
+        raise HTTPException(status_code=404, detail="No matching sales data found.")
+
+    df = pd.DataFrame(rows)
+    df["date"] = pd.to_datetime(df["date"])
+    daily = df.groupby(["item", "date"], as_index=False)["quantity_sold"].sum()
+
+    # Per-item stats
+    item_stats = daily.groupby("item").agg(
+        avg_daily=("quantity_sold", "mean"),
+        std_daily=("quantity_sold", "std"),
+        active_days=("quantity_sold", "count"),
+        total_sold=("quantity_sold", "sum"),
+    ).reset_index()
+    item_stats["std_daily"] = item_stats["std_daily"].fillna(0)
+
+    # Weekday factors from real sales
+    daily["dow"] = daily["date"].dt.dayofweek
+    dow_avg = daily.groupby(["item", "dow"])["quantity_sold"].mean()
+    overall_avg = daily.groupby("item")["quantity_sold"].mean()
+
+    # Apply top_n filter
+    if top_n and top_n > 0:
+        item_stats = item_stats.nlargest(top_n, "total_sold")
+
+    # Generate forecasts
+    base_date = date.today() + timedelta(days=1)
+    forecasts = []
+
+    for _, row in item_stats.iterrows():
+        item_name = row["item"]
+        avg = float(row["avg_daily"])
+        std = float(row["std_daily"])
+        cv = std / avg if avg > 0 else 0
+        active = int(row["active_days"])
+
+        # Confidence based on data volume
+        if active >= 14:
+            confidence = "medium"
+        elif active >= 5:
+            confidence = "low"
+        else:
+            confidence = "very_low"
+
+        risk = "high" if cv > 1.0 else "medium" if cv > 0.5 else "low"
+
+        item_lower = item_name.lower()
+        perishable_kw = ["salad", "juice", "fresh", "smoothie", "sandwich", "bowl", "wrap", "acai", "egg"]
+        is_perishable = any(kw in item_lower for kw in perishable_kw)
+
+        for d in range(days_ahead):
+            forecast_date = base_date + timedelta(days=d)
+            dow = forecast_date.weekday()
+
+            # Weekday scaling from real data
+            factor = 1.0
+            if (item_name, dow) in dow_avg.index and item_name in overall_avg.index:
+                raw_factor = dow_avg[(item_name, dow)] / overall_avg[item_name]
+                factor = max(0.5, min(1.8, raw_factor))
+            elif dow in (5, 6):
+                factor = 0.8
+            elif dow == 4:
+                factor = 1.1
+
+            pred = max(0.0, avg * factor)
+
+            forecasts.append({
+                "item_title": item_name,
+                "date": forecast_date.isoformat(),
+                "predicted_quantity": round(pred, 1),
+                "lower_bound": round(pred * 0.7, 1),
+                "upper_bound": round(pred * 1.4, 1),
+                "demand_risk": risk,
+                "is_perishable": is_perishable,
+                "safety_stock": round(1.65 * std, 1),
+                "model_source": f"supabase_history ({active}d)",
+                "confidence": confidence,
+            })
+
+    return {
+        "forecasts": forecasts,
+        "generated_at": datetime.now().isoformat(),
+    }
+
+
 @router.post("/forecast", response_model=ForecastResponse)
 async def generate_forecast(
     request: ForecastRequest,
@@ -111,7 +234,15 @@ async def generate_forecast(
 
     Uses the trained HybridForecaster/WasteOptimizedForecaster .pkl models.
     Falls back to the DemandForecaster if trained models aren't available.
+    Pass source="supabase" to use real POS store data instead of demo data.
     """
+    # ── Supabase source: use real POS data ───────────────────────────
+    if request.source == "supabase":
+        result = await _forecast_from_supabase(
+            request.days_ahead, request.item_filter, request.top_n
+        )
+        return ForecastResponse(**result)
+
     # Try trained .pkl models first
     trained = load_trained_models()
     if trained:
