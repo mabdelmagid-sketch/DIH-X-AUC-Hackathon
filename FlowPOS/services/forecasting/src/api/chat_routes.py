@@ -96,17 +96,9 @@ async def generate_insights(
         loader.load_all_tables()
 
         if request.store_context:
-            # When store context is provided, use it as primary data source
-            # and filter raw data to only include relevant items
+            # When store context is provided, use it as the sole data source
+            # Skip DuckDB data which contains items from a different dataset
             context["store_info"] = request.store_context
-
-            # Try to get sales data filtered to store items
-            try:
-                sales = loader.get_daily_sales()
-                if not sales.empty:
-                    context["recent_sales"] = sales.tail(30).to_string()
-            except Exception:
-                pass
         else:
             # Default: use all DuckDB data
             inventory = loader.get_inventory_status()
