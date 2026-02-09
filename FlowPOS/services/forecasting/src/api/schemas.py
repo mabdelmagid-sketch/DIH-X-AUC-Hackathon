@@ -23,6 +23,7 @@ class ForecastRequest(BaseModel):
     days_ahead: int = 7
     item_filter: Optional[str] = None
     top_n: Optional[int] = None  # Limit to top N items by predicted volume
+    source: Optional[str] = None  # "supabase" to use real POS data
 
 
 class ForecastResponse(BaseModel):

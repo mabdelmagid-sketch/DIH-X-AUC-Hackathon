@@ -77,6 +77,7 @@ export async function getForecast(daysAhead = 7, itemFilter?: string) {
     body: JSON.stringify({
       days_ahead: daysAhead,
       item_filter: itemFilter || null,
+      source: "supabase",
     }),
   });
 }
