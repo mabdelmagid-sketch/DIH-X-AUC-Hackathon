@@ -43,7 +43,11 @@ def get_forecaster() -> DemandForecaster:
 
 
 def preload_trained_models():
-    """Pre-load the trained HybridForecaster + WasteOptimizedForecaster .pkl files."""
+    """Pre-load the trained HybridForecaster + WasteOptimizedForecaster .pkl files
+    AND pre-load CSV data into DuckDB so the first forecast request is fast."""
+    import time
+
+    # 1. Load pkl models
     from ..models.model_service import load_trained_models
     models = load_trained_models()
     loaded = list(models.keys())
@@ -51,6 +55,32 @@ def preload_trained_models():
         print(f"Trained models loaded: {loaded}")
     else:
         print("No trained .pkl models found in data/models/ - dual forecast will use SQL fallback")
+
+    # 2. Pre-load CSV data into DuckDB (avoids 130MB CSV parse on first request)
+    t0 = time.time()
+    loader = get_data_loader()
+    tables = loader.load_all_tables()
+    elapsed = time.time() - t0
+    if tables:
+        print(f"CSV data pre-loaded into DuckDB in {elapsed:.1f}s ({len(tables)} tables)")
+    else:
+        # Tables were already loaded or no CSV files found
+        loaded_tables = loader.list_tables()
+        if loaded_tables:
+            print(f"CSV data already in DuckDB ({len(loaded_tables)} tables)")
+        else:
+            print(f"No CSV files found at {settings.data_path}")
+
+    # 3. Pre-load LSTM model (avoids PyTorch cold-start on first request)
+    try:
+        from ..models.model_service import load_rnn_model
+        rnn = load_rnn_model()
+        if rnn:
+            print("LSTM model pre-loaded")
+        else:
+            print("No LSTM model available (XGBoost-only ensemble)")
+    except Exception as e:
+        print(f"LSTM pre-load skipped: {e}")
 
 
 def get_llm_client() -> Optional[LLMClient]:

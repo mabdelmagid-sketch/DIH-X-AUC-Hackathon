@@ -3,8 +3,11 @@ Model/forecasting endpoints for FlowPOS Forecasting API.
 """
 from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime, date, timedelta
+import asyncio
+import hashlib
 import json
 import logging
+import time
 
 import numpy as np
 import pandas as pd
@@ -92,6 +95,9 @@ async def train_model(
         if tool_executor:
             tool_executor.forecaster = forecaster
 
+        # Invalidate forecast cache since models changed
+        _forecast_cache.clear()
+
         return TrainResponse(
             status=results.get("status", "unknown"),
             metrics=results.get("metrics"),
@@ -101,26 +107,64 @@ async def train_model(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-async def _forecast_from_supabase(days_ahead: int, item_filter: str | None, top_n: int | None) -> dict:
-    """Generate forecasts using real POS data from Supabase."""
-    import httpx
+# ── Caches ───────────────────────────────────────────────────────────
+_supabase_cache: dict = {"data": None, "ts": 0.0}
+_CACHE_TTL = 300  # 5 minutes
+
+# Forecast result cache: keyed by (days_ahead, item_filter, top_n, source)
+_forecast_cache: dict = {}  # {cache_key: {"data": ..., "ts": float}}
+_FORECAST_CACHE_TTL = 300  # 5 minutes
+
+
+def _forecast_cache_key(request: ForecastRequest) -> str:
+    raw = f"{request.days_ahead}|{request.item_filter}|{request.top_n}|{request.source}"
+    return hashlib.md5(raw.encode()).hexdigest()
+
+
+def _get_cached_forecast(key: str) -> dict | None:
+    entry = _forecast_cache.get(key)
+    if entry and (time.time() - entry["ts"]) < _FORECAST_CACHE_TTL:
+        logger.info(f"Forecast cache HIT (key={key[:8]}...)")
+        return entry["data"]
+    return None
+
+
+def _set_cached_forecast(key: str, data: dict):
+    _forecast_cache[key] = {"data": data, "ts": time.time()}
+
+
+async def _fetch_supabase_orders() -> list[dict]:
+    """Fetch order items from Supabase with 5-min in-memory cache."""
+    import httpx, time
+
+    now = time.time()
+    if _supabase_cache["data"] is not None and (now - _supabase_cache["ts"]) < _CACHE_TTL:
+        return _supabase_cache["data"]
 
     supa_url = settings.supabase_url
     supa_key = settings.supabase_service_key
     if not supa_url or not supa_key:
-        raise HTTPException(status_code=400, detail="Supabase not configured. Set SUPABASE_URL and SUPABASE_SERVICE_KEY.")
+        raise HTTPException(status_code=400, detail="Supabase not configured.")
 
     headers = {"apikey": supa_key, "Authorization": f"Bearer {supa_key}"}
     rest_url = f"{supa_url}/rest/v1"
 
     async with httpx.AsyncClient(timeout=15.0) as client:
-        # Fetch order items with order dates
         oi_resp = await client.get(
-            f"{rest_url}/order_items?select=name,quantity,created_at,order_id",
+            f"{rest_url}/order_items?select=name,quantity,created_at,order_id&order=created_at.desc&limit=5000",
             headers=headers,
         )
         oi_resp.raise_for_status()
         order_items = oi_resp.json()
+
+    _supabase_cache["data"] = order_items
+    _supabase_cache["ts"] = now
+    return order_items
+
+
+async def _forecast_from_supabase(days_ahead: int, item_filter: str | None, top_n: int | None) -> dict:
+    """Generate forecasts using real POS data from Supabase (cached)."""
+    order_items = await _fetch_supabase_orders()
 
     if not order_items:
         raise HTTPException(status_code=404, detail="No order data in Supabase.")
@@ -224,6 +268,79 @@ async def _forecast_from_supabase(days_ahead: int, item_filter: str | None, top_
     }
 
 
+def _run_pkl_forecast_sync(
+    loader: DataLoader,
+    forecaster: DemandForecaster,
+    days_ahead: int,
+    item_filter: str | None,
+    top_n: int | None,
+) -> dict:
+    """Heavy CPU-bound forecast work (runs in thread pool)."""
+    t0 = time.time()
+
+    # Try trained .pkl models first
+    trained = load_trained_models()
+    if trained:
+        daily_sales = _get_sales_for_forecast(loader, item_filter, top_n)
+        if daily_sales.empty:
+            raise HTTPException(status_code=404, detail="No sales data found for the given filter.")
+
+        logger.info(f"Sales data loaded in {time.time() - t0:.1f}s ({len(daily_sales)} rows)")
+
+        t1 = time.time()
+        multi_results = predict_multi_day(daily_sales, days_ahead=days_ahead)
+        logger.info(f"Model inference done in {time.time() - t1:.1f}s ({len(multi_results)} results)")
+
+        if multi_results:
+            forecasts = []
+            for r in multi_results:
+                entry = {
+                    "item_title": r["item"],
+                    "date": r["date"],
+                    "predicted_quantity": r["forecast_balanced"],
+                    "lower_bound": r["forecast_waste_optimized"],
+                    "upper_bound": r["forecast_stockout_optimized"],
+                    "demand_risk": r["demand_risk"],
+                    "is_perishable": r["is_perishable"],
+                    "safety_stock": r["safety_stock_units"],
+                    "model_source": r["model_source"],
+                }
+                if "forecast_lstm" in r:
+                    entry["forecast_lstm"] = r["forecast_lstm"]
+                if "forecast_xgboost" in r:
+                    entry["forecast_xgboost"] = r["forecast_xgboost"]
+                forecasts.append(entry)
+
+            # Apply top_n filter if specified
+            if top_n and top_n > 0:
+                item_totals = {}
+                for f in forecasts:
+                    item = f["item_title"]
+                    item_totals[item] = item_totals.get(item, 0) + abs(f["predicted_quantity"])
+                top_items = set(sorted(item_totals, key=item_totals.get, reverse=True)[:top_n])
+                forecasts = [f for f in forecasts if f["item_title"] in top_items]
+
+            logger.info(f"Total forecast time: {time.time() - t0:.1f}s")
+            return {
+                "forecasts": forecasts,
+                "generated_at": datetime.now().isoformat(),
+            }
+
+    # Fallback: old DemandForecaster (requires /train)
+    if forecaster.model is None:
+        raise HTTPException(status_code=400, detail="Model not trained. Call /train first.")
+
+    trainer = ModelTrainer()
+    forecasts_df = trainer.generate_forecasts(
+        days_ahead=days_ahead,
+        item_filter=item_filter,
+    )
+    return {
+        "forecasts": _df_to_records(forecasts_df),
+        "generated_at": datetime.now().isoformat(),
+    }
+
+
 @router.post("/forecast", response_model=ForecastResponse)
 async def generate_forecast(
     request: ForecastRequest,
@@ -235,81 +352,36 @@ async def generate_forecast(
     Uses the trained HybridForecaster/WasteOptimizedForecaster .pkl models.
     Falls back to the DemandForecaster if trained models aren't available.
     Pass source="supabase" to use real POS store data instead of demo data.
+
+    Results are cached for 5 minutes to avoid re-running heavy ML inference.
     """
+    # ── Check cache first ────────────────────────────────────────────
+    cache_key = _forecast_cache_key(request)
+    cached = _get_cached_forecast(cache_key)
+    if cached is not None:
+        return ForecastResponse(**cached)
+
     # ── Supabase source: use real POS data ───────────────────────────
     if request.source == "supabase":
         result = await _forecast_from_supabase(
             request.days_ahead, request.item_filter, request.top_n
         )
+        _set_cached_forecast(cache_key, result)
         return ForecastResponse(**result)
 
-    # Try trained .pkl models first
-    trained = load_trained_models()
-    if trained:
-        try:
-            daily_sales = _get_sales_for_forecast(loader, request.item_filter, request.top_n)
-            if daily_sales.empty:
-                raise HTTPException(status_code=404, detail="No sales data found for the given filter.")
-
-            # Use multi-day prediction so each future day gets distinct
-            # time features (day_of_week, is_weekend, etc.) → different predictions
-            multi_results = predict_multi_day(daily_sales, days_ahead=request.days_ahead)
-
-            if multi_results:
-                forecasts = []
-                for r in multi_results:
-                    entry = {
-                        "item_title": r["item"],
-                        "date": r["date"],
-                        "predicted_quantity": r["forecast_balanced"],
-                        "lower_bound": r["forecast_waste_optimized"],
-                        "upper_bound": r["forecast_stockout_optimized"],
-                        "demand_risk": r["demand_risk"],
-                        "is_perishable": r["is_perishable"],
-                        "safety_stock": r["safety_stock_units"],
-                        "model_source": r["model_source"],
-                    }
-                    # Include individual model predictions when available
-                    if "forecast_lstm" in r:
-                        entry["forecast_lstm"] = r["forecast_lstm"]
-                    if "forecast_xgboost" in r:
-                        entry["forecast_xgboost"] = r["forecast_xgboost"]
-                    forecasts.append(entry)
-
-                # Apply top_n filter if specified
-                if request.top_n and request.top_n > 0:
-                    item_totals = {}
-                    for f in forecasts:
-                        item = f["item_title"]
-                        item_totals[item] = item_totals.get(item, 0) + abs(f["predicted_quantity"])
-                    top_items = set(sorted(item_totals, key=item_totals.get, reverse=True)[:request.top_n])
-                    forecasts = [f for f in forecasts if f["item_title"] in top_items]
-
-                return ForecastResponse(
-                    forecasts=forecasts,
-                    generated_at=datetime.now().isoformat()
-                )
-        except HTTPException:
-            raise
-        except Exception as e:
-            logger.warning(f"Trained model forecast failed, trying fallback: {e}")
-
-    # Fallback: old DemandForecaster (requires /train)
-    if forecaster.model is None:
-        raise HTTPException(status_code=400, detail="Model not trained. Call /train first.")
-
+    # ── ML model path: run in thread to avoid blocking event loop ────
     try:
-        trainer = ModelTrainer()
-        forecasts = trainer.generate_forecasts(
-            days_ahead=request.days_ahead,
-            item_filter=request.item_filter
+        result = await asyncio.to_thread(
+            _run_pkl_forecast_sync,
+            loader, forecaster,
+            request.days_ahead, request.item_filter, request.top_n,
         )
-
-        return ForecastResponse(
-            forecasts=_df_to_records(forecasts),
-            generated_at=datetime.now().isoformat()
-        )
+        _set_cached_forecast(cache_key, result)
+        return ForecastResponse(**result)
+    except HTTPException:
+        raise
     except Exception as e:
+        logger.error(f"Forecast failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
