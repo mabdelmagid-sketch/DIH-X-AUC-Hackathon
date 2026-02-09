@@ -18,6 +18,7 @@ COPY src/ /app/src/
 COPY run.py /app/
 
 ENV DATA_PATH=/app/data/Inventory\ Management
+ENV PYTHONUNBUFFERED=1
 ENV PORT=8080
 
 EXPOSE 8080
