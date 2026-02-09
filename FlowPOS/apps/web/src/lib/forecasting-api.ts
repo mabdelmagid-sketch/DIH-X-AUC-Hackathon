@@ -1,11 +1,19 @@
 /**
  * Typed API client for the FlowPOS Forecasting microservice.
  *
- * All calls go through Next.js rewrites:
- *   /api/forecast/* -> http://localhost:8002/api/*
+ * In production, calls the forecasting API directly (bypasses Next.js rewrite
+ * which has a 30s proxy timeout too short for ML model inference).
+ * In development, uses the Next.js rewrite proxy.
  */
 
-const API_BASE = "/api/forecast";
+function getApiBase(): string {
+  if (typeof window !== "undefined" && window.location.hostname !== "localhost") {
+    return "https://forecasting-api-production-2809.up.railway.app/api";
+  }
+  return "/api/forecast";
+}
+
+const API_BASE = getApiBase();
 
 async function fetcher<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${url}`, {

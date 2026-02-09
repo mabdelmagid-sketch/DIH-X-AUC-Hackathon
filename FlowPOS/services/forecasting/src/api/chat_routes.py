@@ -95,11 +95,25 @@ async def generate_insights(
         context = {}
         loader.load_all_tables()
 
-        inventory = loader.get_inventory_status()
-        context["current_stock"] = inventory.head(20).to_string()
+        if request.store_context:
+            # When store context is provided, use it as primary data source
+            # and filter raw data to only include relevant items
+            context["store_info"] = request.store_context
 
-        sales = loader.get_daily_sales()
-        context["recent_sales"] = sales.tail(50).to_string()
+            # Try to get sales data filtered to store items
+            try:
+                sales = loader.get_daily_sales()
+                if not sales.empty:
+                    context["recent_sales"] = sales.tail(30).to_string()
+            except Exception:
+                pass
+        else:
+            # Default: use all DuckDB data
+            inventory = loader.get_inventory_status()
+            context["current_stock"] = inventory.head(20).to_string()
+
+            sales = loader.get_daily_sales()
+            context["recent_sales"] = sales.tail(50).to_string()
 
         if forecaster.model is not None:
             try:
@@ -111,10 +125,6 @@ async def generate_insights(
 
         if rag_engine and request.query:
             context["business_rules"] = rag_engine.get_context_for_query(request.query)
-
-        # Include store-specific context if provided
-        if request.store_context:
-            context["store_info"] = request.store_context
 
         response = await llm_client.generate_insights(context, query=request.query)
 
