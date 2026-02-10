@@ -4,6 +4,19 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { DashboardLayout, PageHeader } from "@/components/layout";
 import { getForecast } from "@/lib/forecasting-api";
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  Cell,
+} from "recharts";
 
 type Forecast = {
   item_title: string;
@@ -17,27 +30,16 @@ type Forecast = {
   model_source: string;
 };
 
-function riskColor(risk: string) {
-  if (risk === "high") return { bg: "bg-red-500/15", text: "text-red-500", border: "border-red-500/30", dot: "bg-red-500" };
-  if (risk === "medium") return { bg: "bg-amber-500/15", text: "text-amber-500", border: "border-amber-500/30", dot: "bg-amber-500" };
-  return { bg: "bg-emerald-500/15", text: "text-emerald-500", border: "border-emerald-500/30", dot: "bg-emerald-500" };
-}
+type ViewMode = "overview" | "detail";
 
-function DayBar({ value, max }: { value: number; max: number }) {
-  const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
-  return (
-    <div className="flex flex-col items-center gap-1">
-      <div className="relative h-16 w-5 overflow-hidden rounded-sm bg-[var(--muted)]/30">
-        <div
-          className="absolute bottom-0 w-full rounded-sm bg-[var(--primary)] transition-all"
-          style={{ height: `${pct}%` }}
-        />
-      </div>
-      <span className="font-body text-[10px] tabular-nums text-[var(--muted-foreground)]">
-        {value > 0 ? Math.round(value) : "-"}
-      </span>
-    </div>
-  );
+const RISK_COLORS = {
+  high: { fill: "#ef4444", bg: "bg-red-500/15", text: "text-red-500", dot: "bg-red-500" },
+  medium: { fill: "#f59e0b", bg: "bg-amber-500/15", text: "text-amber-500", dot: "bg-amber-500" },
+  low: { fill: "#10b981", bg: "bg-emerald-500/15", text: "text-emerald-500", dot: "bg-emerald-500" },
+};
+
+function riskColor(risk: string) {
+  return RISK_COLORS[risk as keyof typeof RISK_COLORS] ?? RISK_COLORS.low;
 }
 
 export default function ForecastPage() {
@@ -48,7 +50,8 @@ export default function ForecastPage() {
   const [daysAhead, setDaysAhead] = useState(7);
   const [itemFilter, setItemFilter] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [view, setView] = useState<ViewMode>("overview");
   const autoLoaded = useRef(false);
 
   useEffect(() => {
@@ -64,6 +67,7 @@ export default function ForecastPage() {
     try {
       const result = await getForecast(daysAhead, itemFilter || undefined, 15);
       setForecasts(result.forecasts as Forecast[]);
+      setSelectedItem(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Forecast failed");
     } finally {
@@ -102,16 +106,6 @@ export default function ForecastPage() {
     return { total: items.length, highRisk, medRisk, totalDemand, perishable };
   }, [byItem, forecasts]);
 
-  function toggleExpand(item: string) {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(item)) next.delete(item);
-      else next.add(item);
-      return next;
-    });
-  }
-
-  // Derive overall risk per item
   function itemRisk(rows: Forecast[]): string {
     if (rows.some((f) => f.demand_risk === "high")) return "high";
     if (rows.some((f) => f.demand_risk === "medium")) return "medium";
@@ -130,6 +124,72 @@ export default function ForecastPage() {
       return avgB - avgA;
     });
   }, [byItem]);
+
+  // Stacked bar data: avg predicted qty per item for the overview chart
+  const overviewBarData = useMemo(() => {
+    return sortedItems.map(([item, rows]) => {
+      const avg = rows.reduce((s, f) => s + f.predicted_quantity, 0) / rows.length;
+      const risk = itemRisk(rows);
+      const safety = rows.find((f) => f.safety_stock != null)?.safety_stock ?? 0;
+      return {
+        name: item.length > 20 ? item.slice(0, 18) + "..." : item,
+        fullName: item,
+        avgDemand: Math.round(avg * 10) / 10,
+        safetyStock: Math.round(safety * 10) / 10,
+        risk,
+      };
+    });
+  }, [sortedItems]);
+
+  // Aggregated daily total demand across all items
+  const dailyTotalData = useMemo(() => {
+    const dateMap: Record<string, { predicted: number; lower: number; upper: number }> = {};
+    for (const f of forecasts) {
+      const d = f.date.slice(0, 10);
+      if (!dateMap[d]) dateMap[d] = { predicted: 0, lower: 0, upper: 0 };
+      dateMap[d].predicted += f.predicted_quantity;
+      dateMap[d].lower += f.lower_bound;
+      dateMap[d].upper += f.upper_bound;
+    }
+    return Object.entries(dateMap)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, vals]) => ({
+        date: new Date(date).toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric" }),
+        predicted: Math.round(vals.predicted),
+        lower: Math.round(vals.lower),
+        upper: Math.round(vals.upper),
+        range: [Math.round(vals.lower), Math.round(vals.upper)],
+      }));
+  }, [forecasts]);
+
+  // Per-item area chart data
+  const selectedItemData = useMemo(() => {
+    if (!selectedItem || !byItem[selectedItem]) return [];
+    const rows = byItem[selectedItem];
+    const dateMap = new Map<string, Forecast>();
+    for (const r of rows) {
+      const d = r.date.slice(0, 10);
+      if (!dateMap.has(d)) dateMap.set(d, r);
+    }
+    return Array.from(dateMap.values())
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map((f) => ({
+        date: new Date(f.date).toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric" }),
+        predicted: Math.round(f.predicted_quantity * 10) / 10,
+        lower: Math.round(f.lower_bound * 10) / 10,
+        upper: Math.round(f.upper_bound * 10) / 10,
+        range: [Math.round(f.lower_bound * 10) / 10, Math.round(f.upper_bound * 10) / 10],
+      }));
+  }, [selectedItem, byItem]);
+
+  // Risk distribution for donut-style summary
+  const riskDistribution = useMemo(() => {
+    return [
+      { name: "High Risk", value: stats.highRisk, color: "#ef4444" },
+      { name: "Medium Risk", value: stats.medRisk, color: "#f59e0b" },
+      { name: "Low Risk", value: stats.total - stats.highRisk - stats.medRisk, color: "#10b981" },
+    ];
+  }, [stats]);
 
   return (
     <DashboardLayout>
@@ -180,6 +240,32 @@ export default function ForecastPage() {
           >
             {loading ? t("generating") : t("generate")}
           </button>
+
+          {/* View toggle */}
+          {!loading && stats.total > 0 && (
+            <div className="ml-auto flex overflow-hidden rounded-[var(--radius-m)] border border-[var(--border)]">
+              <button
+                onClick={() => { setView("overview"); setSelectedItem(null); }}
+                className={`px-3 py-2 font-body text-xs font-medium transition-colors ${
+                  view === "overview"
+                    ? "bg-[var(--primary)] text-white"
+                    : "bg-[var(--background)] text-[var(--muted-foreground)] hover:bg-[var(--muted)]/50"
+                }`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => setView("detail")}
+                className={`px-3 py-2 font-body text-xs font-medium transition-colors ${
+                  view === "detail"
+                    ? "bg-[var(--primary)] text-white"
+                    : "bg-[var(--background)] text-[var(--muted-foreground)] hover:bg-[var(--muted)]/50"
+                }`}
+              >
+                By Product
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Loading */}
@@ -194,7 +280,7 @@ export default function ForecastPage() {
 
         {/* Summary Stats */}
         {!loading && stats.total > 0 && (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
             <div className="rounded-[var(--radius-m)] border border-[var(--border)] bg-[var(--card)] p-4">
               <p className="font-body text-xs text-[var(--muted-foreground)]">Products Tracked</p>
               <p className="mt-1 font-brand text-2xl font-bold text-[var(--foreground)]">{stats.total}</p>
@@ -207,6 +293,12 @@ export default function ForecastPage() {
               <p className="font-body text-xs text-amber-500">Medium Risk</p>
               <p className="mt-1 font-brand text-2xl font-bold text-amber-500">{stats.medRisk}</p>
             </div>
+            <div className="rounded-[var(--radius-m)] border border-emerald-500/20 bg-emerald-500/5 p-4">
+              <p className="font-body text-xs text-emerald-500">Low Risk</p>
+              <p className="mt-1 font-brand text-2xl font-bold text-emerald-500">
+                {stats.total - stats.highRisk - stats.medRisk}
+              </p>
+            </div>
             <div className="rounded-[var(--radius-m)] border border-[var(--border)] bg-[var(--card)] p-4">
               <p className="font-body text-xs text-[var(--muted-foreground)]">Total Predicted</p>
               <p className="mt-1 font-brand text-2xl font-bold text-[var(--foreground)]">
@@ -216,190 +308,260 @@ export default function ForecastPage() {
           </div>
         )}
 
-        {/* Forecast Cards */}
-        {!loading && sortedItems.length > 0 && (
-          <div className="flex flex-col gap-3">
-            {sortedItems.map(([item, rows]) => {
-              const risk = itemRisk(rows);
-              const rc = riskColor(risk);
-              const avgQty = rows.reduce((s, f) => s + f.predicted_quantity, 0) / rows.length;
-              const maxQty = Math.max(...rows.map((f) => f.upper_bound || f.predicted_quantity));
-              const safetyStock = rows.find((f) => f.safety_stock != null)?.safety_stock;
-              const isExpanded = expanded.has(item);
-              const perishable = rows.some((f) => f.is_perishable);
+        {/* ──────── OVERVIEW VIEW ──────── */}
+        {!loading && stats.total > 0 && view === "overview" && (
+          <div className="flex flex-col gap-6">
+            {/* Total Daily Demand Area Chart */}
+            <div className="rounded-[var(--radius-m)] border border-[var(--border)] bg-[var(--card)] p-5">
+              <h3 className="mb-4 font-brand text-sm font-semibold text-[var(--foreground)]">
+                Total Daily Demand Forecast
+              </h3>
+              <ResponsiveContainer width="100%" height={280}>
+                <AreaChart data={dailyTotalData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                  <defs>
+                    <linearGradient id="gradPredicted" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="gradRange" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.1} />
+                      <stop offset="95%" stopColor="var(--primary)" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+                  <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--card)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 8,
+                      fontSize: 12,
+                    }}
+                  />
+                  <Area type="monotone" dataKey="upper" stroke="none" fill="url(#gradRange)" name="Upper Bound" />
+                  <Area type="monotone" dataKey="lower" stroke="none" fill="transparent" name="Lower Bound" />
+                  <Area
+                    type="monotone"
+                    dataKey="predicted"
+                    stroke="var(--primary)"
+                    strokeWidth={2.5}
+                    fill="url(#gradPredicted)"
+                    name="Predicted"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
 
-              // Get unique dates sorted
-              const dateMap = new Map<string, Forecast>();
-              for (const r of rows) {
-                const d = String(r.date).slice(0, 10);
-                if (!dateMap.has(d)) dateMap.set(d, r);
-              }
-              const dailyForecasts = Array.from(dateMap.values());
-
-              return (
-                <div
-                  key={item}
-                  className="overflow-hidden rounded-[var(--radius-m)] border border-[var(--border)] bg-[var(--card)] transition-shadow hover:shadow-sm"
+            {/* Per-Item Horizontal Bar Chart */}
+            <div className="rounded-[var(--radius-m)] border border-[var(--border)] bg-[var(--card)] p-5">
+              <h3 className="mb-4 font-brand text-sm font-semibold text-[var(--foreground)]">
+                Avg Daily Demand by Product
+              </h3>
+              <ResponsiveContainer width="100%" height={Math.max(300, overviewBarData.length * 40)}>
+                <BarChart
+                  data={overviewBarData}
+                  layout="vertical"
+                  margin={{ top: 5, right: 20, bottom: 5, left: 10 }}
                 >
-                  {/* Card Header */}
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
+                  <XAxis type="number" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                    width={150}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--card)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 8,
+                      fontSize: 12,
+                    }}
+                    formatter={(value: number, name: string) => [
+                      value.toFixed(1),
+                      name === "avgDemand" ? "Avg Demand/Day" : "Safety Stock",
+                    ]}
+                    labelFormatter={(label: string) => {
+                      const item = overviewBarData.find((d) => d.name === label);
+                      return item?.fullName ?? label;
+                    }}
+                  />
+                  <Legend
+                    formatter={(value) =>
+                      value === "avgDemand" ? "Avg Demand/Day" : "Safety Stock"
+                    }
+                  />
+                  <Bar dataKey="avgDemand" radius={[0, 4, 4, 0]} name="avgDemand">
+                    {overviewBarData.map((entry, idx) => (
+                      <Cell
+                        key={idx}
+                        fill={RISK_COLORS[entry.risk as keyof typeof RISK_COLORS]?.fill ?? "#10b981"}
+                        cursor="pointer"
+                        onClick={() => {
+                          setSelectedItem(entry.fullName);
+                          setView("detail");
+                        }}
+                      />
+                    ))}
+                  </Bar>
+                  <Bar dataKey="safetyStock" fill="var(--primary)" radius={[0, 4, 4, 0]} opacity={0.3} name="safetyStock" />
+                </BarChart>
+              </ResponsiveContainer>
+              <p className="mt-2 font-body text-[10px] text-[var(--muted-foreground)]">
+                Click a bar to see daily breakdown. Colors: <span className="text-red-500">High risk</span> / <span className="text-amber-500">Medium</span> / <span className="text-emerald-500">Low</span>
+              </p>
+            </div>
+
+            {/* Risk Distribution */}
+            <div className="grid gap-3 sm:grid-cols-3">
+              {riskDistribution.map((r) => (
+                <div
+                  key={r.name}
+                  className="flex items-center gap-3 rounded-[var(--radius-m)] border border-[var(--border)] bg-[var(--card)] p-4"
+                >
+                  <div
+                    className="h-10 w-10 rounded-full"
+                    style={{ background: `${r.color}20`, border: `2px solid ${r.color}` }}
+                  />
+                  <div>
+                    <p className="font-body text-xs text-[var(--muted-foreground)]">{r.name}</p>
+                    <p className="font-brand text-xl font-bold" style={{ color: r.color }}>
+                      {r.value} <span className="font-body text-xs font-normal text-[var(--muted-foreground)]">products</span>
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ──────── DETAIL VIEW ──────── */}
+        {!loading && stats.total > 0 && view === "detail" && (
+          <div className="flex flex-col gap-4">
+            {/* Item selector */}
+            <div className="flex flex-wrap gap-2">
+              {sortedItems.map(([item, rows]) => {
+                const risk = itemRisk(rows);
+                const rc = riskColor(risk);
+                const isActive = selectedItem === item;
+                return (
                   <button
-                    onClick={() => toggleExpand(item)}
-                    className="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-[var(--muted)]/30"
+                    key={item}
+                    onClick={() => setSelectedItem(item)}
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-body text-xs font-medium transition-all ${
+                      isActive
+                        ? "bg-[var(--primary)] text-white shadow-sm"
+                        : `border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] hover:border-[var(--primary)]/40`
+                    }`}
                   >
-                    {/* Risk dot */}
-                    <div className={`h-2.5 w-2.5 shrink-0 rounded-full ${rc.dot}`} />
+                    <span className={`inline-block h-2 w-2 rounded-full ${isActive ? "bg-white" : rc.dot}`} />
+                    {item.length > 25 ? item.slice(0, 23) + "..." : item}
+                  </button>
+                );
+              })}
+            </div>
 
-                    {/* Item name + badges */}
-                    <div className="flex min-w-0 flex-1 items-center gap-2">
-                      <h3 className="truncate font-brand text-sm font-semibold text-[var(--foreground)]">
-                        {item}
-                      </h3>
-                      <span className={`shrink-0 rounded-full px-2 py-0.5 font-body text-[10px] font-medium uppercase tracking-wide ${rc.bg} ${rc.text}`}>
-                        {risk}
-                      </span>
-                      {perishable && (
-                        <span className="shrink-0 rounded-full bg-blue-500/10 px-2 py-0.5 font-body text-[10px] font-medium uppercase tracking-wide text-blue-500">
-                          Perishable
-                        </span>
-                      )}
-                    </div>
+            {/* Selected item chart */}
+            {selectedItem && byItem[selectedItem] && (
+              <div className="rounded-[var(--radius-m)] border border-[var(--border)] bg-[var(--card)] p-5">
+                <div className="mb-4 flex items-center gap-3">
+                  <div className={`h-3 w-3 rounded-full ${riskColor(itemRisk(byItem[selectedItem])).dot}`} />
+                  <h3 className="font-brand text-base font-semibold text-[var(--foreground)]">
+                    {selectedItem}
+                  </h3>
+                  {byItem[selectedItem].some((f) => f.is_perishable) && (
+                    <span className="rounded-full bg-blue-500/10 px-2 py-0.5 font-body text-[10px] font-medium uppercase tracking-wide text-blue-500">
+                      Perishable
+                    </span>
+                  )}
+                  <span className={`rounded-full px-2 py-0.5 font-body text-[10px] font-medium uppercase tracking-wide ${riskColor(itemRisk(byItem[selectedItem])).bg} ${riskColor(itemRisk(byItem[selectedItem])).text}`}>
+                    {itemRisk(byItem[selectedItem])} risk
+                  </span>
+                </div>
 
-                    {/* Mini daily bars – scaled per item so low-demand items are still visible */}
-                    <div className="hidden items-end gap-1 sm:flex">
-                      {dailyForecasts.slice(0, 7).map((f, i) => (
-                        <DayBar key={i} value={f.predicted_quantity} max={maxQty} />
-                      ))}
-                    </div>
+                {/* Area chart with confidence band */}
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={selectedItemData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                    <defs>
+                      <linearGradient id="gradItemPred" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                    <XAxis dataKey="date" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+                    <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+                    <Tooltip
+                      contentStyle={{
+                        background: "var(--card)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 8,
+                        fontSize: 12,
+                      }}
+                    />
+                    <Area type="monotone" dataKey="upper" stroke="#94a3b820" fill="#94a3b810" name="Upper Bound" />
+                    <Area type="monotone" dataKey="lower" stroke="#94a3b820" fill="var(--card)" name="Lower Bound" />
+                    <Area
+                      type="monotone"
+                      dataKey="predicted"
+                      stroke="var(--primary)"
+                      strokeWidth={2.5}
+                      fill="url(#gradItemPred)"
+                      name="Predicted"
+                      dot={{ r: 4, fill: "var(--primary)" }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
 
-                    {/* Key numbers */}
-                    <div className="flex shrink-0 items-center gap-6">
-                      <div className="text-right">
-                        <p className="font-body text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
-                          Avg/Day
-                        </p>
-                        <p className="font-brand text-lg font-bold tabular-nums text-[var(--foreground)]">
-                          {avgQty.toFixed(1)}
-                        </p>
+                {/* Key stats row */}
+                {(() => {
+                  const rows = byItem[selectedItem];
+                  const avg = rows.reduce((s, f) => s + f.predicted_quantity, 0) / rows.length;
+                  const maxQ = Math.max(...rows.map((f) => f.upper_bound));
+                  const minQ = Math.min(...rows.map((f) => f.lower_bound));
+                  const safety = rows.find((f) => f.safety_stock != null)?.safety_stock;
+                  const totalPeriod = rows.reduce((s, f) => s + f.predicted_quantity, 0);
+                  return (
+                    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+                      <div className="rounded-[var(--radius-m)] bg-[var(--muted)]/30 p-3">
+                        <p className="font-body text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">Avg/Day</p>
+                        <p className="font-brand text-lg font-bold tabular-nums text-[var(--foreground)]">{avg.toFixed(1)}</p>
                       </div>
-                      {safetyStock != null && safetyStock > 0 && (
-                        <div className="text-right">
-                          <p className="font-body text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
-                            Safety
-                          </p>
-                          <p className="font-brand text-lg font-bold tabular-nums text-[var(--primary)]">
-                            {safetyStock.toFixed(1)}
-                          </p>
+                      <div className="rounded-[var(--radius-m)] bg-[var(--muted)]/30 p-3">
+                        <p className="font-body text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">Total ({daysAhead}d)</p>
+                        <p className="font-brand text-lg font-bold tabular-nums text-[var(--foreground)]">{Math.round(totalPeriod)}</p>
+                      </div>
+                      <div className="rounded-[var(--radius-m)] bg-[var(--muted)]/30 p-3">
+                        <p className="font-body text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">Range</p>
+                        <p className="font-body text-sm tabular-nums text-[var(--muted-foreground)]">{minQ.toFixed(0)} - {maxQ.toFixed(0)}</p>
+                      </div>
+                      {safety != null && safety > 0 && (
+                        <div className="rounded-[var(--radius-m)] bg-[var(--primary)]/10 p-3">
+                          <p className="font-body text-[10px] uppercase tracking-wide text-[var(--primary)]">Safety Stock</p>
+                          <p className="font-brand text-lg font-bold tabular-nums text-[var(--primary)]">{safety.toFixed(1)}</p>
                         </div>
                       )}
-                      <div className="text-right">
-                        <p className="font-body text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
-                          Range
-                        </p>
-                        <p className="font-body text-xs tabular-nums text-[var(--muted-foreground)]">
-                          {rows[0] ? Number(rows[0].lower_bound).toFixed(0) : 0}
-                          {" - "}
-                          {maxQty.toFixed(0)}
-                        </p>
+                      <div className="rounded-[var(--radius-m)] bg-[var(--muted)]/30 p-3">
+                        <p className="font-body text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">Model</p>
+                        <p className="font-body text-xs text-[var(--muted-foreground)]">{rows[0]?.model_source || "n/a"}</p>
                       </div>
                     </div>
+                  );
+                })()}
+              </div>
+            )}
 
-                    {/* Expand chevron */}
-                    <svg
-                      className={`h-4 w-4 shrink-0 text-[var(--muted-foreground)] transition-transform ${isExpanded ? "rotate-180" : ""}`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-
-                  {/* Expanded Detail */}
-                  {isExpanded && (
-                    <div className="border-t border-[var(--border)] px-4 pb-4 pt-3">
-                      {/* Visual bar chart */}
-                      <div className="mb-4 flex items-end gap-2">
-                        {dailyForecasts.map((f, i) => {
-                          const dayMax = Math.max(...dailyForecasts.map((d) => d.upper_bound || d.predicted_quantity));
-                          const pct = dayMax > 0 ? (f.predicted_quantity / dayMax) * 100 : 0;
-                          const lPct = dayMax > 0 ? (f.lower_bound / dayMax) * 100 : 0;
-                          const uPct = dayMax > 0 ? (f.upper_bound / dayMax) * 100 : 0;
-                          const dayName = new Date(f.date).toLocaleDateString("en", { weekday: "short" });
-                          const dayNum = new Date(f.date).getDate();
-                          return (
-                            <div key={i} className="flex flex-1 flex-col items-center gap-1">
-                              <div className="relative h-24 w-full max-w-[40px] overflow-hidden rounded-t-sm bg-[var(--muted)]/20">
-                                {/* Confidence range */}
-                                <div
-                                  className="absolute w-full bg-[var(--primary)]/10"
-                                  style={{
-                                    bottom: `${lPct}%`,
-                                    height: `${uPct - lPct}%`,
-                                  }}
-                                />
-                                {/* Predicted bar */}
-                                <div
-                                  className="absolute bottom-0 w-full rounded-t-sm bg-[var(--primary)] transition-all"
-                                  style={{ height: `${pct}%` }}
-                                />
-                              </div>
-                              <span className="font-body text-[10px] font-medium text-[var(--muted-foreground)]">
-                                {dayName}
-                              </span>
-                              <span className="font-body text-[10px] tabular-nums text-[var(--muted-foreground)]">
-                                {dayNum}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* Compact table */}
-                      <table className="w-full font-body text-xs">
-                        <thead>
-                          <tr className="border-b border-[var(--border)] text-[var(--muted-foreground)]">
-                            <th className="pb-1.5 text-left font-medium">Date</th>
-                            <th className="pb-1.5 text-right font-medium">{t("predicted")}</th>
-                            <th className="pb-1.5 text-right font-medium">{t("lowerBound")}</th>
-                            <th className="pb-1.5 text-right font-medium">{t("upperBound")}</th>
-                            <th className="pb-1.5 text-right font-medium">Risk</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {dailyForecasts.map((row, i) => {
-                            const drc = riskColor(row.demand_risk);
-                            return (
-                              <tr key={i} className="border-b border-[var(--border)]/20">
-                                <td className="py-1.5 text-[var(--foreground)]">
-                                  {new Date(row.date).toLocaleDateString("en", {
-                                    weekday: "short",
-                                    month: "short",
-                                    day: "numeric",
-                                  })}
-                                </td>
-                                <td className="py-1.5 text-right font-medium tabular-nums text-[var(--foreground)]">
-                                  {row.predicted_quantity.toFixed(1)}
-                                </td>
-                                <td className="py-1.5 text-right tabular-nums text-[var(--muted-foreground)]">
-                                  {row.lower_bound.toFixed(1)}
-                                </td>
-                                <td className="py-1.5 text-right tabular-nums text-[var(--muted-foreground)]">
-                                  {row.upper_bound.toFixed(1)}
-                                </td>
-                                <td className="py-1.5 text-right">
-                                  <span className={`inline-block h-1.5 w-1.5 rounded-full ${drc.dot}`} />
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            {/* Prompt to select if nothing selected */}
+            {!selectedItem && (
+              <div className="flex h-48 items-center justify-center rounded-[var(--radius-m)] border border-dashed border-[var(--border)] bg-[var(--card)]">
+                <span className="font-body text-sm text-[var(--muted-foreground)]">
+                  Select a product above to view its forecast chart
+                </span>
+              </div>
+            )}
           </div>
         )}
 
