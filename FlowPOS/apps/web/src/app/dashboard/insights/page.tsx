@@ -32,16 +32,7 @@ function renderMarkdown(text: string): string {
     .replace(/\n/g, "<br/>");
 }
 
-const STORE_CONTEXT = `This is FlowPOS, a modern coffee shop & cafe. Our actual menu products are:
-- Hot Drinks: Flat White, Cappuccino, Americano, Chai Latte, Hot Chocolate, Green Tea
-- Cold Drinks: Iced Latte, Fresh Orange Juice, Green Smoothie, Berry Blast Smoothie
-- Breakfast: Eggs Benedict, Avocado & Egg Sandwich, Full Danish Breakfast, Acai Bowl, Granola & Yoghurt
-- Bakery: Butter Croissant, Pain au Chocolat, Cinnamon Roll, Almond Croissant
-- Lunch: Turkey Club Wrap, Falafel Pita, Grilled Cheese, Smoked Salmon Bagel
-- Salads: Caesar Salad, Greek Salad, Quinoa Bowl, Thai Chicken Salad
-- Snacks & Desserts: Hummus & Crackers, Carrot Cake Slice, Chocolate Brownie, Fruit Tart
-Key ingredients: Espresso Beans, Whole Milk, Oat Milk, Croissant Dough, Fresh Berries, Avocado, Smoked Salmon, Chicken Breast, Falafel Mix.
-Focus your analysis ONLY on these cafe products and their ingredients. Ignore any items not on our menu.`;
+const STORE_CONTEXT = `This is FlowPOS, a modern coffee shop & cafe in Denmark (currency: DKK). The menu and product data come directly from our POS system — treat ALL items in the sales and forecast data as valid menu items. Do not flag any items as "not on the menu." Base your analysis entirely on the real sales and forecast data provided.`;
 
 export default function InsightsPage() {
   const t = useTranslations("insights");
