@@ -191,6 +191,88 @@ export default function ForecastPage() {
     ];
   }, [stats]);
 
+  // ── Actionable insights derived from forecast data ──
+
+  // Tomorrow's prep list: first forecast day per item
+  const tomorrowPrep = useMemo(() => {
+    if (forecasts.length === 0) return [];
+    const allDates = [...new Set(forecasts.map((f) => f.date.slice(0, 10)))].sort();
+    const tomorrow = allDates[0];
+    if (!tomorrow) return [];
+    return sortedItems
+      .map(([item, rows]) => {
+        const row = rows.find((f) => f.date.slice(0, 10) === tomorrow);
+        if (!row) return null;
+        const risk = itemRisk(rows);
+        return {
+          item,
+          qty: Math.ceil(row.predicted_quantity),
+          upper: Math.ceil(row.upper_bound),
+          risk,
+          perishable: row.is_perishable,
+          safety: row.safety_stock ?? 0,
+        };
+      })
+      .filter(Boolean) as {
+        item: string; qty: number; upper: number;
+        risk: string; perishable: boolean; safety: number;
+      }[];
+  }, [forecasts, sortedItems]);
+
+  // Peak demand day
+  const peakDay = useMemo(() => {
+    if (dailyTotalData.length === 0) return null;
+    let best = dailyTotalData[0];
+    for (const d of dailyTotalData) {
+      if (d.predicted > best.predicted) best = d;
+    }
+    return best;
+  }, [dailyTotalData]);
+
+  // Slowest day
+  const slowestDay = useMemo(() => {
+    if (dailyTotalData.length === 0) return null;
+    let worst = dailyTotalData[0];
+    for (const d of dailyTotalData) {
+      if (d.predicted < worst.predicted) worst = d;
+    }
+    return worst;
+  }, [dailyTotalData]);
+
+  // Items with high volatility (wide confidence band relative to predicted)
+  const volatileItems = useMemo(() => {
+    return sortedItems
+      .map(([item, rows]) => {
+        const avgPred = rows.reduce((s, f) => s + f.predicted_quantity, 0) / rows.length;
+        const avgSpread = rows.reduce((s, f) => s + (f.upper_bound - f.lower_bound), 0) / rows.length;
+        const volatility = avgPred > 0 ? avgSpread / avgPred : 0;
+        return { item, volatility, avgPred, avgSpread };
+      })
+      .filter((v) => v.volatility > 0.5)
+      .sort((a, b) => b.volatility - a.volatility)
+      .slice(0, 5);
+  }, [sortedItems]);
+
+  // Trending items: compare first half vs second half of forecast period
+  const trendingItems = useMemo(() => {
+    return sortedItems
+      .map(([item, rows]) => {
+        const sorted = [...rows].sort((a, b) => a.date.localeCompare(b.date));
+        const mid = Math.floor(sorted.length / 2);
+        if (mid === 0) return null;
+        const firstHalf = sorted.slice(0, mid);
+        const secondHalf = sorted.slice(mid);
+        const avgFirst = firstHalf.reduce((s, f) => s + f.predicted_quantity, 0) / firstHalf.length;
+        const avgSecond = secondHalf.reduce((s, f) => s + f.predicted_quantity, 0) / secondHalf.length;
+        const change = avgFirst > 0 ? ((avgSecond - avgFirst) / avgFirst) * 100 : 0;
+        return { item, change, avgFirst, avgSecond, risk: itemRisk(rows) };
+      })
+      .filter(Boolean)
+      .filter((t) => t && Math.abs(t.change) > 5)
+      .sort((a, b) => Math.abs(b!.change) - Math.abs(a!.change))
+      .slice(0, 6) as { item: string; change: number; avgFirst: number; avgSecond: number; risk: string }[];
+  }, [sortedItems]);
+
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
@@ -305,6 +387,162 @@ export default function ForecastPage() {
                 {Math.round(stats.totalDemand).toLocaleString()}
               </p>
             </div>
+          </div>
+        )}
+
+        {/* ──────── ACTIONABLE INSIGHTS ──────── */}
+        {!loading && stats.total > 0 && view === "overview" && (
+          <div className="flex flex-col gap-4">
+            {/* Quick Action Cards Row */}
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Peak Day */}
+              {peakDay && (
+                <div className="flex items-start gap-3 rounded-[var(--radius-m)] border border-orange-500/20 bg-gradient-to-br from-orange-500/5 to-transparent p-4">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-500/15 text-orange-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
+                  </div>
+                  <div>
+                    <p className="font-body text-xs font-semibold text-orange-500">Peak Day</p>
+                    <p className="font-brand text-sm font-bold text-[var(--foreground)]">{peakDay.date}</p>
+                    <p className="font-body text-xs text-[var(--muted-foreground)]">
+                      {peakDay.predicted} units expected &mdash; schedule extra staff
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Slowest Day */}
+              {slowestDay && (
+                <div className="flex items-start gap-3 rounded-[var(--radius-m)] border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent p-4">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/15 text-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </div>
+                  <div>
+                    <p className="font-body text-xs font-semibold text-blue-500">Slowest Day</p>
+                    <p className="font-brand text-sm font-bold text-[var(--foreground)]">{slowestDay.date}</p>
+                    <p className="font-body text-xs text-[var(--muted-foreground)]">
+                      {slowestDay.predicted} units &mdash; reduce prep, run promos
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Perishable Alert */}
+              {stats.perishable > 0 && (
+                <div className="flex items-start gap-3 rounded-[var(--radius-m)] border border-red-500/20 bg-gradient-to-br from-red-500/5 to-transparent p-4">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/15 text-red-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                  </div>
+                  <div>
+                    <p className="font-body text-xs font-semibold text-red-500">Waste Watch</p>
+                    <p className="font-brand text-sm font-bold text-[var(--foreground)]">{stats.perishable} perishable items</p>
+                    <p className="font-body text-xs text-[var(--muted-foreground)]">
+                      Prep to predicted qty only &mdash; don&apos;t overbatch
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Trending Items */}
+            {trendingItems.length > 0 && (
+              <div className="rounded-[var(--radius-m)] border border-[var(--border)] bg-[var(--card)] p-5">
+                <h3 className="mb-3 font-brand text-sm font-semibold text-[var(--foreground)]">
+                  Demand Trends This Week
+                </h3>
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {trendingItems.map((t) => (
+                    <button
+                      key={t.item}
+                      onClick={() => { setSelectedItem(t.item); setView("detail"); }}
+                      className="flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--background)] p-3 text-left transition-colors hover:border-[var(--primary)]/40"
+                    >
+                      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                        t.change > 0
+                          ? "bg-emerald-500/15 text-emerald-500"
+                          : "bg-red-500/15 text-red-500"
+                      }`}>
+                        {t.change > 0 ? "+" : ""}{Math.round(t.change)}%
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate font-body text-xs font-medium text-[var(--foreground)]">{t.item}</p>
+                        <p className="font-body text-[10px] text-[var(--muted-foreground)]">
+                          {t.change > 0 ? "Rising demand" : "Declining demand"} &mdash; {t.avgSecond.toFixed(1)}/day
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Tomorrow's Prep List */}
+            {tomorrowPrep.length > 0 && (
+              <div className="rounded-[var(--radius-m)] border border-[var(--border)] bg-[var(--card)] p-5">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="font-brand text-sm font-semibold text-[var(--foreground)]">
+                    Tomorrow&apos;s Prep Plan
+                  </h3>
+                  <span className="font-body text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
+                    Predicted &rarr; Safe Max
+                  </span>
+                </div>
+                <div className="space-y-1.5">
+                  {tomorrowPrep.map((p) => {
+                    const rc = riskColor(p.risk);
+                    return (
+                      <div
+                        key={p.item}
+                        className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-[var(--muted)]/30"
+                      >
+                        <span className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${rc.dot}`} />
+                        <span className="min-w-0 flex-1 truncate font-body text-sm text-[var(--foreground)]">
+                          {p.item}
+                        </span>
+                        {p.perishable && (
+                          <span className="shrink-0 rounded bg-blue-500/10 px-1.5 py-0.5 font-body text-[9px] font-medium uppercase text-blue-500">
+                            Perish
+                          </span>
+                        )}
+                        <div className="flex shrink-0 items-center gap-1.5 font-brand tabular-nums">
+                          <span className="text-sm font-bold text-[var(--foreground)]">{p.qty}</span>
+                          <span className="text-xs text-[var(--muted-foreground)]">&rarr;</span>
+                          <span className="text-xs text-[var(--muted-foreground)]">{p.upper}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="mt-3 font-body text-[10px] text-[var(--muted-foreground)]">
+                  Prep to the predicted quantity. The &quot;Safe Max&quot; covers 95% demand scenarios. Perishable items: prep to predicted only.
+                </p>
+              </div>
+            )}
+
+            {/* Volatile Items Warning */}
+            {volatileItems.length > 0 && (
+              <div className="rounded-[var(--radius-m)] border border-amber-500/20 bg-amber-500/5 p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500"><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 4v16"/></svg>
+                  <h4 className="font-body text-xs font-semibold text-amber-600 dark:text-amber-400">Unpredictable Demand</h4>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {volatileItems.map((v) => (
+                    <button
+                      key={v.item}
+                      onClick={() => { setSelectedItem(v.item); setView("detail"); }}
+                      className="rounded-full border border-amber-500/20 bg-[var(--card)] px-3 py-1 font-body text-xs text-[var(--foreground)] transition-colors hover:border-amber-500/50"
+                    >
+                      {v.item.length > 22 ? v.item.slice(0, 20) + "..." : v.item}
+                      <span className="ml-1.5 text-amber-500">&#177;{Math.round(v.avgSpread)}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 font-body text-[10px] text-amber-600/80 dark:text-amber-400/80">
+                  These items have wide confidence bands. Keep flexible stock and check daily actuals.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
