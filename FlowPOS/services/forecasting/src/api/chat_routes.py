@@ -93,43 +93,88 @@ async def generate_insights(
 
     try:
         context = {}
-        loader.load_all_tables()
 
+        # Always include store context if provided
         if request.store_context:
-            # When store context is provided, use it as the sole data source
-            # Skip DuckDB data which contains items from a different dataset
             context["store_info"] = request.store_context
-        else:
-            # Default: use all DuckDB data
-            inventory = loader.get_inventory_status()
-            context["current_stock"] = inventory.head(20).to_string()
 
-            sales = loader.get_daily_sales()
-            context["recent_sales"] = sales.tail(50).to_string()
-
-        # Add forecast data from trained ensemble models
+        # Fetch real data from Supabase (same source as forecast page)
         try:
-            from ..models.model_service import load_trained_models, predict_multi_day
-            trained = load_trained_models()
-            if trained:
-                from ..api.model_routes import _get_sales_for_forecast
-                daily_sales = _get_sales_for_forecast(loader, top_n=15)
-                if not daily_sales.empty:
-                    results = predict_multi_day(daily_sales, days_ahead=7)
-                    if results:
-                        import pandas as pd
-                        forecast_df = pd.DataFrame(results)[
-                            ["item", "date", "forecast_balanced", "forecast_waste_optimized", "demand_risk"]
-                        ].head(50)
-                        context["forecasts"] = forecast_df.to_string(index=False)
-        except Exception:
-            pass
+            from .model_routes import _forecast_from_supabase, _fetch_supabase_orders
+            import pandas as pd
+            from collections import Counter
+            from datetime import timedelta
 
-        # Fallback: old DemandForecaster
-        if "forecasts" not in context and forecaster.model is not None:
+            # 1) Get forecast data (reuses cached result)
+            forecast_result = await _forecast_from_supabase(7, None, 15)
+            forecast_rows = forecast_result.get("forecasts", [])
+            if forecast_rows:
+                # Build a concise summary table for the LLM
+                lines = []
+                items_seen = set()
+                for f in forecast_rows:
+                    item = f["item_title"]
+                    if item in items_seen:
+                        continue
+                    items_seen.add(item)
+                    # Compute avg across forecast days for this item
+                    item_forecasts = [r for r in forecast_rows if r["item_title"] == item]
+                    avg_qty = sum(r["predicted_quantity"] for r in item_forecasts) / len(item_forecasts)
+                    total_qty = sum(r["predicted_quantity"] for r in item_forecasts)
+                    risk = f["demand_risk"]
+                    perishable = "Yes" if f.get("is_perishable") else "No"
+                    safety = f.get("safety_stock", 0) or 0
+                    lines.append(
+                        f"  {item}: avg {avg_qty:.1f}/day, total {total_qty:.0f} over 7d, "
+                        f"risk={risk}, perishable={perishable}, safety_stock={safety:.1f}"
+                    )
+                context["forecasts"] = "\n".join(lines)
+
+            # 2) Get recent sales trends from Supabase order items
+            order_items = await _fetch_supabase_orders()
+            if order_items:
+                df = pd.DataFrame(order_items)
+                df["date"] = pd.to_datetime(df["created_at"].str[:10], errors="coerce")
+
+                # Recent daily totals (last 7 days)
+                cutoff = pd.Timestamp.now() - timedelta(days=7)
+                recent = df[df["date"] >= cutoff]
+                if not recent.empty:
+                    daily_totals = recent.groupby("date")["quantity"].sum()
+                    avg_daily = daily_totals.mean()
+                    context["recent_sales"] = (
+                        f"Last 7 days: avg {avg_daily:.0f} items/day, "
+                        f"total {daily_totals.sum():.0f} items across {len(daily_totals)} days.\n"
+                        f"Top sellers (7d):\n"
+                    )
+                    top = recent.groupby("name")["quantity"].sum().sort_values(ascending=False).head(10)
+                    for name, qty in top.items():
+                        context["recent_sales"] += f"  {name}: {qty:.0f} sold\n"
+
+                # Overall inventory proxy: items with declining sales
+                if len(df) > 50:
+                    week_ago = pd.Timestamp.now() - timedelta(days=7)
+                    two_weeks_ago = pd.Timestamp.now() - timedelta(days=14)
+                    this_week = df[df["date"] >= week_ago].groupby("name")["quantity"].sum()
+                    last_week = df[(df["date"] >= two_weeks_ago) & (df["date"] < week_ago)].groupby("name")["quantity"].sum()
+                    declining = []
+                    for item in last_week.index:
+                        prev = last_week[item]
+                        curr = this_week.get(item, 0)
+                        if prev > 0 and curr < prev * 0.7:
+                            pct = ((curr - prev) / prev) * 100
+                            declining.append(f"  {item}: {prev:.0f} → {curr:.0f} ({pct:+.0f}%)")
+                    if declining:
+                        context["low_stock_alerts"] = "Items with declining sales (potential overstock risk):\n" + "\n".join(declining[:10])
+
+        except Exception as e:
+            # If Supabase fetch fails, fall back to DuckDB
             try:
-                forecasts = trainer.generate_forecasts(days_ahead=7)
-                context["forecasts"] = forecasts.head(20).to_string()
+                loader.load_all_tables()
+                inventory = loader.get_inventory_status()
+                context["current_stock"] = inventory.head(20).to_string()
+                sales = loader.get_daily_sales()
+                context["recent_sales"] = sales.tail(50).to_string()
             except Exception:
                 pass
 
