@@ -99,6 +99,26 @@ async def get_menu_items(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/data/places")
+async def list_places(loader: DataLoader = Depends(get_data_loader)):
+    """List restaurants/places that have order data, sorted by order count."""
+    try:
+        loader.load_all_tables()
+        sql = """
+        SELECT p.id, p.title, COUNT(DISTINCT o.id) AS order_count
+        FROM dim_places p
+        JOIN fct_orders o ON o.place_id = p.id
+        GROUP BY p.id, p.title
+        ORDER BY order_count DESC
+        """
+        df = loader.query(sql)
+        return {
+            "places": _df_to_records(df),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/data/query")
 async def run_query(
     sql: str,

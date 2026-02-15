@@ -29,7 +29,7 @@ def _df_to_records(df) -> list:
     return json.loads(df.to_json(orient="records", date_format="iso"))
 
 
-def _get_sales_for_forecast(loader: DataLoader, item_filter: str | None = None, top_n: int | None = None) -> pd.DataFrame:
+def _get_sales_for_forecast(loader: DataLoader, item_filter: str | None = None, top_n: int | None = None, place_id: int | None = None) -> pd.DataFrame:
     """Pull daily sales data from loaded DuckDB tables for the trained models."""
     loader.load_all_tables()
 
@@ -39,13 +39,22 @@ def _get_sales_for_forecast(loader: DataLoader, item_filter: str | None = None, 
         item_clause = f"AND LOWER(oi.title) LIKE LOWER('%' || ${len(params) + 1} || '%')"
         params.append(item_filter)
 
+    place_clause = ""
+    if place_id is not None:
+        place_clause = f"AND o.place_id = ${len(params) + 1}"
+        params.append(place_id)
+
     # If top_n specified, pre-filter to only top-selling items for performance
     top_items_clause = ""
     if top_n and top_n > 0 and not item_filter:
+        top_place_clause = f"JOIN fct_orders o3 ON o3.id = oi2.order_id WHERE o3.place_id = ${len(params) + 1}" if place_id is not None else ""
+        if place_id is not None:
+            params.append(place_id)
         top_items_clause = f"""AND oi.title IN (
             SELECT title FROM (
                 SELECT oi2.title, SUM(oi2.quantity) AS total_qty
                 FROM fct_order_items oi2
+                {top_place_clause}
                 GROUP BY oi2.title
                 ORDER BY total_qty DESC
                 LIMIT {int(top_n)}
@@ -62,6 +71,7 @@ def _get_sales_for_forecast(loader: DataLoader, item_filter: str | None = None, 
     JOIN fct_order_items oi ON o.id = oi.order_id
     WHERE o.created IS NOT NULL
       {item_clause}
+      {place_clause}
       {top_items_clause}
     GROUP BY oi.title, o.place_id, CAST(to_timestamp(o.created)::DATE AS DATE)
     ORDER BY oi.title, CAST(to_timestamp(o.created)::DATE AS DATE)
@@ -117,7 +127,7 @@ _FORECAST_CACHE_TTL = 300  # 5 minutes
 
 
 def _forecast_cache_key(request: ForecastRequest) -> str:
-    raw = f"{request.days_ahead}|{request.item_filter}|{request.top_n}|{request.source}"
+    raw = f"{request.days_ahead}|{request.item_filter}|{request.top_n}|{request.source}|{request.place_id}"
     return hashlib.md5(raw.encode()).hexdigest()
 
 
@@ -162,7 +172,7 @@ async def _fetch_supabase_orders() -> list[dict]:
     return order_items
 
 
-async def _forecast_from_supabase(days_ahead: int, item_filter: str | None, top_n: int | None) -> dict:
+async def _forecast_from_supabase(days_ahead: int, item_filter: str | None, top_n: int | None, place_id: int | None = None) -> dict:
     """Generate forecasts using real POS data from Supabase (cached)."""
     order_items = await _fetch_supabase_orders()
 
@@ -274,6 +284,7 @@ def _run_pkl_forecast_sync(
     days_ahead: int,
     item_filter: str | None,
     top_n: int | None,
+    place_id: int | None = None,
 ) -> dict:
     """Heavy CPU-bound forecast work (runs in thread pool)."""
     t0 = time.time()
@@ -281,7 +292,7 @@ def _run_pkl_forecast_sync(
     # Try trained .pkl models first
     trained = load_trained_models()
     if trained:
-        daily_sales = _get_sales_for_forecast(loader, item_filter, top_n)
+        daily_sales = _get_sales_for_forecast(loader, item_filter, top_n, place_id)
         if daily_sales.empty:
             raise HTTPException(status_code=404, detail="No sales data found for the given filter.")
 
@@ -364,7 +375,7 @@ async def generate_forecast(
     # ── Supabase source: use real POS data ───────────────────────────
     if request.source == "supabase":
         result = await _forecast_from_supabase(
-            request.days_ahead, request.item_filter, request.top_n
+            request.days_ahead, request.item_filter, request.top_n, request.place_id
         )
         _set_cached_forecast(cache_key, result)
         return ForecastResponse(**result)
@@ -375,6 +386,7 @@ async def generate_forecast(
             _run_pkl_forecast_sync,
             loader, forecaster,
             request.days_ahead, request.item_filter, request.top_n,
+            request.place_id,
         )
         _set_cached_forecast(cache_key, result)
         return ForecastResponse(**result)
