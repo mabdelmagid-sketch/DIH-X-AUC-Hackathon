@@ -80,6 +80,20 @@ export async function getPlaces() {
   }>("/data/places");
 }
 
+// --- Products (dataset) ---
+
+export async function getDataProducts(placeId: number, limit = 200) {
+  return fetcher<{
+    products: {
+      id: number;
+      title: string;
+      price: number;
+      image: string | null;
+      order_count: number;
+    }[];
+  }>(`/data/products?place_id=${placeId}&limit=${limit}`);
+}
+
 // --- Model ---
 
 export async function getForecast(

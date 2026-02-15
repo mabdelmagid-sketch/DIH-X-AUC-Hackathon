@@ -119,6 +119,31 @@ async def list_places(loader: DataLoader = Depends(get_data_loader)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/data/products")
+async def get_products_for_place(
+    place_id: int,
+    limit: int = 200,
+    loader: DataLoader = Depends(get_data_loader),
+):
+    """Get products for a specific restaurant, ordered by popularity."""
+    try:
+        loader.load_all_tables()
+        sql = """
+        SELECT m.item_id AS id, m.item_name AS title,
+               i.price, i.image, m.order_count
+        FROM most_ordered m
+        LEFT JOIN dim_items i ON m.item_id = i.id
+        WHERE m.place_id = $1
+          AND (i.status = 'Active' OR i.status IS NULL)
+        ORDER BY m.order_count DESC
+        LIMIT $2
+        """
+        df = loader.query(sql, [place_id, limit])
+        return {"products": _df_to_records(df)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/data/query")
 async def run_query(
     sql: str,
