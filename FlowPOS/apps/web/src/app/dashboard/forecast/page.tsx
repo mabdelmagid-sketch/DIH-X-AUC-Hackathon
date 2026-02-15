@@ -146,7 +146,7 @@ export default function ForecastPage() {
         name: item.length > 20 ? item.slice(0, 18) + "..." : item,
         fullName: item,
         avgDemand: Math.round(avg * 10) / 10,
-        safetyStock: Math.round(safety * 10) / 10,
+        safetyStock: Math.round((avg + safety) * 10) / 10,
         risk,
       };
     });
@@ -339,7 +339,7 @@ export default function ForecastPage() {
               <option value="">All restaurants</option>
               {places.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.title} ({p.order_count.toLocaleString()})
+                  {p.title} ({p.order_count.toLocaleString()} tracked)
                 </option>
               ))}
             </select>
@@ -666,7 +666,7 @@ export default function ForecastPage() {
                     }}
                     formatter={(value: number, name: string) => [
                       value.toFixed(1),
-                      name === "avgDemand" ? "Avg Demand/Day" : "Safety Stock",
+                      name === "avgDemand" ? "Avg Demand/Day" : "Recommended Prep",
                     ]}
                     labelFormatter={(label: string) => {
                       const item = overviewBarData.find((d) => d.name === label);
@@ -675,7 +675,7 @@ export default function ForecastPage() {
                   />
                   <Legend
                     formatter={(value) =>
-                      value === "avgDemand" ? "Avg Demand/Day" : "Safety Stock"
+                      value === "avgDemand" ? "Avg Demand/Day" : "Recommended Prep"
                     }
                   />
                   <Bar dataKey="avgDemand" radius={[0, 4, 4, 0]} name="avgDemand">

@@ -198,7 +198,7 @@ export default function POSPage() {
               ) : (
                 places.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.title} ({p.order_count.toLocaleString()} orders)
+                    {p.title} ({p.order_count.toLocaleString()} tracked)
                   </option>
                 ))
               )}

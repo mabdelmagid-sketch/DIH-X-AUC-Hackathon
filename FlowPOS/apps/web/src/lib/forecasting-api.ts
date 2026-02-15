@@ -94,6 +94,41 @@ export async function getDataProducts(placeId: number, limit = 200) {
   }>(`/data/products?place_id=${placeId}&limit=${limit}`);
 }
 
+// --- Orders (dataset) ---
+
+export type DataOrder = {
+  id: number;
+  code: string | null;
+  status: string;
+  type: string | null;
+  total_amount: number;
+  items_amount: number;
+  discount_amount: number;
+  payment_method: string | null;
+  customer_name: string | null;
+  channel: string | null;
+  place_name: string | null;
+  created: number | null;
+  items: { title: string; quantity: number; price: number }[];
+};
+
+export async function getDataOrders(opts: {
+  placeId?: number;
+  status?: string;
+  limit?: number;
+  offset?: number;
+} = {}) {
+  const params = new URLSearchParams();
+  if (opts.placeId != null) params.set("place_id", String(opts.placeId));
+  if (opts.status) params.set("status", opts.status);
+  params.set("limit", String(opts.limit ?? 50));
+  params.set("offset", String(opts.offset ?? 0));
+  return fetcher<{
+    orders: DataOrder[];
+    total: number;
+  }>(`/data/orders?${params}`);
+}
+
 // --- Model ---
 
 export async function getForecast(
