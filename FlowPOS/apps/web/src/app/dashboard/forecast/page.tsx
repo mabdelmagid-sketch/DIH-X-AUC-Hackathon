@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { DashboardLayout, PageHeader } from "@/components/layout";
-import { getForecast } from "@/lib/forecasting-api";
+import { getForecast, getPlaces } from "@/lib/forecasting-api";
 import {
   AreaChart,
   Area,
@@ -50,9 +50,20 @@ export default function ForecastPage() {
   const [daysAhead, setDaysAhead] = useState(7);
   const [itemFilter, setItemFilter] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [topN, setTopN] = useState(15);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [view, setView] = useState<ViewMode>("overview");
+  const [placeId, setPlaceId] = useState<number | undefined>(undefined);
+  const [places, setPlaces] = useState<{ id: number; title: string; order_count: number }[]>([]);
+  const [placesLoading, setPlacesLoading] = useState(true);
   const autoLoaded = useRef(false);
+
+  useEffect(() => {
+    getPlaces()
+      .then((res) => setPlaces(res.places))
+      .catch(() => {})
+      .finally(() => setPlacesLoading(false));
+  }, []);
 
   useEffect(() => {
     if (!autoLoaded.current) {
@@ -65,7 +76,7 @@ export default function ForecastPage() {
     setLoading(true);
     setError(null);
     try {
-      const result = await getForecast(daysAhead, itemFilter || undefined, 15);
+      const result = await getForecast(daysAhead, itemFilter || undefined, topN || undefined, placeId);
       setForecasts(result.forecasts as Forecast[]);
       setSelectedItem(null);
     } catch (e) {
@@ -313,6 +324,42 @@ export default function ForecastPage() {
               placeholder="e.g. Coffee"
               className="w-48 rounded-[var(--radius-m)] border border-[var(--border)] bg-[var(--background)] px-3 py-2 font-body text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]"
             />
+          </div>
+
+          <div>
+            <label className="mb-1 block font-body text-xs font-medium text-[var(--muted-foreground)]">
+              Restaurant
+            </label>
+            <select
+              value={placeId ?? ""}
+              onChange={(e) => setPlaceId(e.target.value ? Number(e.target.value) : undefined)}
+              disabled={placesLoading}
+              className="w-52 rounded-[var(--radius-m)] border border-[var(--border)] bg-[var(--background)] px-3 py-2 font-body text-sm text-[var(--foreground)]"
+            >
+              <option value="">All restaurants</option>
+              {places.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title} ({p.order_count.toLocaleString()})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-1 block font-body text-xs font-medium text-[var(--muted-foreground)]">
+              Products (by sales)
+            </label>
+            <select
+              value={topN}
+              onChange={(e) => setTopN(Number(e.target.value))}
+              className="rounded-[var(--radius-m)] border border-[var(--border)] bg-[var(--background)] px-3 py-2 font-body text-sm text-[var(--foreground)]"
+            >
+              <option value={10}>Best 10</option>
+              <option value={15}>Best 15</option>
+              <option value={25}>Best 25</option>
+              <option value={50}>Best 50</option>
+              <option value={0}>All products</option>
+            </select>
           </div>
 
           <button

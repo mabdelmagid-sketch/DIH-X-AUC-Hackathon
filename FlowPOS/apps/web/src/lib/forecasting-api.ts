@@ -72,12 +72,21 @@ export async function getMenu(limit = 100) {
   }>(`/data/menu?limit=${limit}`);
 }
 
+// --- Places ---
+
+export async function getPlaces() {
+  return fetcher<{
+    places: { id: number; title: string; order_count: number }[];
+  }>("/data/places");
+}
+
 // --- Model ---
 
 export async function getForecast(
   daysAhead = 7,
   itemFilter?: string,
   topN?: number,
+  placeId?: number,
 ) {
   return fetcher<{
     forecasts: Record<string, unknown>[];
@@ -88,6 +97,7 @@ export async function getForecast(
       days_ahead: daysAhead,
       item_filter: itemFilter || null,
       top_n: topN || null,
+      place_id: placeId || null,
     }),
   });
 }
