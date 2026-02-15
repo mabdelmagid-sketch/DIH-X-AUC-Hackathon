@@ -101,13 +101,13 @@ async def get_menu_items(
 
 @router.get("/data/places")
 async def list_places(loader: DataLoader = Depends(get_data_loader)):
-    """List restaurants/places that have order data, sorted by order count."""
+    """List restaurants/places that have tracked order data, sorted by total tracked orders."""
     try:
         loader.load_all_tables()
         sql = """
-        SELECT p.id, p.title, COUNT(DISTINCT o.id) AS order_count
+        SELECT p.id, p.title, SUM(m.order_count) AS order_count
         FROM dim_places p
-        JOIN fct_orders o ON o.place_id = p.id
+        JOIN most_ordered m ON m.place_id = p.id
         GROUP BY p.id, p.title
         ORDER BY order_count DESC
         """
@@ -140,6 +140,103 @@ async def get_products_for_place(
         """
         df = loader.query(sql, [place_id, limit])
         return {"products": _df_to_records(df)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/data/orders")
+async def get_orders(
+    place_id: int | None = None,
+    status: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+    loader: DataLoader = Depends(get_data_loader),
+):
+    """Get orders with their items from the dataset."""
+    try:
+        loader.load_all_tables()
+
+        # Build WHERE clauses
+        conditions = []
+        params = []
+        idx = 1
+        if place_id is not None:
+            conditions.append(f"o.place_id = ${idx}")
+            params.append(place_id)
+            idx += 1
+        if status is not None:
+            conditions.append(f"o.status = ${idx}")
+            params.append(status)
+            idx += 1
+
+        where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+
+        # Count total
+        count_sql = f"SELECT COUNT(*) as cnt FROM fct_orders o {where}"
+        total = int(loader.query(count_sql, params if params else None).iloc[0]["cnt"])
+
+        # Fetch orders page
+        params_page = params.copy()
+        params_page.append(limit)
+        params_page.append(offset)
+        orders_sql = f"""
+        SELECT o.id, o.code, o.status, o.type,
+               o.total_amount, o.items_amount, o.discount_amount,
+               o.payment_method, o.place_id, o.customer_name,
+               o.created, o.channel,
+               p.title as place_name
+        FROM fct_orders o
+        LEFT JOIN dim_places p ON o.place_id = p.id
+        {where}
+        ORDER BY o.created DESC
+        LIMIT ${idx} OFFSET ${idx + 1}
+        """
+        orders_df = loader.query(orders_sql, params_page)
+
+        if orders_df.empty:
+            return {"orders": [], "total": total}
+
+        # Fetch items for these orders
+        order_ids = orders_df["id"].tolist()
+        placeholders = ", ".join(str(int(oid)) for oid in order_ids)
+        items_sql = f"""
+        SELECT oi.order_id, oi.title, oi.quantity, oi.price
+        FROM fct_order_items oi
+        WHERE oi.order_id IN ({placeholders})
+        """
+        items_df = loader.query(items_sql)
+
+        # Group items by order_id
+        items_by_order: dict[int, list] = {}
+        for _, row in items_df.iterrows():
+            oid = int(row["order_id"])
+            items_by_order.setdefault(oid, []).append({
+                "title": row["title"],
+                "quantity": int(row["quantity"]) if pd.notnull(row["quantity"]) else 1,
+                "price": float(row["price"]) if pd.notnull(row["price"]) else 0,
+            })
+
+        # Build response
+        orders_out = []
+        for _, o in orders_df.iterrows():
+            oid = int(o["id"])
+            orders_out.append({
+                "id": oid,
+                "code": o["code"] if pd.notnull(o.get("code")) else None,
+                "status": o["status"] if pd.notnull(o.get("status")) else "Unknown",
+                "type": o["type"] if pd.notnull(o.get("type")) else None,
+                "total_amount": float(o["total_amount"]) if pd.notnull(o.get("total_amount")) else 0,
+                "items_amount": float(o["items_amount"]) if pd.notnull(o.get("items_amount")) else 0,
+                "discount_amount": float(o["discount_amount"]) if pd.notnull(o.get("discount_amount")) else 0,
+                "payment_method": o["payment_method"] if pd.notnull(o.get("payment_method")) else None,
+                "customer_name": o["customer_name"] if pd.notnull(o.get("customer_name")) else None,
+                "channel": o["channel"] if pd.notnull(o.get("channel")) else None,
+                "place_name": o["place_name"] if pd.notnull(o.get("place_name")) else None,
+                "created": int(o["created"]) if pd.notnull(o.get("created")) else None,
+                "items": items_by_order.get(oid, []),
+            })
+
+        return {"orders": orders_out, "total": total}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
