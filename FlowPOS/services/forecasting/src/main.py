@@ -41,14 +41,19 @@ async def startup_event():
     # Warm the forecast cache in background (default params the frontend uses)
     async def _warm_cache():
         try:
-            from .api.model_routes import _forecast_from_supabase, _set_cached_forecast, _forecast_cache_key
+            from .api.model_routes import _run_pkl_forecast_sync, _set_cached_forecast, _forecast_cache_key
             from .api.schemas import ForecastRequest
+            from .api.dependencies import get_data_loader, get_forecaster as _get_forecaster
 
-            # Frontend now uses source="supabase" to match real POS menu items
-            req = ForecastRequest(days_ahead=7, top_n=15, source="supabase")
+            req = ForecastRequest(days_ahead=7, top_n=15)
             key = _forecast_cache_key(req)
 
-            result = await _forecast_from_supabase(7, None, 15)
+            loader = get_data_loader()
+            forecaster = _get_forecaster()
+            result = await asyncio.to_thread(
+                _run_pkl_forecast_sync,
+                loader, forecaster, 7, None, 15,
+            )
             _set_cached_forecast(key, result)
             print(f"Forecast cache warmed ({len(result.get('forecasts', []))} forecasts)")
         except Exception as e:

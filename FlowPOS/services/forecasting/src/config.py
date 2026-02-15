@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
 
     # Paths
-    data_path: Path = Path("../data/Inventory Management")
+    data_path: Path = Path("./data/Inventory Management")
     model_path: Path = Path("./models")
     chroma_path: Path = Path("./chroma_db")
     trained_models_dir: Path = Path("./data/models")

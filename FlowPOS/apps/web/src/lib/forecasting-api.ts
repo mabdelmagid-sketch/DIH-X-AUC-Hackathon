@@ -88,7 +88,6 @@ export async function getForecast(
       days_ahead: daysAhead,
       item_filter: itemFilter || null,
       top_n: topN || null,
-      source: "supabase",
     }),
   });
 }
