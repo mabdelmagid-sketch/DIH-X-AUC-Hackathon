@@ -32,7 +32,7 @@ function renderMarkdown(text: string): string {
     .replace(/\n/g, "<br/>");
 }
 
-const STORE_CONTEXT = `This is FlowPOS, a modern coffee shop & cafe in Denmark (currency: DKK). The menu and product data come directly from our POS system — treat ALL items in the sales and forecast data as valid menu items. Do not flag any items as "not on the menu." Base your analysis entirely on the real sales and forecast data provided.`;
+const STORE_CONTEXT = `This is FlowPOS, a multi-restaurant POS platform managing data for restaurants and food businesses in Denmark (currency: DKK). The data comes from the Fresh Flow Markets dataset covering 1,800+ restaurants with 87,000+ menu items and 294,000+ orders. Treat ALL items in the sales, inventory, and forecast data as valid — they are real POS records. Do NOT invent or assume product names like "Cappuccino" or "Acai Bowl" — ONLY reference items that appear in the actual data provided to you. If inventory quantities are null, state that inventory tracking is not set up for those items rather than assuming stockouts.`;
 
 export default function InsightsPage() {
   const t = useTranslations("insights");

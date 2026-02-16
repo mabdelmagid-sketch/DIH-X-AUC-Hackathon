@@ -304,8 +304,12 @@ class LLMClient:
         system_prompt = SYSTEM_PROMPTS["inventory_analyst"]
 
         context_parts = []
+        if "store_info" in context:
+            context_parts.append(f"**IMPORTANT - Platform Context:**\n{context['store_info']}\n\nOnly discuss items that appear in the data below. Do NOT invent product names.")
+        if "menu_items" in context:
+            context_parts.append(f"**Actual Menu Items (from real order data — ONLY reference these):**\n{context['menu_items']}")
         if "current_stock" in context:
-            context_parts.append(f"**Current Stock Levels:**\n{context['current_stock']}")
+            context_parts.append(f"**Inventory Status:**\n{context['current_stock']}")
         if "forecasts" in context:
             context_parts.append(f"**Demand Forecasts (Next 7 Days):**\n{context['forecasts']}")
         if "expiring_items" in context:
@@ -314,8 +318,6 @@ class LLMClient:
             context_parts.append(f"**Low Stock Alerts:**\n{context['low_stock_alerts']}")
         if "recent_sales" in context:
             context_parts.append(f"**Recent Sales Trends:**\n{context['recent_sales']}")
-        if "store_info" in context:
-            context_parts.insert(0, f"**IMPORTANT - This Store's Actual Menu & Products (base ALL analysis on these):**\n{context['store_info']}\n\nOnly discuss items from this store's menu. Do not reference items not on the menu.")
         if "business_rules" in context:
             context_parts.append(f"**Business Rules:**\n{context['business_rules']}")
 
