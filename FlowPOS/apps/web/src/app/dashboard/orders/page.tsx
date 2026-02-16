@@ -6,6 +6,7 @@ import { DashboardLayout, PageHeader } from "@/components/layout";
 import { Icon } from "@/components/ui";
 import { cn, formatCurrency } from "@/lib/utils";
 import { getPlaces, getDataOrders, type DataOrder } from "@/lib/forecasting-api";
+import { usePOSOrdersStore } from "@/store/pos-orders-store";
 
 const STATUS_FILTERS = ["All", "Closed", "Pending", "Cancelled"];
 
@@ -89,18 +90,48 @@ export default function OrdersPage() {
     setPage(0);
   }, [placeId, statusFilter]);
 
+  // Merge POS orders (from local store) with dataset orders
+  const posOrders = usePOSOrdersStore((s) => s.orders);
+
+  const allOrders = useMemo(() => {
+    // Convert POS orders to DataOrder shape and prepend them
+    const mapped: DataOrder[] = posOrders.map((po) => ({
+      id: 0,
+      code: po.code,
+      status: po.status,
+      type: po.type,
+      total_amount: po.total_amount,
+      items_amount: po.items_amount,
+      discount_amount: po.discount_amount,
+      payment_method: po.payment_method,
+      customer_name: po.customer_name,
+      channel: po.channel,
+      place_name: po.place_name,
+      created: po.created,
+      items: po.items,
+    }));
+    return [...mapped, ...orders];
+  }, [posOrders, orders]);
+
   // Client-side search on loaded orders
   const filteredOrders = useMemo(() => {
-    if (!searchQuery) return orders;
+    // Apply status filter to POS orders too
+    let filtered = allOrders;
+    if (statusFilter !== "All") {
+      filtered = filtered.filter((o) => o.status === statusFilter);
+    } else {
+      filtered = allOrders;
+    }
+    if (!searchQuery) return filtered;
     const q = searchQuery.toLowerCase();
-    return orders.filter(
+    return filtered.filter(
       (o) =>
         String(o.id).includes(q) ||
         (o.code?.toLowerCase().includes(q) ?? false) ||
         (o.customer_name?.toLowerCase().includes(q) ?? false) ||
         o.items.some((i) => i.title.toLowerCase().includes(q))
     );
-  }, [orders, searchQuery]);
+  }, [allOrders, statusFilter, searchQuery]);
 
   const isLoading = placesLoading || ordersLoading;
   const totalPages = Math.ceil(totalOrders / pageSize);
