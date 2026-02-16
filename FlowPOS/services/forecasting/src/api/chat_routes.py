@@ -104,29 +104,60 @@ async def generate_insights(
 
             loader.load_all_tables()
 
-            # 1) Current inventory status
+            # 1) Top menu items from actual order data (so LLM knows real product names)
+            try:
+                top_items_df = loader.query("""
+                    SELECT oi.title, COUNT(*) as order_count,
+                           SUM(oi.quantity) as total_qty,
+                           ROUND(AVG(oi.price), 2) as avg_price
+                    FROM fct_order_items oi
+                    GROUP BY oi.title
+                    ORDER BY total_qty DESC
+                    LIMIT 40
+                """)
+                if not top_items_df.empty:
+                    item_lines = []
+                    for _, row in top_items_df.iterrows():
+                        item_lines.append(
+                            f"  {row['title']}: {row['total_qty']:.0f} sold, avg price {row['avg_price']:.0f} DKK"
+                        )
+                    context["menu_items"] = (
+                        f"Top {len(top_items_df)} menu items by total sales volume:\n"
+                        + "\n".join(item_lines)
+                    )
+            except Exception:
+                pass
+
+            # 2) Current inventory status
             inventory = loader.get_inventory_status()
             if not inventory.empty:
-                low_stock = inventory[
-                    inventory["quantity"].notnull()
-                    & inventory["threshold"].notnull()
-                    & (inventory["quantity"] <= inventory["threshold"])
+                # Only include items that have actual quantity data
+                tracked = inventory[inventory["quantity"].notnull()]
+                low_stock = tracked[
+                    tracked["threshold"].notnull()
+                    & (tracked["quantity"] <= tracked["threshold"])
                 ]
-                lines = []
-                for _, row in inventory.head(30).iterrows():
-                    qty = row.get("quantity")
-                    thresh = row.get("threshold")
-                    unit = row.get("unit", "")
-                    status = "LOW" if (pd.notnull(qty) and pd.notnull(thresh) and qty <= thresh) else "OK"
-                    lines.append(
-                        f"  {row['title']}: {qty} {unit} (threshold: {thresh}) [{status}]"
+                if not tracked.empty:
+                    lines = []
+                    for _, row in tracked.head(30).iterrows():
+                        qty = row.get("quantity")
+                        thresh = row.get("threshold")
+                        unit = row.get("unit", "")
+                        status = "LOW" if (pd.notnull(thresh) and qty <= thresh) else "OK"
+                        lines.append(
+                            f"  {row['title']}: {qty} {unit} (threshold: {thresh}) [{status}]"
+                        )
+                    context["current_stock"] = (
+                        f"{len(tracked)} items with inventory tracking, {len(low_stock)} below threshold.\n"
+                        + "\n".join(lines)
                     )
-                context["current_stock"] = (
-                    f"{len(inventory)} items tracked, {len(low_stock)} below threshold.\n"
-                    + "\n".join(lines)
-                )
+                else:
+                    context["current_stock"] = (
+                        f"Inventory tracking is not configured — no quantity data available for {len(inventory)} catalog items. "
+                        f"Analysis is based on sales and forecast data only."
+                    )
 
-            # 2) Recent sales from fct_orders + fct_order_items
+            # 3) Recent sales from fct_orders + fct_order_items
             sales = loader.get_daily_sales()
             if not sales.empty:
                 sales["date"] = pd.to_datetime(sales["date"], errors="coerce")
@@ -172,7 +203,7 @@ async def generate_insights(
                 if trending_down:
                     context["trending_down"] = "Items with declining demand (week-over-week):\n" + "\n".join(trending_down[:10])
 
-            # 3) Forecast data from trained models or SQL fallback
+            # 4) Forecast data from trained models or SQL fallback
             try:
                 from ..llm.tools import ToolExecutor
                 tool_exec = ToolExecutor(loader, forecaster)
