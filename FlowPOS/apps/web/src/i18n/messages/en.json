@@ -43,9 +43,7 @@
     "none": "None",
     "flowPos": "Flow POS",
     "sku": "SKU",
-    "location": "Location",
-    "showing": "Showing",
-    "of": "of"
+    "location": "Location"
   },
   "nav": {
     "main": "Main",
@@ -239,8 +237,7 @@
     "contact": "Contact",
     "customerName": "Customer name",
     "additionalNotes": "Any additional notes...",
-    "saveChanges": "Save Changes",
-    "customers": "customers"
+    "saveChanges": "Save Changes"
   },
   "employees": {
     "title": "Employees",
@@ -344,9 +341,7 @@
     "valuePlaceholder": "20",
     "minOrderPlaceholder": "5.00",
     "deleteConfirm": "Are you sure you want to delete coupon \"{name}\"? This action cannot be undone.",
-    "saveChanges": "Save Changes",
-    "couponsCount": "coupons",
-    "loading": "Loading coupons..."
+    "saveChanges": "Save Changes"
   },
   "recipes": {
     "title": "Recipes",
@@ -363,8 +358,7 @@
     "easy": "Easy",
     "medium": "Medium",
     "hard": "Hard",
-    "min": "min",
-    "category": "Category"
+    "min": "min"
   },
   "ingredients": {
     "title": "Ingredients",
@@ -386,8 +380,6 @@
     "optionalSku": "Optional SKU",
     "noSupplier": "No supplier",
     "deleteConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
-    "active": "Active",
-    "inactive": "Inactive",
     "categories": {
       "dairy": "Dairy",
       "meat": "Meat",
@@ -427,10 +419,7 @@
     "paymentTermsPlaceholder": "Net 30",
     "addressPlaceholder": "Street address",
     "notesPlaceholder": "Additional notes...",
-    "deleteConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
-    "suppliersCount": "suppliers",
-    "active": "Active",
-    "inactive": "Inactive"
+    "deleteConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone."
   },
   "reports": {
     "title": "Reports",
@@ -449,7 +438,7 @@
     "activeOrders": "Active Orders",
     "activeDescription": "Open, In Progress, or Ready",
     "completionRate": "Completion Rate",
-    "ofOrders": "of {total} orders"
+    "ofOrders": "of {count} orders"
   },
   "settings": {
     "title": "Settings",

@@ -1,0 +1,1 @@
+{"sequence_length": 14, "lstm_units": 64, "dropout": 0.2, "input_size": 1}

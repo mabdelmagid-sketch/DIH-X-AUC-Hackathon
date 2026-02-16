@@ -43,9 +43,7 @@
     "none": "لا يوجد",
     "flowPos": "Flow POS",
     "sku": "رمز المنتج",
-    "location": "الموقع",
-    "showing": "عرض",
-    "of": "من"
+    "location": "الموقع"
   },
   "nav": {
     "main": "الرئيسية",
@@ -239,8 +237,7 @@
     "contact": "التواصل",
     "customerName": "اسم العميل",
     "additionalNotes": "ملاحظات إضافية...",
-    "saveChanges": "حفظ التغييرات",
-    "customers": "عملاء"
+    "saveChanges": "حفظ التغييرات"
   },
   "employees": {
     "title": "الموظفين",
@@ -344,9 +341,7 @@
     "valuePlaceholder": "20",
     "minOrderPlaceholder": "5.00",
     "deleteConfirm": "هل أنت متأكد من حذف القسيمة \"{name}\"؟ لا يمكن التراجع عن هذا الإجراء.",
-    "saveChanges": "حفظ التغييرات",
-    "couponsCount": "قسائم",
-    "loading": "جاري تحميل القسائم..."
+    "saveChanges": "حفظ التغييرات"
   },
   "recipes": {
     "title": "الوصفات",
@@ -363,8 +358,7 @@
     "easy": "سهل",
     "medium": "متوسط",
     "hard": "صعب",
-    "min": "دقيقة",
-    "category": "الفئة"
+    "min": "دقيقة"
   },
   "ingredients": {
     "title": "المكونات",
@@ -386,8 +380,6 @@
     "optionalSku": "رمز اختياري",
     "noSupplier": "بدون مورد",
     "deleteConfirm": "هل أنت متأكد من حذف \"{name}\"؟ لا يمكن التراجع عن هذا الإجراء.",
-    "active": "نشط",
-    "inactive": "غير نشط",
     "categories": {
       "dairy": "ألبان",
       "meat": "لحوم",
@@ -427,10 +419,7 @@
     "paymentTermsPlaceholder": "صافي 30 يوم",
     "addressPlaceholder": "عنوان الشارع",
     "notesPlaceholder": "ملاحظات إضافية...",
-    "deleteConfirm": "هل أنت متأكد من حذف \"{name}\"؟ لا يمكن التراجع عن هذا الإجراء.",
-    "suppliersCount": "موردين",
-    "active": "نشط",
-    "inactive": "غير نشط"
+    "deleteConfirm": "هل أنت متأكد من حذف \"{name}\"؟ لا يمكن التراجع عن هذا الإجراء."
   },
   "reports": {
     "title": "التقارير",
@@ -449,7 +438,7 @@
     "activeOrders": "الطلبات النشطة",
     "activeDescription": "مفتوحة، قيد التنفيذ، أو جاهزة",
     "completionRate": "معدل الإنجاز",
-    "ofOrders": "من {total} طلب"
+    "ofOrders": "من {count} طلب"
   },
   "settings": {
     "title": "الإعدادات",
