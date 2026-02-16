@@ -146,7 +146,16 @@
     "minutesAgo": "منذ {count} دقيقة",
     "hoursAgo": "منذ {count} ساعة",
     "daysAgo": "منذ {count} يوم",
-    "pts": "نقاط"
+    "pts": "نقاط",
+    "cash": "نقدي",
+    "card": "بطاقة",
+    "mobile": "جوال",
+    "other": "أخرى",
+    "processing": "جاري المعالجة...",
+    "payment": "الدفع",
+    "cashReceived": "المبلغ المستلم",
+    "change": "الباقي",
+    "completePayment": "إتمام الدفع"
   },
   "kitchen": {
     "title": "شاشة المطبخ",

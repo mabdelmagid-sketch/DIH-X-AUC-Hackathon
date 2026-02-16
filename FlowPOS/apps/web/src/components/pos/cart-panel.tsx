@@ -3,10 +3,12 @@
 import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useCartStore, type CartCustomer } from "@/store/cart-store";
+import { useAuthStore } from "@/store/auth-store";
 import { CartItem } from "./cart-item";
 import { formatCurrency } from "@/lib/utils";
 import { Icon } from "@/components/ui";
 import { trpc } from "@/lib/trpc";
+import { PaymentModal } from "./payment-modal";
 
 /* ─── Customer Picker (inline search dropdown) ─────────── */
 
@@ -160,12 +162,58 @@ export function CartPanel() {
   const t = useTranslations("pos");
   const tc = useTranslations("common");
   const items = useCartStore((s) => s.items);
+  const customer = useCartStore((s) => s.customer);
   const removeItem = useCartStore((s) => s.removeItem);
   const updateQuantity = useCartStore((s) => s.updateQuantity);
+  const clearCart = useCartStore((s) => s.clearCart);
   const subtotal = useCartStore((s) => s.subtotal);
   const tax = useCartStore((s) => s.tax);
   const total = useCartStore((s) => s.total);
   const itemCount = useCartStore((s) => s.itemCount);
+
+  const user = useAuthStore((s) => s.user);
+
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
+  const [isCreatingOrder, setIsCreatingOrder] = useState(false);
+
+  const createOrderMutation = trpc.orders.create.useMutation({
+    onSuccess: (data) => {
+      setCurrentOrderId(data.id);
+      setPaymentModalOpen(true);
+      setIsCreatingOrder(false);
+    },
+    onError: (error) => {
+      alert(error.message);
+      setIsCreatingOrder(false);
+    },
+  });
+
+  const handlePayClick = () => {
+    if (items.length === 0 || !user?.locationId) return;
+    setIsCreatingOrder(true);
+
+    createOrderMutation.mutate({
+      locationId: user.locationId,
+      type: "DINE_IN",
+      customerId: customer?.id,
+      items: items.map((item) => ({
+        productId: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        unitPrice: item.price,
+        totalPrice: item.price * item.quantity,
+      })),
+      discountAmount: 0,
+      taxAmount: tax(),
+      tipAmount: 0,
+    });
+  };
+
+  const handlePaymentSuccess = () => {
+    clearCart();
+    setCurrentOrderId(null);
+  };
 
   return (
     <div className="flex h-full w-[360px] flex-col border-s border-[var(--border)] bg-[var(--card)]">
@@ -231,11 +279,32 @@ export function CartPanel() {
               {formatCurrency(total())}
             </span>
           </div>
-          <button className="flex h-12 w-full items-center justify-center rounded-[var(--radius-pill)] bg-[var(--primary)] font-brand text-base font-semibold text-white transition-colors hover:bg-[var(--primary)]/90">
-            {t("pay")} {formatCurrency(total())}
+          <button
+            onClick={handlePayClick}
+            disabled={isCreatingOrder}
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] bg-[var(--primary)] font-brand text-base font-semibold text-white transition-colors hover:bg-[var(--primary)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isCreatingOrder ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                {t("processing")}
+              </>
+            ) : (
+              <>
+                {t("pay")} {formatCurrency(total())}
+              </>
+            )}
           </button>
         </div>
       )}
+
+      <PaymentModal
+        open={paymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
+        orderId={currentOrderId}
+        total={total()}
+        onSuccess={handlePaymentSuccess}
+      />
     </div>
   );
 }
@@ -244,23 +313,84 @@ export function CartPanel() {
 export function CartBottomBar() {
   const t = useTranslations("pos");
   const tc = useTranslations("common");
+  const items = useCartStore((s) => s.items);
+  const customer = useCartStore((s) => s.customer);
+  const clearCart = useCartStore((s) => s.clearCart);
   const itemCount = useCartStore((s) => s.itemCount);
+  const tax = useCartStore((s) => s.tax);
   const total = useCartStore((s) => s.total);
+  const user = useAuthStore((s) => s.user);
+
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
+  const [isCreatingOrder, setIsCreatingOrder] = useState(false);
+
+  const createOrderMutation = trpc.orders.create.useMutation({
+    onSuccess: (data) => {
+      setCurrentOrderId(data.id);
+      setPaymentModalOpen(true);
+      setIsCreatingOrder(false);
+    },
+    onError: (error) => {
+      alert(error.message);
+      setIsCreatingOrder(false);
+    },
+  });
+
+  const handlePayClick = () => {
+    if (items.length === 0 || !user?.locationId) return;
+    setIsCreatingOrder(true);
+
+    createOrderMutation.mutate({
+      locationId: user.locationId,
+      type: "DINE_IN",
+      customerId: customer?.id,
+      items: items.map((item) => ({
+        productId: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        unitPrice: item.price,
+        totalPrice: item.price * item.quantity,
+      })),
+      discountAmount: 0,
+      taxAmount: tax(),
+      tipAmount: 0,
+    });
+  };
+
+  const handlePaymentSuccess = () => {
+    clearCart();
+    setCurrentOrderId(null);
+  };
 
   if (itemCount() === 0) return null;
 
   return (
-    <div className="flex h-16 items-center justify-between border-t border-[var(--border)] bg-[var(--card)] px-5 lg:hidden">
-      <div className="flex items-center gap-2 text-[var(--muted-foreground)]">
-        <Icon name="shopping_cart" size={20} />
-        <span className="font-body text-sm">{itemCount()} {tc("items")}</span>
+    <>
+      <div className="flex h-16 items-center justify-between border-t border-[var(--border)] bg-[var(--card)] px-5 lg:hidden">
+        <div className="flex items-center gap-2 text-[var(--muted-foreground)]">
+          <Icon name="shopping_cart" size={20} />
+          <span className="font-body text-sm">{itemCount()} {tc("items")}</span>
+        </div>
+        <span className="font-brand text-base font-semibold text-[var(--foreground)]">
+          {t("total")}: {formatCurrency(total())}
+        </span>
+        <button
+          onClick={handlePayClick}
+          disabled={isCreatingOrder}
+          className="rounded-[var(--radius-pill)] bg-[var(--primary)] px-6 py-2 font-brand text-sm font-semibold text-white transition-colors hover:bg-[var(--primary)]/90 disabled:opacity-50"
+        >
+          {isCreatingOrder ? t("processing") : `${t("pay")} ${formatCurrency(total())}`}
+        </button>
       </div>
-      <span className="font-brand text-base font-semibold text-[var(--foreground)]">
-        {t("total")}: {formatCurrency(total())}
-      </span>
-      <button className="rounded-[var(--radius-pill)] bg-[var(--primary)] px-6 py-2 font-brand text-sm font-semibold text-white transition-colors hover:bg-[var(--primary)]/90">
-        {t("pay")} {formatCurrency(total())}
-      </button>
-    </div>
+
+      <PaymentModal
+        open={paymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
+        orderId={currentOrderId}
+        total={total()}
+        onSuccess={handlePaymentSuccess}
+      />
+    </>
   );
 }
