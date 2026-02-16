@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { Modal } from "@/components/ui";
 import { Icon } from "@/components/ui";
 import { formatCurrency } from "@/lib/utils";
+import { useCartStore } from "@/store/cart-store";
+import { usePOSOrdersStore, generateOrderCode } from "@/store/pos-orders-store";
 
 type PaymentMethod = "CASH" | "CARD" | "MOBILE" | "OTHER";
 
@@ -28,6 +30,9 @@ export function PaymentModal({ open, onClose, total, onSuccess }: PaymentModalPr
   const [cashReceived, setCashReceived] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const cartItems = useCartStore((s) => s.items);
+  const addOrder = usePOSOrdersStore((s) => s.addOrder);
+
   const handleClose = () => {
     setSelectedMethod("CASH");
     setCashReceived("");
@@ -37,7 +42,27 @@ export function PaymentModal({ open, onClose, total, onSuccess }: PaymentModalPr
 
   const handlePayment = () => {
     setIsProcessing(true);
-    // Simulate brief processing delay for demo
+    // Save order to local store so it appears on the orders page
+    addOrder({
+      id: crypto.randomUUID(),
+      code: generateOrderCode(),
+      status: "Closed",
+      type: "Dine-in",
+      total_amount: total / 100,
+      items_amount: cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0) / 100,
+      discount_amount: 0,
+      payment_method: selectedMethod,
+      customer_name: null,
+      channel: "POS",
+      place_name: null,
+      created: Math.floor(Date.now() / 1000),
+      items: cartItems.map((i) => ({
+        title: i.name,
+        quantity: i.quantity,
+        price: i.price / 100,
+      })),
+    });
+    // Brief processing delay for demo
     setTimeout(() => {
       onSuccess();
       handleClose();
