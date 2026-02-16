@@ -5,14 +5,12 @@ import { useTranslations } from "next-intl";
 import { Modal } from "@/components/ui";
 import { Icon } from "@/components/ui";
 import { formatCurrency } from "@/lib/utils";
-import { trpc } from "@/lib/trpc";
 
 type PaymentMethod = "CASH" | "CARD" | "MOBILE" | "OTHER";
 
 interface PaymentModalProps {
   open: boolean;
   onClose: () => void;
-  orderId: string | null;
   total: number;
   onSuccess: () => void;
 }
@@ -24,24 +22,11 @@ const PAYMENT_METHODS: { value: PaymentMethod; icon: string; labelKey: string }[
   { value: "OTHER", icon: "more_horiz", labelKey: "other" },
 ];
 
-export function PaymentModal({ open, onClose, orderId, total, onSuccess }: PaymentModalProps) {
+export function PaymentModal({ open, onClose, total, onSuccess }: PaymentModalProps) {
   const t = useTranslations("pos");
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>("CASH");
   const [cashReceived, setCashReceived] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
-
-  const utils = trpc.useUtils();
-  const checkoutMutation = trpc.orders.checkout.useMutation({
-    onSuccess: () => {
-      utils.orders.invalidate();
-      onSuccess();
-      handleClose();
-    },
-    onError: (error) => {
-      alert(error.message);
-      setIsProcessing(false);
-    },
-  });
 
   const handleClose = () => {
     setSelectedMethod("CASH");
@@ -51,25 +36,12 @@ export function PaymentModal({ open, onClose, orderId, total, onSuccess }: Payme
   };
 
   const handlePayment = () => {
-    if (!orderId) return;
-
     setIsProcessing(true);
-
-    const paymentAmount = selectedMethod === "CASH" && cashReceived
-      ? Math.round(parseFloat(cashReceived) * 100)
-      : total;
-
-    checkoutMutation.mutate({
-      orderId,
-      payments: [
-        {
-          method: selectedMethod,
-          amount: Math.max(paymentAmount, total),
-          tipAmount: 0,
-        },
-      ],
-      status: "COMPLETED",
-    });
+    // Simulate brief processing delay for demo
+    setTimeout(() => {
+      onSuccess();
+      handleClose();
+    }, 600);
   };
 
   const cashReceivedCents = cashReceived ? Math.round(parseFloat(cashReceived) * 100) : 0;
