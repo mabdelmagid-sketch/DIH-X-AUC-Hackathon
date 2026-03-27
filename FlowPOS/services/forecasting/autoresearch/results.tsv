@@ -55,3 +55,4 @@ feccc09	5233372.07	2604213.73	1752772.23	2.304926	keep	Adaptive blend RF(300) gl
 38ce3f7	5231713.91	2668088.20	1709083.80	2.344585	keep	Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 27% buffer
 f52a6d7	5234039.28	2764702.02	1646224.84	2.405482	discard	Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 30% buffer
 8d8866c	5231868.77	2700189.43	1687786.22	2.364663	discard	Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 28% buffer
+3745bae	5232195.49	2636093.05	1730734.96	2.324667	discard	Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 26% buffer
