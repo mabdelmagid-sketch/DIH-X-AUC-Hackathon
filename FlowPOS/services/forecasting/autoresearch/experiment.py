@@ -1,7 +1,7 @@
 """
 Experiment file for autoresearch. THIS FILE IS MODIFIED BY THE AGENT.
 
-Current best: 5,455,894 DKK (40/60 blend + 8% safety buffer).
+Current best: 5,393,255 DKK (40/60 blend + 22% safety buffer, all data).
 
 The agent modifies this file to try different:
 - Model architectures (RF, XGBoost, LightGBM, CatBoost, ensembles, blends)
@@ -16,7 +16,7 @@ returns an object with fit(X, y, sample_weight=None) and predict(X) methods.
 """
 
 import numpy as np
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 
 
 # =============================================================================
@@ -25,12 +25,11 @@ from sklearn.ensemble import RandomForestRegressor
 
 class StoreGlobalBlendModel:
     """
-    Blends a global RF model with per-store RF models.
-    global_weight: fraction from global model.
-    safety_buffer: multiply predictions to reduce costly stockouts.
+    Blends a global RF model with per-store ExtraTrees models.
+    ExtraTrees is faster and can capture different patterns.
     """
 
-    def __init__(self, global_weight=0.6, n_estimators=100, random_state=42, safety_buffer=1.0):
+    def __init__(self, global_weight=0.6, n_estimators=100, random_state=42, safety_buffer=1.22):
         self.global_weight = global_weight
         self.store_weight = 1.0 - global_weight
         self.n_estimators = n_estimators
@@ -43,10 +42,12 @@ class StoreGlobalBlendModel:
     def fit(self, X, y, sample_weight=None):
         self.feature_cols_ = list(X.columns) if hasattr(X, 'columns') else None
 
+        # Global RF model
         self.global_model = RandomForestRegressor(
-            n_estimators=self.n_estimators,
+            n_estimators=200,   # more trees for better global model
             random_state=self.random_state,
             n_jobs=-1,
+            min_samples_leaf=2,
         )
         if sample_weight is not None:
             self.global_model.fit(X, y, sample_weight=sample_weight)
@@ -72,7 +73,8 @@ class StoreGlobalBlendModel:
             if len(y_store) < 10:
                 continue
 
-            store_model = RandomForestRegressor(
+            # ExtraTrees per-store: faster, different random splits
+            store_model = ExtraTreesRegressor(
                 n_estimators=50,
                 random_state=self.random_state,
                 n_jobs=1,
@@ -113,9 +115,9 @@ def build_model():
     """Return a model instance with fit() and predict() methods."""
     return StoreGlobalBlendModel(
         global_weight=0.6,
-        n_estimators=100,
+        n_estimators=200,   # 200 trees global RF + ET per-store
         random_state=42,
-        safety_buffer=1.22,   # try 22% buffer (18% = 5,394,508)
+        safety_buffer=1.22,
     )
 
 
@@ -136,7 +138,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="40/60 blend + 22% safety buffer",
+        description="RF(200,min_leaf=2) global + ExtraTrees per-store 60/40 + 22% buffer",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
