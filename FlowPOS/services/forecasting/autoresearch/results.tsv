@@ -62,3 +62,4 @@ f52a6d7	5234039.28	2764702.02	1646224.84	2.405482	discard	Adaptive blend RF(300)
 890dfd3	5225791.94	2729455.33	1664224.41	2.377057	keep	Feature interactions + RF(300)+ET(800) 75/25 + hl=12d + 25% buffer
 6aaedc4	5225379.29	2696299.09	1686053.47	2.356267	keep	Feature interactions + RF(300)+ET(800) 75/25 + hl=12d + 24% buffer
 2baa579	5226646.94	2630335.45	1730874.33	2.315266	discard	Feature interactions + RF(300)+ET(800) 75/25 + hl=12d + 22% buffer
+ac4849e	5225654.54	2663257.51	1708264.69	2.335682	discard	Feature interactions + RF(300)+ET(800) 75/25 + hl=12d + 23% buffer
