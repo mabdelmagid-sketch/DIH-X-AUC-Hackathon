@@ -150,7 +150,7 @@ def build_model():
         base_global_weight=0.75,
         min_store_samples=200,
         random_state=42,
-        safety_buffer=1.27,
+        safety_buffer=1.25,
     )
 
 
@@ -171,7 +171,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="Feature interactions + adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 27% buffer",
+        description="Feature interactions + adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 25% buffer",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
