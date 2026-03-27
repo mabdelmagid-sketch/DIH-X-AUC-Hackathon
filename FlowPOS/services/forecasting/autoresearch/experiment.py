@@ -1,7 +1,7 @@
 """
 Experiment file for autoresearch. THIS FILE IS MODIFIED BY THE AGENT.
 
-Current best: 5,570,286 DKK (40% per-store + 60% global RF blend, all data).
+Current best: 5,455,894 DKK (40/60 blend + 8% safety buffer).
 
 The agent modifies this file to try different:
 - Model architectures (RF, XGBoost, LightGBM, CatBoost, ensembles, blends)
@@ -16,7 +16,6 @@ returns an object with fit(X, y, sample_weight=None) and predict(X) methods.
 """
 
 import numpy as np
-import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 
 
@@ -28,9 +27,7 @@ class StoreGlobalBlendModel:
     """
     Blends a global RF model with per-store RF models.
     global_weight: fraction from global model.
-    store_weight = 1 - global_weight.
-    safety_buffer: multiply predictions by this factor (>1 = slight over-predict).
-    Stockouts cost 1.5x more than waste, so slight over-prediction is valuable.
+    safety_buffer: multiply predictions to reduce costly stockouts.
     """
 
     def __init__(self, global_weight=0.6, n_estimators=100, random_state=42, safety_buffer=1.0):
@@ -65,9 +62,8 @@ class StoreGlobalBlendModel:
             store_col_idx = -3
 
         store_ids = X_arr[:, store_col_idx]
-        unique_stores = np.unique(store_ids)
 
-        for store_id in unique_stores:
+        for store_id in np.unique(store_ids):
             mask = store_ids == store_id
             X_store = X_arr[mask]
             y_store = y_arr[mask]
@@ -110,18 +106,16 @@ class StoreGlobalBlendModel:
             store_preds[mask] = self.store_models[store_id].predict(X_arr[mask])
 
         blended = self.store_weight * store_preds + self.global_weight * global_preds
-        # Apply safety buffer to reduce costly stockouts
-        blended = blended * self.safety_buffer
-        return np.clip(blended, 0, None)
+        return np.clip(blended * self.safety_buffer, 0, None)
 
 
 def build_model():
     """Return a model instance with fit() and predict() methods."""
     return StoreGlobalBlendModel(
-        global_weight=0.6,     # 60% global, 40% per-store
+        global_weight=0.6,
         n_estimators=100,
         random_state=42,
-        safety_buffer=1.08,    # 8% over-prediction buffer to reduce stockouts
+        safety_buffer=1.12,   # try 12% buffer (was 8% = 5,455,894)
     )
 
 
@@ -142,7 +136,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="40/60 blend + 8% safety buffer",
+        description="40/60 blend + 12% safety buffer",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
