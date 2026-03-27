@@ -1,7 +1,7 @@
 """
 Experiment file for autoresearch. THIS FILE IS MODIFIED BY THE AGENT.
 
-Current best: 5,340,551 DKK (RF(200,min_leaf=2) global + ExtraTrees(100) per-store 60/40 + 22% buffer).
+Current best: 5,340,523 DKK (adaptive blend RF(200,min_leaf=2) global + ET(100) per-store 60/40 + 22% buffer).
 
 The agent modifies this file to try different:
 - Model architectures (RF, XGBoost, LightGBM, CatBoost, ensembles, blends)
@@ -27,7 +27,6 @@ class AdaptiveBlendModel:
     """
     Blends global RF with per-store ExtraTrees.
     Adaptive blend ratio: stores with more data get more weight on their own model.
-    min_store_samples: minimum samples needed for full store weight.
     """
 
     def __init__(self, base_global_weight=0.6, min_store_samples=200,
@@ -38,15 +37,15 @@ class AdaptiveBlendModel:
         self.safety_buffer = safety_buffer
         self.global_model = None
         self.store_models = {}
-        self.store_weights = {}  # per-store global weight
+        self.store_weights = {}
         self.feature_cols_ = None
 
     def fit(self, X, y, sample_weight=None):
         self.feature_cols_ = list(X.columns) if hasattr(X, 'columns') else None
 
-        # Global RF model
+        # Global RF model with 300 trees (was 200)
         self.global_model = RandomForestRegressor(
-            n_estimators=200,
+            n_estimators=300,
             random_state=self.random_state,
             n_jobs=-1,
             min_samples_leaf=2,
@@ -74,7 +73,7 @@ class AdaptiveBlendModel:
             n_store = len(y_store)
 
             if n_store < 10:
-                self.store_weights[store_id] = 1.0  # all global
+                self.store_weights[store_id] = 1.0
                 continue
 
             store_model = ExtraTreesRegressor(
@@ -89,8 +88,6 @@ class AdaptiveBlendModel:
 
             self.store_models[store_id] = store_model
 
-            # Adaptive blend: more store data -> more store weight
-            # Interpolate global_weight from 1.0 (no data) to base_global_weight (full data)
             frac = min(n_store / self.min_store_samples, 1.0)
             self.store_weights[store_id] = 1.0 - frac * (1.0 - self.base_global_weight)
 
@@ -124,8 +121,8 @@ class AdaptiveBlendModel:
 def build_model():
     """Return a model instance with fit() and predict() methods."""
     return AdaptiveBlendModel(
-        base_global_weight=0.6,   # max global weight (for data-rich stores)
-        min_store_samples=200,    # samples needed for full per-store weight
+        base_global_weight=0.6,
+        min_store_samples=200,
         random_state=42,
         safety_buffer=1.22,
     )
@@ -136,7 +133,8 @@ def build_model():
 # =============================================================================
 
 TRAIN_DAYS = None
-DECAY_HALF_LIFE = None
+# Try exponential decay with half-life=14d combined with best architecture
+DECAY_HALF_LIFE = 14
 
 
 # =============================================================================
@@ -148,7 +146,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="Adaptive blend (more data = more store weight) RF global + ET per-store + 22% buffer",
+        description="Adaptive blend RF(300) global + ET(100) per-store 60/40 + 22% buffer + decay hl=14d",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
