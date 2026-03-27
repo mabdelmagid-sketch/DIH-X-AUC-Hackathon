@@ -1,7 +1,7 @@
 """
 Experiment file for autoresearch. THIS FILE IS MODIFIED BY THE AGENT.
 
-Current best: 5,340,523 DKK (adaptive blend RF(200,min_leaf=2) global + ET(100) per-store 60/40 + 22% buffer).
+Current best: 5,322,364 DKK (RF(300,min_leaf=2) global + ET(100) per-store 60/40 + decay hl=14d + 22% buffer).
 
 The agent modifies this file to try different:
 - Model architectures (RF, XGBoost, LightGBM, CatBoost, ensembles, blends)
@@ -29,7 +29,7 @@ class AdaptiveBlendModel:
     Adaptive blend ratio: stores with more data get more weight on their own model.
     """
 
-    def __init__(self, base_global_weight=0.6, min_store_samples=200,
+    def __init__(self, base_global_weight=0.65, min_store_samples=200,
                  random_state=42, safety_buffer=1.22):
         self.base_global_weight = base_global_weight
         self.min_store_samples = min_store_samples
@@ -43,7 +43,6 @@ class AdaptiveBlendModel:
     def fit(self, X, y, sample_weight=None):
         self.feature_cols_ = list(X.columns) if hasattr(X, 'columns') else None
 
-        # Global RF model with 300 trees (was 200)
         self.global_model = RandomForestRegressor(
             n_estimators=300,
             random_state=self.random_state,
@@ -121,7 +120,7 @@ class AdaptiveBlendModel:
 def build_model():
     """Return a model instance with fit() and predict() methods."""
     return AdaptiveBlendModel(
-        base_global_weight=0.6,
+        base_global_weight=0.65,  # 65% global, 35% per-store (was 60/40)
         min_store_samples=200,
         random_state=42,
         safety_buffer=1.22,
@@ -133,7 +132,6 @@ def build_model():
 # =============================================================================
 
 TRAIN_DAYS = None
-# Try exponential decay with half-life=14d combined with best architecture
 DECAY_HALF_LIFE = 14
 
 
@@ -146,7 +144,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="Adaptive blend RF(300) global + ET(100) per-store 60/40 + 22% buffer + decay hl=14d",
+        description="Adaptive blend RF(300) global + ET(100) per-store 65/35 + decay hl=14d + 22% buffer",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
