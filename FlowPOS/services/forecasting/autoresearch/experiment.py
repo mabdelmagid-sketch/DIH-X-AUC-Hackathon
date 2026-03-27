@@ -40,8 +40,37 @@ class AdaptiveBlendModel:
         self.store_weights = {}
         self.feature_cols_ = None
 
+    def _add_interactions(self, X):
+        """Add multiplicative interaction features."""
+        X_arr = X.values if hasattr(X, 'values') else X
+        cols = self.feature_cols_
+        if cols is None:
+            return X_arr
+
+        idx = {c: i for i, c in enumerate(cols)}
+
+        # Key interactions for zero-inflated demand forecasting
+        lag7 = X_arr[:, idx['demand_lag_7d']]
+        dow = X_arr[:, idx['day_of_week']]
+        roll7 = X_arr[:, idx['rolling_mean_7d']]
+        is_wknd = X_arr[:, idx['is_weekend']]
+        days_start = X_arr[:, idx['days_since_start']]
+        exp_mean = np.maximum(X_arr[:, idx['expanding_mean']], 0.01)
+
+        interactions = np.column_stack([
+            lag7 * (dow + 1),            # lag * day_of_week
+            roll7 * is_wknd,             # rolling_mean * weekend
+            roll7 * days_start / 45.0,   # trend in rolling_mean (normalized)
+            lag7 / exp_mean,             # lag relative to expanding mean
+        ])
+
+        return np.concatenate([X_arr, interactions], axis=1)
+
     def fit(self, X, y, sample_weight=None):
         self.feature_cols_ = list(X.columns) if hasattr(X, 'columns') else None
+        X_arr = X.values if hasattr(X, 'values') else X
+        X_aug = self._add_interactions(X)
+        y_arr = np.array(y)
 
         self.global_model = RandomForestRegressor(
             n_estimators=300,
@@ -50,12 +79,9 @@ class AdaptiveBlendModel:
             min_samples_leaf=2,
         )
         if sample_weight is not None:
-            self.global_model.fit(X, y, sample_weight=sample_weight)
+            self.global_model.fit(X_aug, y_arr, sample_weight=sample_weight)
         else:
-            self.global_model.fit(X, y)
-
-        X_arr = X.values if hasattr(X, 'values') else X
-        y_arr = np.array(y)
+            self.global_model.fit(X_aug, y_arr)
 
         if self.feature_cols_ is not None:
             store_col_idx = self.feature_cols_.index('place_id_encoded')
@@ -66,7 +92,7 @@ class AdaptiveBlendModel:
 
         for store_id in np.unique(store_ids):
             mask = store_ids == store_id
-            X_store = X_arr[mask]
+            X_store = X_aug[mask]
             y_store = y_arr[mask]
             w_store = sample_weight[mask] if sample_weight is not None else None
             n_store = len(y_store)
@@ -94,8 +120,9 @@ class AdaptiveBlendModel:
 
     def predict(self, X):
         X_arr = X.values if hasattr(X, 'values') else X
+        X_aug = self._add_interactions(X)
 
-        global_preds = self.global_model.predict(X_arr)
+        global_preds = self.global_model.predict(X_aug)
         result = global_preds.copy()
 
         if self.feature_cols_ is not None:
@@ -111,7 +138,7 @@ class AdaptiveBlendModel:
                 continue
             gw = self.store_weights.get(store_id, self.base_global_weight)
             sw = 1.0 - gw
-            store_pred = self.store_models[store_id].predict(X_arr[mask])
+            store_pred = self.store_models[store_id].predict(X_aug[mask])
             result[mask] = sw * store_pred + gw * global_preds[mask]
 
         return np.clip(result * self.safety_buffer, 0, None)
@@ -144,7 +171,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 27% buffer",
+        description="Feature interactions + adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 27% buffer",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
