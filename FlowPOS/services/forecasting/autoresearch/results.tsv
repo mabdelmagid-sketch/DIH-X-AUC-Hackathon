@@ -38,3 +38,4 @@ cc0dd0f	5265987.43	2569609.02	1797585.61	2.288188	keep	Adaptive blend RF(300) gl
 6864227	5343587.11	2571425.38	1848107.82	2.289518	discard	Asymmetric weights(3x nonzero) + adaptive blend RF(300)+ET(100) 75/25 + decay hl=14d + 22% buffer
 cda3856	5254187.89	2512889.99	1827531.94	2.251010	keep	Adaptive blend RF(300) global + ET(100) per-store 75/25 + decay hl=10d + 22% buffer
 5a254db	5262336.03	2517312.57	1830015.64	2.259595	discard	Adaptive blend RF(300) global + ET(100) per-store 75/25 + decay hl=8d + 22% buffer
+7d7ac66	5250272.15	2510725.47	1826364.45	2.249581	keep	Adaptive blend RF(300) global + ET(100) per-store 75/25 + decay hl=12d + 22% buffer
