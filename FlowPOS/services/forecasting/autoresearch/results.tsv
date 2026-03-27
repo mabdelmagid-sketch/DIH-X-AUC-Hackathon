@@ -48,3 +48,4 @@ df7636f	5242954.50	2510964.18	1821326.88	2.247644	keep	Adaptive blend RF(300) gl
 0e09453	5241274.02	2509304.46	1821313.04	2.246820	keep	Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 22% buffer
 f2bd100	5242646.99	2509088.96	1822372.02	2.247058	discard	Adaptive blend RF(300) global + ET(1000) per-store 75/25 + decay hl=12d + 22% buffer
 db9d3b3	5243264.93	2511231.39	1821355.69	2.247269	discard	Adaptive blend RF(500) global + ET(800) per-store 75/25 + decay hl=12d + 22% buffer
+7a1098e	5245283.87	2477897.35	1844924.35	2.227781	discard	Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 21% buffer
