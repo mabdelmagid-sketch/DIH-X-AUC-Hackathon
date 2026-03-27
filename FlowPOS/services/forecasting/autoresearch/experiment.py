@@ -1,7 +1,7 @@
 """
 Experiment file for autoresearch. THIS FILE IS MODIFIED BY THE AGENT.
 
-Current best: 5,322,364 DKK (RF(300,min_leaf=2) global + ET(100) per-store 60/40 + decay hl=14d + 22% buffer).
+Current best: 5,260,180 DKK (RF(300,min_leaf=2) global + ET(100) per-store 75/25 + decay hl=14d + 22% buffer).
 
 The agent modifies this file to try different:
 - Model architectures (RF, XGBoost, LightGBM, CatBoost, ensembles, blends)
@@ -29,7 +29,7 @@ class AdaptiveBlendModel:
     Adaptive blend ratio: stores with more data get more weight on their own model.
     """
 
-    def __init__(self, base_global_weight=0.65, min_store_samples=200,
+    def __init__(self, base_global_weight=0.75, min_store_samples=200,
                  random_state=42, safety_buffer=1.22):
         self.base_global_weight = base_global_weight
         self.min_store_samples = min_store_samples
@@ -120,10 +120,10 @@ class AdaptiveBlendModel:
 def build_model():
     """Return a model instance with fit() and predict() methods."""
     return AdaptiveBlendModel(
-        base_global_weight=0.75,  # 75% global, 25% per-store (70/30 = 5,265,987)
+        base_global_weight=0.75,
         min_store_samples=200,
         random_state=42,
-        safety_buffer=1.22,
+        safety_buffer=1.20,   # try 20% buffer (22% = 5,260,180)
     )
 
 
@@ -144,7 +144,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="Adaptive blend RF(300) global + ET(100) per-store 75/25 + decay hl=14d + 22% buffer",
+        description="Adaptive blend RF(300) global + ET(100) per-store 75/25 + decay hl=14d + 20% buffer",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
