@@ -1,2 +1,35 @@
 commit	total_cost_dkk	waste_dkk	stockout_dkk	mae	status	description
 baseline	5984623.55	1739152.02	2830314.36	1.839868	keep	baseline RF default (100 trees, all data, no decay)
+f4e6af9	5570286.18	2092382.94	2318602.16	2.033170	keep	40% per-store + 60% global RF blend (all data)
+fb69ece	5616765.11	2082167.71	2356398.27	2.040127	discard	40/60 blend + 14d training window
+be6b998	5455894.43	2348633.19	2071507.50	2.174434	keep	40/60 blend + 8% safety buffer
+144b77c	5421427.89	2480546.54	1960587.57	2.251312	keep	40/60 blend + 12% safety buffer
+aee2fdf	5404141.72	2580908.83	1882155.26	2.311274	keep	40/60 blend + 15% safety buffer
+64494f2	5394508.25	2682546.58	1807974.44	2.373049	keep	40/60 blend + 18% safety buffer
+512cfd1	5393255.19	2819995.51	1715506.45	2.458445	keep	40/60 blend + 22% safety buffer
+72effbb	5399760.22	2924323.01	1650291.47	2.524530	discard	40/60 blend + 25% safety buffer
+95edfda	5644459.02	1992739.28	2434479.83	1.959292	discard	LightGBM quantile(0.65) global + RF per-store blend 60/40
+59ab2cf	5494516.25	2965669.93	1685897.54	2.572623	discard	50/50 blend + 22% safety buffer
+6f3498a	0.00	0.00	0.00	0.00	crash	XGBoost asymmetric loss global crash (get_label error)
+21256fd	5985608.96	2031225.60	2636255.57	2.048108	discard	XGBoost asymmetric loss (fixed) global + RF per-store 60/40 + 22% buffer
+aac89e8	5349347.45	2723249.62	1750731.88	2.389579	keep	RF(200,min_leaf=2) global + ExtraTrees(50) per-store 60/40 + 22% buffer
+4db1bcf	5501008.68	2788497.06	1808341.08	2.435791	discard	ExtraTrees(200,min_leaf=2) global + ExtraTrees(50) per-store 60/40 + 22% buffer
+194f963	5340551.29	2722959.95	1745060.89	2.386366	keep	RF(200,min_leaf=2) global + ExtraTrees(100) per-store 60/40 + 22% buffer
+2f030f7	5341547.01	2727103.85	1742962.11	2.387249	discard	RF(200,min_leaf=2) global + ExtraTrees(150) per-store 60/40 + 22% buffer
+0c830ba	5340523.01	2722972.62	1745033.59	2.386613	keep	Adaptive blend ratio by store data volume + RF global + ET per-store + 22% buffer
+94d0873	5359445.35	2741692.14	1745168.81	2.395849	discard	Adaptive blend + drop 7 stub zero features + 22% buffer
+0bd1850	5322364.59	2702911.25	1746302.22	2.385973	keep	Adaptive blend RF(300) global + ET(100) per-store 60/40 + decay hl=14d + 22% buffer
+97b5c53	5335792.73	2698535.67	1758171.37	2.392023	discard	Adaptive blend RF(300) global + ET(100) per-store + decay hl=7d + 22% buffer
+f295794	5334234.90	2701536.68	1755132.15	2.381920	discard	Adaptive blend RF(300) global + ET(100) per-store + decay hl=21d + 22% buffer
+213abb5	5324809.22	2636215.53	1792395.79	2.344394	discard	Adaptive blend RF(300) global + ET(100) per-store + decay hl=14d + 20% buffer
+4b28bbe	5519309.23	2860036.82	1772848.27	2.508465	discard	3-level blend: 40% global RF + 20% per-item ET + 40% per-store ET + decay hl=14d + 22% buffer
+6735235	5755609.68	2951726.31	1869255.58	2.525127	discard	LightGBM(500,lr=0.03,nl=127) global + ET(100) per-store 60/40 + decay hl=14d + 22% buffer
+a496e83	5546035.07	2802913.85	1828747.48	2.462757	discard	RF(400,min_leaf=2,max_feat=log2) global + ET(100) per-store + decay hl=14d + 22% buf
+21e4b62	5287411.90	2635132.78	1768186.08	2.335422	keep	Adaptive blend RF(300) global + ET(100) per-store 65/35 + decay hl=14d + 22% buffer
+cc0dd0f	5265987.43	2569609.02	1797585.61	2.288188	keep	Adaptive blend RF(300) global + ET(100) per-store 70/30 + decay hl=14d + 22% buffer
+4fe0d6d	5260180.13	2506688.11	1835661.34	2.244777	keep	Adaptive blend RF(300) global + ET(100) per-store 75/25 + decay hl=14d + 22% buffer
+35dc6a4	5272156.71	2446731.19	1883617.01	2.205592	discard	Adaptive blend RF(300) global + ET(100) per-store 80/20 + decay hl=14d + 22% buffer
+9f0bc25	6193110.57	1173618.31	3346328.17	1.571157	discard	log1p target transform + adaptive blend RF(300) global + ET(100) per-store 75/25 + decay hl=14d + 22% buffer
+846a94f	5658484.80	1456534.12	2801300.45	1.739900	discard	Two-stage: RF classifier + adaptive blend RF(300)+ET(100) 75/25 + decay hl=14d + 22% buffer
+8894968	5270530.77	2479838.17	1860461.74	2.228934	discard	Adaptive blend RF(300) global + RF(100,min_leaf=2) per-store 75/25 + decay hl=14d + 22% buffer
+55c1040	715580759.74	711384225.43	2797689.54	408.405854	discard	HistGradientBoosting Poisson global + ET(100) per-store 75/25 + decay hl=14d + 22% buffer
