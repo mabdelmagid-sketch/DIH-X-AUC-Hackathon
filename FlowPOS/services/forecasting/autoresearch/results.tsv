@@ -1,0 +1,2 @@
+commit	total_cost_dkk	waste_dkk	stockout_dkk	mae	status	description
+baseline	5984623.55	1739152.02	2830314.36	1.839868	keep	baseline RF default (100 trees, all data, no decay)
