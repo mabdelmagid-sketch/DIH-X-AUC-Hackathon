@@ -120,7 +120,7 @@ class AdaptiveBlendModel:
 def build_model():
     """Return a model instance with fit() and predict() methods."""
     return AdaptiveBlendModel(
-        base_global_weight=0.65,  # 65% global, 35% per-store (was 60/40)
+        base_global_weight=0.70,  # 70% global, 30% per-store (was 65/35 = 5,287,411)
         min_store_samples=200,
         random_state=42,
         safety_buffer=1.22,
@@ -144,7 +144,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="Adaptive blend RF(300) global + ET(100) per-store 65/35 + decay hl=14d + 22% buffer",
+        description="Adaptive blend RF(300) global + ET(100) per-store 70/30 + decay hl=14d + 22% buffer",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
