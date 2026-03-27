@@ -59,3 +59,4 @@ f52a6d7	5234039.28	2764702.02	1646224.84	2.405482	discard	Adaptive blend RF(300)
 272ffba	5234728.68	2706603.45	1685416.82	2.371299	discard	Adaptive blend RF(300) global + ET(800) per-store 72/28 + decay hl=12d + 27% buffer
 54a215e	5228622.53	2796102.01	1621680.34	2.419144	keep	Feature interactions (lag*dow, roll*wknd) + adaptive blend RF(300)+ET(800) 75/25 + hl=12d + 27% buffer
 167439d	5234540.30	2783779.73	1633840.38	2.406514	discard	More feature interactions (7 total) + RF(300)+ET(800) 75/25 + hl=12d + 27% buffer
+890dfd3	5225791.94	2729455.33	1664224.41	2.377057	keep	Feature interactions + RF(300)+ET(800) 75/25 + hl=12d + 25% buffer
