@@ -1,7 +1,7 @@
 """
 Experiment file for autoresearch. THIS FILE IS MODIFIED BY THE AGENT.
 
-Current best: 5,349,347 DKK (RF(200,min_leaf=2) global + ExtraTrees(50) per-store 60/40 + 22% buffer).
+Current best: 5,340,551 DKK (RF(200,min_leaf=2) global + ExtraTrees(100) per-store 60/40 + 22% buffer).
 
 The agent modifies this file to try different:
 - Model architectures (RF, XGBoost, LightGBM, CatBoost, ensembles, blends)
@@ -23,24 +23,28 @@ from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 # MODEL DEFINITION (agent modifies this)
 # =============================================================================
 
-class StoreGlobalBlendModel:
+class AdaptiveBlendModel:
     """
-    Blends a global RF model with per-store ExtraTrees models.
+    Blends global RF with per-store ExtraTrees.
+    Adaptive blend ratio: stores with more data get more weight on their own model.
+    min_store_samples: minimum samples needed for full store weight.
     """
 
-    def __init__(self, global_weight=0.6, random_state=42, safety_buffer=1.22):
-        self.global_weight = global_weight
-        self.store_weight = 1.0 - global_weight
+    def __init__(self, base_global_weight=0.6, min_store_samples=200,
+                 random_state=42, safety_buffer=1.22):
+        self.base_global_weight = base_global_weight
+        self.min_store_samples = min_store_samples
         self.random_state = random_state
         self.safety_buffer = safety_buffer
         self.global_model = None
         self.store_models = {}
+        self.store_weights = {}  # per-store global weight
         self.feature_cols_ = None
 
     def fit(self, X, y, sample_weight=None):
         self.feature_cols_ = list(X.columns) if hasattr(X, 'columns') else None
 
-        # Global RF model with 200 trees, min_samples_leaf=2
+        # Global RF model
         self.global_model = RandomForestRegressor(
             n_estimators=200,
             random_state=self.random_state,
@@ -67,11 +71,12 @@ class StoreGlobalBlendModel:
             X_store = X_arr[mask]
             y_store = y_arr[mask]
             w_store = sample_weight[mask] if sample_weight is not None else None
+            n_store = len(y_store)
 
-            if len(y_store) < 10:
+            if n_store < 10:
+                self.store_weights[store_id] = 1.0  # all global
                 continue
 
-            # ExtraTrees per-store with 100 trees (was 50)
             store_model = ExtraTreesRegressor(
                 n_estimators=100,
                 random_state=self.random_state,
@@ -84,13 +89,18 @@ class StoreGlobalBlendModel:
 
             self.store_models[store_id] = store_model
 
+            # Adaptive blend: more store data -> more store weight
+            # Interpolate global_weight from 1.0 (no data) to base_global_weight (full data)
+            frac = min(n_store / self.min_store_samples, 1.0)
+            self.store_weights[store_id] = 1.0 - frac * (1.0 - self.base_global_weight)
+
         return self
 
     def predict(self, X):
         X_arr = X.values if hasattr(X, 'values') else X
 
         global_preds = self.global_model.predict(X_arr)
-        store_preds = global_preds.copy()
+        result = global_preds.copy()
 
         if self.feature_cols_ is not None:
             store_col_idx = self.feature_cols_.index('place_id_encoded')
@@ -100,19 +110,22 @@ class StoreGlobalBlendModel:
         store_ids = X_arr[:, store_col_idx]
 
         for store_id in np.unique(store_ids):
+            mask = store_ids == store_id
             if store_id not in self.store_models:
                 continue
-            mask = store_ids == store_id
-            store_preds[mask] = self.store_models[store_id].predict(X_arr[mask])
+            gw = self.store_weights.get(store_id, self.base_global_weight)
+            sw = 1.0 - gw
+            store_pred = self.store_models[store_id].predict(X_arr[mask])
+            result[mask] = sw * store_pred + gw * global_preds[mask]
 
-        blended = self.store_weight * store_preds + self.global_weight * global_preds
-        return np.clip(blended * self.safety_buffer, 0, None)
+        return np.clip(result * self.safety_buffer, 0, None)
 
 
 def build_model():
     """Return a model instance with fit() and predict() methods."""
-    return StoreGlobalBlendModel(
-        global_weight=0.6,
+    return AdaptiveBlendModel(
+        base_global_weight=0.6,   # max global weight (for data-rich stores)
+        min_store_samples=200,    # samples needed for full per-store weight
         random_state=42,
         safety_buffer=1.22,
     )
@@ -135,7 +148,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="RF(200,min_leaf=2) global + ExtraTrees(100) per-store 60/40 + 22% buffer",
+        description="Adaptive blend (more data = more store weight) RF global + ET per-store + 22% buffer",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
