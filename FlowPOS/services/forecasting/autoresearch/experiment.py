@@ -115,7 +115,7 @@ def build_model():
         global_weight=0.6,
         n_estimators=100,
         random_state=42,
-        safety_buffer=1.12,   # try 12% buffer (was 8% = 5,455,894)
+        safety_buffer=1.15,   # try 15% buffer (12% = 5,421,428)
     )
 
 
@@ -136,7 +136,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="40/60 blend + 12% safety buffer",
+        description="40/60 blend + 15% safety buffer",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
