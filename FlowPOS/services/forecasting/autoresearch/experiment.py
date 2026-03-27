@@ -1,7 +1,7 @@
 """
 Experiment file for autoresearch. THIS FILE IS MODIFIED BY THE AGENT.
 
-Current best: 5,260,180 DKK (RF(300,min_leaf=2) global + ET(100) per-store 75/25 + decay hl=14d + 22% buffer).
+Current best: 5,254,187 DKK (RF(300,min_leaf=2) global + ET(100) per-store 75/25 + decay hl=10d + 22% buffer).
 
 The agent modifies this file to try different:
 - Model architectures (RF, XGBoost, LightGBM, CatBoost, ensembles, blends)
