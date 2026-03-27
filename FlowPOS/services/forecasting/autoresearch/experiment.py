@@ -1,7 +1,7 @@
 """
 Experiment file for autoresearch. THIS FILE IS MODIFIED BY THE AGENT.
 
-Current best: 5,241,274 DKK (RF(300,min_leaf=2) global + ET(800) per-store 75/25 + decay hl=12d + 22% buffer).
+Current best: 5,237,887 DKK (RF(300,min_leaf=2) global + ET(800) per-store 75/25 + decay hl=12d + 23% buffer).
 
 The agent modifies this file to try different:
 - Model architectures (RF, XGBoost, LightGBM, CatBoost, ensembles, blends)
@@ -123,7 +123,7 @@ def build_model():
         base_global_weight=0.75,
         min_store_samples=200,
         random_state=42,
-        safety_buffer=1.23,
+        safety_buffer=1.24,
     )
 
 
@@ -144,7 +144,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 23% buffer",
+        description="Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 24% buffer",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
