@@ -132,7 +132,7 @@ def build_model():
 # =============================================================================
 
 TRAIN_DAYS = None
-DECAY_HALF_LIFE = 14
+DECAY_HALF_LIFE = 10
 
 
 # =============================================================================
@@ -144,7 +144,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="Adaptive blend RF(300) global + ET(100) per-store 75/25 + decay hl=14d + 22% buffer",
+        description="Adaptive blend RF(300) global + ET(100) per-store 75/25 + decay hl=10d + 22% buffer",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
