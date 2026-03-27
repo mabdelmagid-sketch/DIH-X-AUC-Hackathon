@@ -66,3 +66,9 @@ ac4849e	5225654.54	2663257.51	1708264.69	2.335682	discard	Feature interactions +
 0feebdc	5809523.74	2947676.15	1907898.39	2.495531	discard	Feature interactions + LightGBM(500) global + ET(800) per-store 75/25 + hl=12d + 24% buffer
 2d89a8b	5225357.02	2696279.47	1686051.70	2.356277	keep	Feature interactions + RF(300)+ET(800) 75/25 min_store_samples=100 + hl=12d + 24% buffer
 c9a70a4	5225385.96	2696296.51	1686059.63	2.355817	discard	Feature interactions + RF(300)+ET(800) 75/25 min_store_samples=50 + hl=12d + 24% buffer
+ed64cf0	5231361.59	2703742.45	1685079.43	2.362647	discard	Feature interactions + RF(300)+ET(800) 75/25 + train_days=45 + hl=12d + 24% buffer
+860e689	5298786.00	2756723.51	1694708.32	2.395153	discard	6 interactions (add CoV + wow_growth*roll7) + RF(300)+ET(800) 75/25 + hl=12d + 24% buffer
+b4e45fe	5277436.62	2697786.09	1719767.02	2.357659	discard	Feature interactions + RF(300,min_leaf=3) global + ET(800) per-store 75/25 + hl=12d + 24% buffer
+75d1270	5429803.90	2815745.37	1742705.69	2.434432	discard	RF(300,min_leaf=2,max_feat=sqrt) global + ET(800) + interactions + hl=12d + 24% buffer
+98a1347	5245074.96	2697493.46	1698387.66	2.365600	discard	Feature interactions + RF(300)+ET(800) 75/25 min_samples=100 + hl=9d + 24% buffer
+06a4dc7	5267531.50	2717539.80	1699994.47	2.369634	discard	Nonzero 2x weight + feature interactions + RF(300)+ET(800) 75/25 + hl=12d + 24% buffer
