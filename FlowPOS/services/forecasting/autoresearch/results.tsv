@@ -33,3 +33,4 @@ cc0dd0f	5265987.43	2569609.02	1797585.61	2.288188	keep	Adaptive blend RF(300) gl
 846a94f	5658484.80	1456534.12	2801300.45	1.739900	discard	Two-stage: RF classifier + adaptive blend RF(300)+ET(100) 75/25 + decay hl=14d + 22% buffer
 8894968	5270530.77	2479838.17	1860461.74	2.228934	discard	Adaptive blend RF(300) global + RF(100,min_leaf=2) per-store 75/25 + decay hl=14d + 22% buffer
 55c1040	715580759.74	711384225.43	2797689.54	408.405854	discard	HistGradientBoosting Poisson global + ET(100) per-store 75/25 + decay hl=14d + 22% buffer
+3b9696d	5269005.50	2577748.51	1794171.33	2.293219	discard	RF(300,min_leaf=1) global + ET(100) per-store 75/25 + decay hl=14d + 22% buffer
