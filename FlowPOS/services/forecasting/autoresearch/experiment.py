@@ -92,7 +92,7 @@ class SoftProbModel:
 
         # Train global RF regressor
         self.global_model = RandomForestRegressor(
-            n_estimators=300,
+            n_estimators=500,
             random_state=self.random_state,
             n_jobs=-1,
             min_samples_leaf=2,
@@ -198,7 +198,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="Soft P^0.5 * RF(300)+ET(100) 75/25 hl=12d buf=1.32 P^0.25 (LGB clf 500 trees)",
+        description="Soft P^0.5 * RF(500)+ET(100) 75/25 hl=12d buf=1.32 P^0.25 (LGB clf 500 trees)",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
