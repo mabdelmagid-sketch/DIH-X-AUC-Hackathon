@@ -16,26 +16,30 @@ returns an object with fit(X, y, sample_weight=None) and predict(X) methods.
 """
 
 import numpy as np
-from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
+from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor, RandomForestClassifier
 
 
 # =============================================================================
 # MODEL DEFINITION (agent modifies this)
 # =============================================================================
 
-class AdaptiveBlendModel:
+class SoftProbModel:
     """
-    Blends global RF with per-store ExtraTrees.
-    Adaptive blend ratio: stores with more data get more weight on their own model.
+    Soft probability weighting: RF classifier predicts P(demand > 0).
+    Final prediction = P^0.5 * regressor_pred * 1.40 buffer.
+    P^0.5 reduces the aggressiveness of scaling (less penalization for low-P items).
+    Larger buffer compensates for the P-downscaling on true demand days.
     """
 
-    def __init__(self, base_global_weight=0.75, min_store_samples=200,
-                 random_state=42, safety_buffer=1.22):
+    def __init__(self, base_global_weight=0.75, min_store_samples=100,
+                 random_state=42, safety_buffer=1.40, prob_exponent=0.5):
         self.base_global_weight = base_global_weight
         self.min_store_samples = min_store_samples
         self.random_state = random_state
         self.safety_buffer = safety_buffer
+        self.prob_exponent = prob_exponent
         self.global_model = None
+        self.classifier = None
         self.store_models = {}
         self.store_weights = {}
         self.feature_cols_ = None
@@ -49,7 +53,6 @@ class AdaptiveBlendModel:
 
         idx = {c: i for i, c in enumerate(cols)}
 
-        # Key interactions for zero-inflated demand forecasting
         lag7 = X_arr[:, idx['demand_lag_7d']]
         dow = X_arr[:, idx['day_of_week']]
         roll7 = X_arr[:, idx['rolling_mean_7d']]
@@ -71,7 +74,21 @@ class AdaptiveBlendModel:
         X_arr = X.values if hasattr(X, 'values') else X
         X_aug = self._add_interactions(X)
         y_arr = np.array(y)
+        y_binary = (y_arr > 0).astype(int)
 
+        # Train RF classifier for P(demand > 0)
+        self.classifier = RandomForestClassifier(
+            n_estimators=50,
+            random_state=self.random_state,
+            n_jobs=-1,
+            min_samples_leaf=5,
+        )
+        if sample_weight is not None:
+            self.classifier.fit(X_aug, y_binary, sample_weight=sample_weight)
+        else:
+            self.classifier.fit(X_aug, y_binary)
+
+        # Train global RF regressor
         self.global_model = RandomForestRegressor(
             n_estimators=300,
             random_state=self.random_state,
@@ -102,7 +119,7 @@ class AdaptiveBlendModel:
                 continue
 
             store_model = ExtraTreesRegressor(
-                n_estimators=800,
+                n_estimators=100,
                 random_state=self.random_state,
                 n_jobs=1,
             )
@@ -121,6 +138,12 @@ class AdaptiveBlendModel:
     def predict(self, X):
         X_arr = X.values if hasattr(X, 'values') else X
         X_aug = self._add_interactions(X)
+
+        # Get P(demand > 0) from classifier
+        classes = self.classifier.classes_
+        pos_idx = list(classes).index(1) if 1 in classes else 1
+        proba = self.classifier.predict_proba(X_aug)[:, pos_idx]
+        p_weight = np.power(proba, self.prob_exponent)
 
         global_preds = self.global_model.predict(X_aug)
         result = global_preds.copy()
@@ -141,16 +164,20 @@ class AdaptiveBlendModel:
             store_pred = self.store_models[store_id].predict(X_aug[mask])
             result[mask] = sw * store_pred + gw * global_preds[mask]
 
+        # Soft weighting: scale by P^0.5 (mild), compensate with larger buffer
+        result = p_weight * result
+
         return np.clip(result * self.safety_buffer, 0, None)
 
 
 def build_model():
     """Return a model instance with fit() and predict() methods."""
-    return AdaptiveBlendModel(
+    return SoftProbModel(
         base_global_weight=0.75,
         min_store_samples=100,
         random_state=42,
-        safety_buffer=1.24,
+        safety_buffer=1.40,
+        prob_exponent=0.5,
     )
 
 
@@ -159,7 +186,7 @@ def build_model():
 # =============================================================================
 
 TRAIN_DAYS = None
-DECAY_HALF_LIFE = 15
+DECAY_HALF_LIFE = 12
 
 
 # =============================================================================
@@ -171,7 +198,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="Feature interactions + RF(300)+ET(800) 75/25 min_samples=100 + hl=15d + 24% buffer",
+        description="Soft P^0.5 * RF(300)+ET(100) 75/25 hl=12d buf=1.40 (RF clf 50 trees)",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
