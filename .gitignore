@@ -79,3 +79,6 @@ test-screenshots/
 # Allow specific config directories
 !config/settings.yaml
 !inventory-forecasting/settings.yaml
+FlowPOS/services/forecasting/autoresearch/.cache/
+**/__pycache__/
+*.pkl
