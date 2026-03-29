@@ -121,7 +121,7 @@ class SoftProbModel:
                 continue
 
             store_model = ExtraTreesRegressor(
-                n_estimators=100,
+                n_estimators=800,
                 random_state=self.random_state,
                 n_jobs=1,
             )
@@ -198,7 +198,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="Soft P^0.25 LGB clf(500) * RF(500)+ET(100) 70/30 hl=12d buf=1.30",
+        description="Soft P^0.25 LGB clf(500) * RF(500)+ET(800) 70/30 hl=12d buf=1.30",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
