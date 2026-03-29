@@ -16,7 +16,7 @@ returns an object with fit(X, y, sample_weight=None) and predict(X) methods.
 """
 
 import numpy as np
-from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor, RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 import lightgbm as lgb
 
 
@@ -27,12 +27,12 @@ import lightgbm as lgb
 class SoftProbModel:
     """
     Soft probability weighting: LightGBM classifier predicts P(demand > 0).
-    Final prediction = P^0.5 * regressor_pred * 1.40 buffer.
-    LGB classifier gives better calibrated probabilities.
+    Final prediction = P^0.25 * (global*0.70 + per-store*0.30) * 1.30 buffer.
+    LGB classifier (500 trees) gives well-calibrated probabilities.
     """
 
-    def __init__(self, base_global_weight=0.75, min_store_samples=100,
-                 random_state=42, safety_buffer=1.40, prob_exponent=0.25):
+    def __init__(self, base_global_weight=0.70, min_store_samples=100,
+                 random_state=42, safety_buffer=1.30, prob_exponent=0.25):
         self.base_global_weight = base_global_weight
         self.min_store_samples = min_store_samples
         self.random_state = random_state
@@ -164,7 +164,7 @@ class SoftProbModel:
             store_pred = self.store_models[store_id].predict(X_aug[mask])
             result[mask] = sw * store_pred + gw * global_preds[mask]
 
-        # Soft weighting: scale by P^0.5 (mild), compensate with larger buffer
+        # Soft weighting: scale by P^0.25 (mild), compensate with buffer
         result = p_weight * result
 
         return np.clip(result * self.safety_buffer, 0, None)
