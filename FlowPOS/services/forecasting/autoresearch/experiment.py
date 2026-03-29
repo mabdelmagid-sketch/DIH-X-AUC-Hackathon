@@ -17,6 +17,7 @@ returns an object with fit(X, y, sample_weight=None) and predict(X) methods.
 
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor, RandomForestClassifier
+import lightgbm as lgb
 
 
 # =============================================================================
@@ -25,10 +26,9 @@ from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor, RandomF
 
 class SoftProbModel:
     """
-    Soft probability weighting: RF classifier predicts P(demand > 0).
+    Soft probability weighting: LightGBM classifier predicts P(demand > 0).
     Final prediction = P^0.5 * regressor_pred * 1.40 buffer.
-    P^0.5 reduces the aggressiveness of scaling (less penalization for low-P items).
-    Larger buffer compensates for the P-downscaling on true demand days.
+    LGB classifier gives better calibrated probabilities.
     """
 
     def __init__(self, base_global_weight=0.75, min_store_samples=100,
@@ -76,12 +76,14 @@ class SoftProbModel:
         y_arr = np.array(y)
         y_binary = (y_arr > 0).astype(int)
 
-        # Train RF classifier for P(demand > 0)
-        self.classifier = RandomForestClassifier(
-            n_estimators=50,
-            random_state=self.random_state,
+        # Train LightGBM classifier for P(demand > 0)
+        self.classifier = lgb.LGBMClassifier(
+            n_estimators=200,
+            learning_rate=0.05,
+            num_leaves=31,
             n_jobs=-1,
-            min_samples_leaf=5,
+            random_state=self.random_state,
+            verbosity=-1,
         )
         if sample_weight is not None:
             self.classifier.fit(X_aug, y_binary, sample_weight=sample_weight)
@@ -140,9 +142,7 @@ class SoftProbModel:
         X_aug = self._add_interactions(X)
 
         # Get P(demand > 0) from classifier
-        classes = self.classifier.classes_
-        pos_idx = list(classes).index(1) if 1 in classes else 1
-        proba = self.classifier.predict_proba(X_aug)[:, pos_idx]
+        proba = self.classifier.predict_proba(X_aug)[:, 1]
         p_weight = np.power(proba, self.prob_exponent)
 
         global_preds = self.global_model.predict(X_aug)
@@ -198,7 +198,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="Soft P^0.5 * RF(300)+ET(100) 75/25 hl=12d buf=1.40 (RF clf 50 trees)",
+        description="Soft P^0.5 * RF(300)+ET(100) 75/25 hl=12d buf=1.40 (LGB clf 200 trees)",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
