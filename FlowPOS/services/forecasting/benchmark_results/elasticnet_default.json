@@ -1,0 +1,29 @@
+{
+  "model_name": "ElasticNet_default",
+  "metrics": {
+    "mae": 2.1821,
+    "rmse": 6.1966,
+    "wmape": 104.06,
+    "forecast_accuracy_pct": 0,
+    "waste_cost_dkk": 1989583.0,
+    "stockout_cost_dkk": 4131430.0,
+    "total_business_cost_dkk": 8186728.0,
+    "overstock_units": 118498.0,
+    "understock_units": 96384.0,
+    "overstock_days_pct": 76.9,
+    "understock_days_pct": 22.2,
+    "n_samples": 98476
+  },
+  "timing": {
+    "data_prep_s": 34.4,
+    "train_s": 91.0,
+    "predict_s": 0.074
+  },
+  "config": {
+    "top_n_items": 30,
+    "test_days": 14,
+    "train_samples": 323564,
+    "test_samples": 98476,
+    "n_features": 40
+  }
+}

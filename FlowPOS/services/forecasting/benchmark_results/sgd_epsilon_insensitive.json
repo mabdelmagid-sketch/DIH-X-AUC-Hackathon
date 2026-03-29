@@ -1,0 +1,29 @@
+{
+  "model_name": "SGD_epsilon_insensitive",
+  "metrics": {
+    "mae": 1.5826,
+    "rmse": 5.3535,
+    "wmape": 75.48,
+    "forecast_accuracy_pct": 24.52,
+    "waste_cost_dkk": 665661.0,
+    "stockout_cost_dkk": 5164381.0,
+    "total_business_cost_dkk": 8412233.0,
+    "overstock_units": 42061.0,
+    "understock_units": 113791.0,
+    "overstock_days_pct": 58.4,
+    "understock_days_pct": 29.8,
+    "n_samples": 98476
+  },
+  "timing": {
+    "data_prep_s": 18.6,
+    "train_s": 1.6,
+    "predict_s": 0.018
+  },
+  "config": {
+    "top_n_items": 30,
+    "test_days": 14,
+    "train_samples": 323564,
+    "test_samples": 98476,
+    "n_features": 40
+  }
+}

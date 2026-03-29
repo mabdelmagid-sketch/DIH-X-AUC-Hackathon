@@ -1,0 +1,29 @@
+{
+  "model_name": "AdaptiveETS",
+  "metrics": {
+    "mae": 1.8626,
+    "rmse": 5.4178,
+    "wmape": 88.83,
+    "forecast_accuracy_pct": 11.17,
+    "waste_cost_dkk": 1511398.0,
+    "stockout_cost_dkk": 4011420.0,
+    "total_business_cost_dkk": 7528529.0,
+    "overstock_units": 93014.0,
+    "understock_units": 90404.0,
+    "overstock_days_pct": 76.2,
+    "understock_days_pct": 23.8,
+    "n_samples": 98476
+  },
+  "timing": {
+    "data_prep_s": 63.3,
+    "train_s": 0.6,
+    "predict_s": 0.018
+  },
+  "config": {
+    "top_n_items": 30,
+    "test_days": 14,
+    "train_samples": 323564,
+    "test_samples": 98476,
+    "n_features": 40
+  }
+}

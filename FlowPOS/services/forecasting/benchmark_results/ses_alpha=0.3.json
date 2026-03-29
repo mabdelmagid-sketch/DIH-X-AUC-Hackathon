@@ -1,0 +1,29 @@
+{
+  "model_name": "SES alpha=0.3",
+  "metrics": {
+    "mae": 1.6775,
+    "rmse": 5.2654,
+    "wmape": 80.0,
+    "forecast_accuracy_pct": 20.0,
+    "waste_cost_dkk": 1180813.0,
+    "stockout_cost_dkk": 3767135.0,
+    "total_business_cost_dkk": 6831516.0,
+    "overstock_units": 85656.0,
+    "understock_units": 79541.0,
+    "overstock_days_pct": 50.3,
+    "understock_days_pct": 24.0,
+    "n_samples": 98476
+  },
+  "timing": {
+    "data_prep_s": 82.6,
+    "train_s": 0.0,
+    "predict_s": 0.015
+  },
+  "config": {
+    "top_n_items": 30,
+    "test_days": 14,
+    "train_samples": 323564,
+    "test_samples": 98476,
+    "n_features": 40
+  }
+}

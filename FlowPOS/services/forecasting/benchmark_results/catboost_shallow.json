@@ -1,0 +1,29 @@
+{
+  "model_name": "CatBoost_shallow",
+  "metrics": {
+    "mae": 1.7734,
+    "rmse": 6.2677,
+    "wmape": 84.58,
+    "forecast_accuracy_pct": 15.42,
+    "waste_cost_dkk": 1524960.0,
+    "stockout_cost_dkk": 3264555.0,
+    "total_business_cost_dkk": 6421793.0,
+    "overstock_units": 106399.0,
+    "understock_units": 68243.0,
+    "overstock_days_pct": 74.0,
+    "understock_days_pct": 23.4,
+    "n_samples": 98476
+  },
+  "timing": {
+    "data_prep_s": 49.1,
+    "train_s": 175.5,
+    "predict_s": 1.685
+  },
+  "config": {
+    "top_n_items": 30,
+    "test_days": 14,
+    "train_samples": 323564,
+    "test_samples": 98476,
+    "n_features": 40
+  }
+}

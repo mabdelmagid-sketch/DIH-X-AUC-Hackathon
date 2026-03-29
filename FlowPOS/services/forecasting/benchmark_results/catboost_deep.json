@@ -1,0 +1,29 @@
+{
+  "model_name": "CatBoost_deep",
+  "metrics": {
+    "mae": 1.7477,
+    "rmse": 6.0971,
+    "wmape": 83.35,
+    "forecast_accuracy_pct": 16.65,
+    "waste_cost_dkk": 1486475.0,
+    "stockout_cost_dkk": 3311668.0,
+    "total_business_cost_dkk": 6453977.0,
+    "overstock_units": 102939.0,
+    "understock_units": 69167.0,
+    "overstock_days_pct": 74.2,
+    "understock_days_pct": 23.9,
+    "n_samples": 98476
+  },
+  "timing": {
+    "data_prep_s": 41.0,
+    "train_s": 328.3,
+    "predict_s": 0.662
+  },
+  "config": {
+    "top_n_items": 30,
+    "test_days": 14,
+    "train_samples": 323564,
+    "test_samples": 98476,
+    "n_features": 40
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "model_name": "SGD_huber",
+  "metrics": {
+    "mae": 1.5038,
+    "rmse": 5.0387,
+    "wmape": 71.71,
+    "forecast_accuracy_pct": 28.29,
+    "waste_cost_dkk": 711386.0,
+    "stockout_cost_dkk": 4519072.0,
+    "total_business_cost_dkk": 7489994.0,
+    "overstock_units": 51705.0,
+    "understock_units": 96378.0,
+    "overstock_days_pct": 52.9,
+    "understock_days_pct": 27.7,
+    "n_samples": 98476
+  },
+  "timing": {
+    "data_prep_s": 7.6,
+    "train_s": 1.0,
+    "predict_s": 0.022
+  },
+  "config": {
+    "top_n_items": 30,
+    "test_days": 14,
+    "train_samples": 323564,
+    "test_samples": 98476,
+    "n_features": 40
+  }
+}
