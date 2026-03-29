@@ -176,7 +176,7 @@ def build_model():
         base_global_weight=0.75,
         min_store_samples=100,
         random_state=42,
-        safety_buffer=1.40,
+        safety_buffer=1.35,
         prob_exponent=0.5,
     )
 
@@ -198,7 +198,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="Soft P^0.5 * RF(300)+ET(100) 75/25 hl=12d buf=1.40 (LGB clf 200 trees)",
+        description="Soft P^0.5 * RF(300)+ET(100) 75/25 hl=12d buf=1.35 (LGB clf 200 trees)",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
