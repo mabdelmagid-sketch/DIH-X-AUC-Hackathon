@@ -80,7 +80,7 @@ class SoftProbModel:
         self.classifier = lgb.LGBMClassifier(
             n_estimators=500,
             learning_rate=0.05,
-            num_leaves=31,
+            num_leaves=63,
             n_jobs=-1,
             random_state=self.random_state,
             verbosity=-1,
@@ -198,7 +198,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="Soft P^0.25 LGB clf(500) * RF(500)+ET(800) 70/30 hl=12d buf=1.30",
+        description="Soft P^0.25 LGB clf(500,nl=63) * RF(500)+ET(800) 70/30 hl=12d buf=1.30",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
