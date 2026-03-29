@@ -1,7 +1,7 @@
 """
 Experiment file for autoresearch. THIS FILE IS MODIFIED BY THE AGENT.
 
-Current best: 5,225,357 DKK (feature interactions + RF(300,min_leaf=2) global + ET(800) per-store 75/25 min_store_samples=100 + decay hl=12d + 24% buffer).
+Current best: 5,145,817 DKK (soft P^0.25 LGB clf(500) * RF(500)+ET(100) 75/25 hl=12d buf=1.32).
 
 The agent modifies this file to try different:
 - Model architectures (RF, XGBoost, LightGBM, CatBoost, ensembles, blends)
@@ -173,7 +173,7 @@ class SoftProbModel:
 def build_model():
     """Return a model instance with fit() and predict() methods."""
     return SoftProbModel(
-        base_global_weight=0.75,
+        base_global_weight=0.70,
         min_store_samples=100,
         random_state=42,
         safety_buffer=1.32,
@@ -198,7 +198,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="Soft P^0.5 * RF(500)+ET(100) 75/25 hl=12d buf=1.32 P^0.25 (LGB clf 500 trees)",
+        description="Soft P^0.25 LGB clf(500) * RF(500)+ET(100) 70/30 hl=12d buf=1.32",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
