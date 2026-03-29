@@ -78,7 +78,7 @@ class SoftProbModel:
 
         # Train LightGBM classifier for P(demand > 0)
         self.classifier = lgb.LGBMClassifier(
-            n_estimators=200,
+            n_estimators=500,
             learning_rate=0.05,
             num_leaves=31,
             n_jobs=-1,
@@ -198,7 +198,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="Soft P^0.5 * RF(300)+ET(100) 75/25 hl=12d buf=1.32 P^0.3 (LGB clf 200 trees)",
+        description="Soft P^0.5 * RF(300)+ET(100) 75/25 hl=12d buf=1.32 P^0.3 (LGB clf 500 trees)",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
