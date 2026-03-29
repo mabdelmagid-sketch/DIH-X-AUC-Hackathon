@@ -1,7 +1,7 @@
 """
 Experiment file for autoresearch. THIS FILE IS MODIFIED BY THE AGENT.
 
-Current best: 5,145,817 DKK (soft P^0.25 LGB clf(500) * RF(500)+ET(100) 75/25 hl=12d buf=1.32).
+Current best: 5,134,633 DKK (soft P^0.25 LGB clf(500) * RF(500)+ET(100) 70/30 hl=12d buf=1.32).
 
 The agent modifies this file to try different:
 - Model architectures (RF, XGBoost, LightGBM, CatBoost, ensembles, blends)
@@ -176,7 +176,7 @@ def build_model():
         base_global_weight=0.70,
         min_store_samples=100,
         random_state=42,
-        safety_buffer=1.32,
+        safety_buffer=1.30,
         prob_exponent=0.25,
     )
 
@@ -198,7 +198,7 @@ if __name__ == "__main__":
 
     results = run_experiment(
         build_model_fn=build_model,
-        description="Soft P^0.25 LGB clf(500) * RF(500)+ET(100) 70/30 hl=12d buf=1.32",
+        description="Soft P^0.25 LGB clf(500) * RF(500)+ET(100) 70/30 hl=12d buf=1.30",
         train_days=TRAIN_DAYS,
         decay_half_life=DECAY_HALF_LIFE,
     )
