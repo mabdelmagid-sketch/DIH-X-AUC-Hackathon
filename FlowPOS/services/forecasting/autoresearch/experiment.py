@@ -1,7 +1,7 @@
 """
 Experiment file for autoresearch. THIS FILE IS MODIFIED BY THE AGENT.
 
-Current best: 5,134,633 DKK (soft P^0.25 LGB clf(500) * RF(500)+ET(100) 70/30 hl=12d buf=1.32).
+Current best: 5,133,972 DKK (soft P^0.25 LGB clf(500) * RF(500)+ET(100) 70/30 hl=12d buf=1.30).
 
 The agent modifies this file to try different:
 - Model architectures (RF, XGBoost, LightGBM, CatBoost, ensembles, blends)
