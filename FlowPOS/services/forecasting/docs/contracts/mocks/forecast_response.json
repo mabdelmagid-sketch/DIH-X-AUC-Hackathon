@@ -1,173 +1,30 @@
 {
-  "placeId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-  "forecastedAt": "2026-03-29T14:22:05.123456",
-  "granularity": "daily",
+  "placeId": "552477",
+  "forecastedAt": "2026-03-30T10:15:00.000Z",
+  "granularity": "day",
   "variant": "balanced",
   "predictions": [
-    {
-      "date": "2026-04-01",
-      "itemTitle": "Classic Burger",
-      "itemId": 42,
-      "predicted": 18.5,
-      "lower": 13.0,
-      "upper": 25.9,
-      "confidence": "high",
-      "demandRisk": "low",
-      "isPerishable": false,
-      "safetyStock": 5.2,
-      "modelSource": "RF300+ET800_blend_75_25"
-    },
-    {
-      "date": "2026-04-02",
-      "itemTitle": "Classic Burger",
-      "itemId": 42,
-      "predicted": 20.3,
-      "lower": 14.2,
-      "upper": 28.4,
-      "confidence": "high",
-      "demandRisk": "low",
-      "isPerishable": false,
-      "safetyStock": 5.2,
-      "modelSource": "RF300+ET800_blend_75_25"
-    },
-    {
-      "date": "2026-04-03",
-      "itemTitle": "Classic Burger",
-      "itemId": 42,
-      "predicted": 22.1,
-      "lower": 15.5,
-      "upper": 30.9,
-      "confidence": "high",
-      "demandRisk": "low",
-      "isPerishable": false,
-      "safetyStock": 5.2,
-      "modelSource": "RF300+ET800_blend_75_25"
-    },
-    {
-      "date": "2026-04-04",
-      "itemTitle": "Classic Burger",
-      "itemId": 42,
-      "predicted": 24.7,
-      "lower": 17.3,
-      "upper": 34.6,
-      "confidence": "high",
-      "demandRisk": "low",
-      "isPerishable": false,
-      "safetyStock": 5.2,
-      "modelSource": "RF300+ET800_blend_75_25"
-    },
-    {
-      "date": "2026-04-05",
-      "itemTitle": "Classic Burger",
-      "itemId": 42,
-      "predicted": 14.2,
-      "lower": 9.9,
-      "upper": 19.9,
-      "confidence": "high",
-      "demandRisk": "low",
-      "isPerishable": false,
-      "safetyStock": 5.2,
-      "modelSource": "RF300+ET800_blend_75_25"
-    },
-    {
-      "date": "2026-04-06",
-      "itemTitle": "Classic Burger",
-      "itemId": 42,
-      "predicted": 12.8,
-      "lower": 9.0,
-      "upper": 17.9,
-      "confidence": "high",
-      "demandRisk": "low",
-      "isPerishable": false,
-      "safetyStock": 5.2,
-      "modelSource": "RF300+ET800_blend_75_25"
-    },
-    {
-      "date": "2026-04-07",
-      "itemTitle": "Classic Burger",
-      "itemId": 42,
-      "predicted": 16.9,
-      "lower": 11.8,
-      "upper": 23.7,
-      "confidence": "high",
-      "demandRisk": "low",
-      "isPerishable": false,
-      "safetyStock": 5.2,
-      "modelSource": "RF300+ET800_blend_75_25"
-    },
-    {
-      "date": "2026-04-01",
-      "itemTitle": "Caesar Salad",
-      "itemId": 55,
-      "predicted": 9.3,
-      "lower": 5.6,
-      "upper": 14.0,
-      "confidence": "medium",
-      "demandRisk": "medium",
-      "isPerishable": true,
-      "safetyStock": 3.8,
-      "modelSource": "RF300+ET800_blend_75_25"
-    },
-    {
-      "date": "2026-04-02",
-      "itemTitle": "Caesar Salad",
-      "itemId": 55,
-      "predicted": 10.1,
-      "lower": 6.1,
-      "upper": 15.2,
-      "confidence": "medium",
-      "demandRisk": "medium",
-      "isPerishable": true,
-      "safetyStock": 3.8,
-      "modelSource": "RF300+ET800_blend_75_25"
-    },
-    {
-      "date": "2026-04-01",
-      "itemTitle": "Fresh Orange Juice",
-      "itemId": 67,
-      "predicted": 6.2,
-      "lower": 3.1,
-      "upper": 10.8,
-      "confidence": "low",
-      "demandRisk": "high",
-      "isPerishable": true,
-      "safetyStock": 4.5,
-      "modelSource": "cold_start_estimate"
-    }
+    { "date": "2026-04-01", "predicted": 12450.50, "lower": 9960.40, "upper": 14940.60, "confidence": 0.82 },
+    { "date": "2026-04-02", "predicted": 11200.00, "lower": 8960.00, "upper": 13440.00, "confidence": 0.79 },
+    { "date": "2026-04-03", "predicted": 13100.75, "lower": 10480.60, "upper": 15720.90, "confidence": 0.81 },
+    { "date": "2026-04-04", "predicted": 18750.25, "lower": 15000.20, "upper": 22500.30, "confidence": 0.85 },
+    { "date": "2026-04-05", "predicted": 16200.00, "lower": 12960.00, "upper": 19440.00, "confidence": 0.83 },
+    { "date": "2026-04-06", "predicted": 8900.50, "lower": 7120.40, "upper": 10680.60, "confidence": 0.78 },
+    { "date": "2026-04-07", "predicted": 11800.00, "lower": 9440.00, "upper": 14160.00, "confidence": 0.80 }
   ],
   "drivers": [
-    {
-      "factor": "day_of_week",
-      "impact": "positive",
-      "weight": 0.38
-    },
-    {
-      "factor": "recent_trend",
-      "impact": "positive",
-      "weight": 0.27
-    },
-    {
-      "factor": "weekend_effect",
-      "impact": "negative",
-      "weight": 0.18
-    },
-    {
-      "factor": "rolling_mean_7d",
-      "impact": "positive",
-      "weight": 0.11
-    },
-    {
-      "factor": "lag_7d",
-      "impact": "positive",
-      "weight": 0.06
-    }
+    { "factor": "Strong Friday demand pattern", "impact": "positive", "weight": 0.35 },
+    { "factor": "7-day demand trend increasing", "impact": "positive", "weight": 0.28 },
+    { "factor": "Weekend seasonal uplift", "impact": "positive", "weight": 0.19 },
+    { "factor": "Recent rolling average above historical mean", "impact": "positive", "weight": 0.11 },
+    { "factor": "Sunday typically low traffic", "impact": "negative", "weight": 0.07 }
   ],
   "scenarios": {
-    "best": 1420.0,
-    "expected": 1105.0,
-    "worst": 812.0
+    "best": { "total": 110401.80, "confidence": 0.70 },
+    "expected": { "total": 92402.00, "confidence": 0.82 },
+    "worst": { "total": 74001.60, "confidence": 0.70 }
   },
   "baselineCostDkk": 6967146.0,
-  "forecastCostDkk": 5225357.0,
-  "costReductionPct": 25.0
+  "forecastCostDkk": 5133764.0,
+  "costReductionPct": 26.3
 }
