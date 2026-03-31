@@ -50,6 +50,8 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field, validator
 
+from .response_wrapper import wrap_response, wrap_error
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["ai-forecast"])
@@ -181,8 +183,8 @@ def _run_forecast_sync(
 # Route
 # ---------------------------------------------------------------------------
 
-@router.post("/ai/forecast/items", response_model=ForecastItemsResponse)
-async def forecast_items(request: ForecastItemsRequest):
+@router.post("/ai/forecast/items")
+async def forecast_items(request: ForecastItemsRequest) -> dict:
     """Generate daily per-item demand forecasts for a restaurant.
 
     Uses the AdaptiveBlendModel (RF(300) global + ExtraTrees(800) per-store,
@@ -207,17 +209,19 @@ async def forecast_items(request: ForecastItemsRequest):
         raise HTTPException(status_code=422, detail=str(exc))
 
     if end_date < start_date:
-        raise HTTPException(
-            status_code=422,
-            detail=f"endDate ({request.endDate}) must be >= startDate ({request.startDate})",
+        raise wrap_error(
+            422,
+            "INVALID_DATE_RANGE",
+            f"endDate ({request.endDate}) must be >= startDate ({request.startDate})",
         )
 
     max_days = 90
     delta = (end_date - start_date).days + 1
     if delta > max_days:
-        raise HTTPException(
-            status_code=422,
-            detail=f"Requested {delta} days exceeds the maximum of {max_days}.",
+        raise wrap_error(
+            422,
+            "INVALID_DATE_RANGE",
+            f"Requested {delta} days exceeds the maximum of {max_days}.",
         )
 
     try:
@@ -233,7 +237,7 @@ async def forecast_items(request: ForecastItemsRequest):
         raise
     except Exception as exc:
         logger.error("Forecast failed for placeId=%s: %s", request.placeId, exc, exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Forecast error: {exc}") from exc
+        raise wrap_error(500, "FORECAST_FAILED", str(exc)) from exc
 
     # Group predictions by item
     from collections import defaultdict
@@ -279,7 +283,7 @@ async def forecast_items(request: ForecastItemsRequest):
         reverse=True,
     )
 
-    return ForecastItemsResponse(
+    return wrap_response(ForecastItemsResponse(
         placeId=request.placeId,
         startDate=request.startDate,
         endDate=request.endDate,
@@ -287,4 +291,4 @@ async def forecast_items(request: ForecastItemsRequest):
         variant=request.variant,
         generatedAt=datetime.utcnow().isoformat() + "Z",
         itemForecasts=item_forecasts,
-    )
+    ))

@@ -31,6 +31,7 @@ from ..models.model_service import (
     predict_multi_day,
 )
 from .dependencies import get_data_loader, get_forecaster
+from .response_wrapper import wrap_response, wrap_error
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai", tags=["ai-forecast"])
@@ -489,11 +490,11 @@ def _cost_estimates(predictions: list[dict]) -> tuple[float, float, float]:
 # Endpoint: POST /ai/forecast
 # ---------------------------------------------------------------------------
 
-@router.post("/forecast", response_model=AiForecastResponse)
+@router.post("/forecast")
 async def ai_forecast(
     request: AiForecastRequest,
     loader: DataLoader = Depends(get_data_loader),
-) -> AiForecastResponse:
+) -> dict:
     """Generate multi-day demand forecasts for all items at a place.
 
     Uses the adaptive RF(300)+ET(800) 75/25 blend with exponential decay
@@ -508,21 +509,21 @@ async def ai_forecast(
     VALID_VARIANTS      = {"balanced", "waste_optimized", "stockout_optimized"}
 
     if request.granularity not in VALID_GRANULARITIES:
-        raise HTTPException(status_code=400, detail=f"INVALID_GRANULARITY: must be one of {VALID_GRANULARITIES}")
+        raise wrap_error(400, "INVALID_GRANULARITY", f"granularity must be one of {VALID_GRANULARITIES}")
     if request.variant not in VALID_VARIANTS:
-        raise HTTPException(status_code=400, detail=f"INVALID_VARIANT: must be one of {VALID_VARIANTS}")
+        raise wrap_error(400, "INVALID_VARIANT", f"variant must be one of {VALID_VARIANTS}")
 
     try:
         start_dt = date.fromisoformat(request.startDate)
         end_dt   = date.fromisoformat(request.endDate)
     except ValueError:
-        raise HTTPException(status_code=422, detail="VALIDATION_ERROR: startDate and endDate must be YYYY-MM-DD")
+        raise wrap_error(422, "VALIDATION_ERROR", "startDate and endDate must be YYYY-MM-DD")
 
     if end_dt < start_dt:
-        raise HTTPException(status_code=400, detail="INVALID_DATE_RANGE: endDate must be >= startDate")
+        raise wrap_error(400, "INVALID_DATE_RANGE", "endDate must be >= startDate")
     days_ahead = (end_dt - start_dt).days + 1
     if days_ahead > 30:
-        raise HTTPException(status_code=400, detail="INVALID_DATE_RANGE: max forecast span is 30 days")
+        raise wrap_error(400, "INVALID_DATE_RANGE", "max forecast span is 30 days")
 
     # --- Cache check ---
     ck = _cache_key({
@@ -536,19 +537,20 @@ async def ai_forecast(
     })
     cached = _get_cached(ck)
     if cached is not None:
-        return AiForecastResponse(**cached)
+        return wrap_response(AiForecastResponse(**cached))
 
     # --- Pull data ---
     try:
         daily_sales = _get_daily_sales(loader, request.placeId, request.itemFilter, request.topN)
     except Exception as e:
         logger.error(f"Data pull failed: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"FORECAST_FAILED: {e}")
+        raise wrap_error(500, "FORECAST_FAILED", str(e))
 
     if daily_sales.empty:
-        raise HTTPException(
-            status_code=404,
-            detail=f"PLACE_NOT_FOUND: no sales history found for placeId={request.placeId}",
+        raise wrap_error(
+            404,
+            "PLACE_NOT_FOUND",
+            f"no sales history found for placeId={request.placeId}",
         )
 
     # --- Run ensemble inference ---
@@ -637,9 +639,10 @@ async def ai_forecast(
                 })
 
     if not predictions:
-        raise HTTPException(
-            status_code=404,
-            detail="PLACE_NOT_FOUND: no sales history found for the given filters",
+        raise wrap_error(
+            404,
+            "PLACE_NOT_FOUND",
+            "no sales history found for the given filters",
         )
 
     # Apply topN filter post-model
@@ -676,18 +679,18 @@ async def ai_forecast(
     }
 
     _set_cached(ck, payload)
-    return AiForecastResponse(**payload)
+    return wrap_response(AiForecastResponse(**payload))
 
 
 # ---------------------------------------------------------------------------
 # Endpoint: POST /ai/forecast/items
 # ---------------------------------------------------------------------------
 
-@router.post("/forecast/items", response_model=AiForecastItemsResponse)
+@router.post("/forecast/items")
 async def ai_forecast_items(
     request: AiForecastItemsRequest,
     loader: DataLoader = Depends(get_data_loader),
-) -> AiForecastItemsResponse:
+) -> dict:
     """Generate per-item demand forecasts, optionally exploded through the BOM.
 
     Each item entry includes a daily breakdown for the full window plus
@@ -696,16 +699,16 @@ async def ai_forecast_items(
     """
     VALID_VARIANTS = {"balanced", "waste_optimized", "stockout_optimized"}
     if request.variant not in VALID_VARIANTS:
-        raise HTTPException(status_code=400, detail=f"INVALID_VARIANT: must be one of {VALID_VARIANTS}")
+        raise wrap_error(400, "INVALID_VARIANT", f"variant must be one of {VALID_VARIANTS}")
 
     try:
         start_dt = date.fromisoformat(request.startDate)
         end_dt   = date.fromisoformat(request.endDate)
     except ValueError:
-        raise HTTPException(status_code=422, detail="VALIDATION_ERROR: dates must be YYYY-MM-DD")
+        raise wrap_error(422, "VALIDATION_ERROR", "dates must be YYYY-MM-DD")
 
     if end_dt < start_dt:
-        raise HTTPException(status_code=400, detail="INVALID_DATE_RANGE: endDate must be >= startDate")
+        raise wrap_error(400, "INVALID_DATE_RANGE", "endDate must be >= startDate")
 
     days_ahead = (end_dt - start_dt).days + 1
 
@@ -713,12 +716,13 @@ async def ai_forecast_items(
     try:
         daily_sales = _get_daily_sales(loader, request.placeId, None, None)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"FORECAST_FAILED: {e}")
+        raise wrap_error(500, "FORECAST_FAILED", str(e))
 
     if daily_sales.empty:
-        raise HTTPException(
-            status_code=404,
-            detail=f"PLACE_NOT_FOUND: no sales history for placeId={request.placeId}",
+        raise wrap_error(
+            404,
+            "PLACE_NOT_FOUND",
+            f"no sales history for placeId={request.placeId}",
         )
 
     # --- Optionally filter by itemIds (requires joining with dim_items) ---
@@ -931,7 +935,7 @@ async def ai_forecast_items(
 
         except Exception as e:
             logger.error(f"BOM explosion failed: {e}", exc_info=True)
-            raise HTTPException(status_code=400, detail=f"BOM_UNAVAILABLE: {e}")
+            raise wrap_error(400, "BOM_UNAVAILABLE", str(e))
 
     summary = {
         "totalItems": len(items_out),
@@ -942,22 +946,22 @@ async def ai_forecast_items(
         summary["criticalCount"]     = critical_count or 0
         summary["mappedProducts"]    = mapped_products or 0
 
-    return AiForecastItemsResponse(
+    return wrap_response(AiForecastItemsResponse(
         placeId=request.placeId,
         forecastedAt=datetime.now().isoformat(),
         variant=request.variant,
         items=[ItemForecastEntry(**i) for i in items_out],
         ingredients=[IngredientForecastEntry(**ig) for ig in ingredients_out] if ingredients_out is not None else None,
         summary=ItemsSummary(**summary),
-    )
+    ))
 
 
 # ---------------------------------------------------------------------------
 # Endpoint: GET /ai/forecast/health
 # ---------------------------------------------------------------------------
 
-@router.get("/forecast/health", response_model=ForecastHealthResponse)
-async def ai_forecast_health() -> ForecastHealthResponse:
+@router.get("/forecast/health")
+async def ai_forecast_health() -> dict:
     """Liveness and readiness probe for the forecasting service.
 
     Returns HTTP 503 with status="degraded" if the primary forecast model
@@ -1004,13 +1008,11 @@ async def ai_forecast_health() -> ForecastHealthResponse:
     )
 
     if status == "degraded":
-        # Return 503 but with full body so monitoring tools can parse it
-        from fastapi import Response
-        import json as _json
-        return Response(
-            content=response_data.model_dump_json(),
+        # Return 503 with wrapped body so monitoring tools can parse it
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            content=wrap_response(response_data),
             status_code=503,
-            media_type="application/json",
         )
 
-    return response_data
+    return wrap_response(response_data)

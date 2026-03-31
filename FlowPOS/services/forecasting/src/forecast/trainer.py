@@ -224,11 +224,18 @@ def compute_newsvendor_buffers(
     group_cols: Optional[list[str]] = None,
     target_col: str = "quantity_sold",
 ) -> dict[tuple, float]:
-    """Compute per-item newsvendor safety buffer.
+    """Compute per-item newsvendor safety buffer using rolling_std_14d.
 
     critical_ratio = 1.5 / (1.5 + 0.3) = 0.833
-    buffer = 1 + z_{0.833} * std / mean
-    Clamped to [1.0, 2.0].  Falls back to 1.27 for < 30 days of history.
+    z_0.833 = scipy.stats.norm.ppf(0.833) ≈ 0.967
+    buffer = 1 + z_0.833 * (rolling_std_14d / mean_demand)  per item
+    Clamped to [1.0, 2.0].  Falls back to 1.27 for items with < 30 days
+    of history (SRS Task 4).
+
+    The rolling_std_14d is the standard deviation of the 14-day rolling
+    window anchored at the last available training date.  Using a
+    recent rolling window captures current volatility better than the
+    all-history std for fast-moving items.
 
     Args:
         daily_df: DataFrame with at least date, group_cols, target_col.
@@ -242,15 +249,20 @@ def compute_newsvendor_buffers(
     buffers: dict[tuple, float] = {}
 
     for key, grp in daily_df.groupby(group_cols, observed=True):
-        demand = grp[target_col].dropna()
+        demand = grp.sort_values("date")[target_col].dropna()
         n_days = len(demand)
         mean_d = float(demand.mean()) if n_days > 0 else 0.0
-        std_d = float(demand.std()) if n_days > 1 else 0.0
 
         if n_days < _MIN_HISTORY_FOR_BUFFER or mean_d < 0.01:
             buf = _FALLBACK_BUFFER
         else:
-            buf = 1.0 + _Z_CRITICAL * std_d / mean_d
+            # Use the most-recent 14-day rolling std for demand variability
+            # (anchored at end of available history)
+            rolling_std_14d = float(demand.rolling(window=14, min_periods=2).std().iloc[-1])
+            if np.isnan(rolling_std_14d):
+                rolling_std_14d = float(demand.std())
+
+            buf = 1.0 + _Z_CRITICAL * rolling_std_14d / mean_d
             buf = float(np.clip(buf, *_BUFFER_CLAMP))
 
         key_t = key if isinstance(key, tuple) else (key,)

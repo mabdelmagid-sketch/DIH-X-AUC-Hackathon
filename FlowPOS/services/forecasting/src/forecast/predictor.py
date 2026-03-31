@@ -266,6 +266,26 @@ class ForecastPredictor:
                 # Forecast drivers
                 drivers = self._forecast_drivers(row, top_features, active_days)
 
+                # --- SRS Section 8 runtime assertions ---
+                assert 1.0 <= buffer <= 2.0, (
+                    f"buffer_multiplier {buffer:.4f} out of range [1.0, 2.0] "
+                    f"for item_id={item_id}, place_id={p_id}"
+                )
+                assert 0.0 <= confidence <= 1.0, (
+                    f"confidence {confidence:.4f} out of range [0.0, 1.0] "
+                    f"for item_id={item_id}, place_id={p_id}"
+                )
+                assert len(drivers) >= 3, (
+                    f"forecast_drivers has {len(drivers)} items (< 3) "
+                    f"for item_id={item_id}, place_id={p_id}"
+                )
+                assert lower_bound <= predicted_units <= upper_bound, (
+                    f"Prediction ordering violated: lower={lower_bound} "
+                    f"predicted={predicted_units} upper={upper_bound} "
+                    f"for item_id={item_id}, place_id={p_id}, date={forecast_date.date()}"
+                )
+                # --- end assertions ---
+
                 results.append({
                     "item_id": item_id,
                     "item_title": item_title,
@@ -276,6 +296,7 @@ class ForecastPredictor:
                     "upper_bound": upper_bound,
                     "confidence": round(confidence, 3),
                     "forecast_drivers": drivers,
+                    "buffer_multiplier": round(buffer, 4),
                 })
 
         return results
