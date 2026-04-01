@@ -1,0 +1,29 @@
+{
+  "model_name": "Croston_Hybrid",
+  "metrics": {
+    "mae": 1.9285,
+    "rmse": 5.4698,
+    "wmape": 91.97,
+    "forecast_accuracy_pct": 8.03,
+    "waste_cost_dkk": 1741452.0,
+    "stockout_cost_dkk": 3546039.0,
+    "total_business_cost_dkk": 7060510.0,
+    "overstock_units": 112657.0,
+    "understock_units": 77252.0,
+    "overstock_days_pct": 77.8,
+    "understock_days_pct": 21.3,
+    "n_samples": 98476
+  },
+  "timing": {
+    "data_prep_s": 26.4,
+    "train_s": 0.0,
+    "predict_s": 0.009
+  },
+  "config": {
+    "top_n_items": 30,
+    "test_days": 14,
+    "train_samples": 323564,
+    "test_samples": 98476,
+    "n_features": 40
+  }
+}

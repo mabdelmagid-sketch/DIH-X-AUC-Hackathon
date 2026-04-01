@@ -1,0 +1,65 @@
+{
+  "placeId": "552477",
+  "itemForecasts": [
+    {
+      "itemTitle": "Alm \u00d8l",
+      "predictions": [
+        { "date": "2026-04-01", "predictedUnits": 22, "confidence": 0.85 },
+        { "date": "2026-04-02", "predictedUnits": 19, "confidence": 0.82 },
+        { "date": "2026-04-03", "predictedUnits": 24, "confidence": 0.84 },
+        { "date": "2026-04-04", "predictedUnits": 35, "confidence": 0.88 },
+        { "date": "2026-04-05", "predictedUnits": 30, "confidence": 0.86 },
+        { "date": "2026-04-06", "predictedUnits": 15, "confidence": 0.79 },
+        { "date": "2026-04-07", "predictedUnits": 20, "confidence": 0.81 }
+      ]
+    },
+    {
+      "itemTitle": "Sodavand",
+      "predictions": [
+        { "date": "2026-04-01", "predictedUnits": 18, "confidence": 0.83 },
+        { "date": "2026-04-02", "predictedUnits": 15, "confidence": 0.80 },
+        { "date": "2026-04-03", "predictedUnits": 20, "confidence": 0.82 },
+        { "date": "2026-04-04", "predictedUnits": 28, "confidence": 0.86 },
+        { "date": "2026-04-05", "predictedUnits": 25, "confidence": 0.84 },
+        { "date": "2026-04-06", "predictedUnits": 12, "confidence": 0.77 },
+        { "date": "2026-04-07", "predictedUnits": 16, "confidence": 0.79 }
+      ]
+    },
+    {
+      "itemTitle": "Ristet Hotdog",
+      "predictions": [
+        { "date": "2026-04-01", "predictedUnits": 8, "confidence": 0.72 },
+        { "date": "2026-04-02", "predictedUnits": 6, "confidence": 0.68 },
+        { "date": "2026-04-03", "predictedUnits": 9, "confidence": 0.71 },
+        { "date": "2026-04-04", "predictedUnits": 14, "confidence": 0.76 },
+        { "date": "2026-04-05", "predictedUnits": 12, "confidence": 0.74 },
+        { "date": "2026-04-06", "predictedUnits": 5, "confidence": 0.65 },
+        { "date": "2026-04-07", "predictedUnits": 7, "confidence": 0.69 }
+      ]
+    },
+    {
+      "itemTitle": "Lille box",
+      "predictions": [
+        { "date": "2026-04-01", "predictedUnits": 12, "confidence": 0.78 },
+        { "date": "2026-04-02", "predictedUnits": 10, "confidence": 0.75 },
+        { "date": "2026-04-03", "predictedUnits": 13, "confidence": 0.77 },
+        { "date": "2026-04-04", "predictedUnits": 19, "confidence": 0.82 },
+        { "date": "2026-04-05", "predictedUnits": 17, "confidence": 0.80 },
+        { "date": "2026-04-06", "predictedUnits": 8, "confidence": 0.71 },
+        { "date": "2026-04-07", "predictedUnits": 11, "confidence": 0.74 }
+      ]
+    },
+    {
+      "itemTitle": "Mellem box",
+      "predictions": [
+        { "date": "2026-04-01", "predictedUnits": 10, "confidence": 0.76 },
+        { "date": "2026-04-02", "predictedUnits": 8, "confidence": 0.73 },
+        { "date": "2026-04-03", "predictedUnits": 11, "confidence": 0.75 },
+        { "date": "2026-04-04", "predictedUnits": 16, "confidence": 0.80 },
+        { "date": "2026-04-05", "predictedUnits": 14, "confidence": 0.78 },
+        { "date": "2026-04-06", "predictedUnits": 6, "confidence": 0.69 },
+        { "date": "2026-04-07", "predictedUnits": 9, "confidence": 0.72 }
+      ]
+    }
+  ]
+}

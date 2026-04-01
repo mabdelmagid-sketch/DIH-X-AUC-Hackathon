@@ -1,0 +1,29 @@
+{
+  "model_name": "BayesianRidge_default",
+  "metrics": {
+    "mae": 3.723,
+    "rmse": 9.8423,
+    "wmape": 177.55,
+    "forecast_accuracy_pct": 0,
+    "waste_cost_dkk": 4462278.0,
+    "stockout_cost_dkk": 5271510.0,
+    "total_business_cost_dkk": 12369543.0,
+    "overstock_units": 234290.0,
+    "understock_units": 132332.0,
+    "overstock_days_pct": 76.6,
+    "understock_days_pct": 18.5,
+    "n_samples": 98476
+  },
+  "timing": {
+    "data_prep_s": 117.3,
+    "train_s": 6.8,
+    "predict_s": 0.211
+  },
+  "config": {
+    "top_n_items": 30,
+    "test_days": 14,
+    "train_samples": 323564,
+    "test_samples": 98476,
+    "n_features": 40
+  }
+}

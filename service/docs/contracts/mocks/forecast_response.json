@@ -1,0 +1,30 @@
+{
+  "placeId": "552477",
+  "forecastedAt": "2026-03-30T10:15:00.000Z",
+  "granularity": "day",
+  "variant": "balanced",
+  "predictions": [
+    { "date": "2026-04-01", "predicted": 12450.50, "lower": 9960.40, "upper": 14940.60, "confidence": 0.82 },
+    { "date": "2026-04-02", "predicted": 11200.00, "lower": 8960.00, "upper": 13440.00, "confidence": 0.79 },
+    { "date": "2026-04-03", "predicted": 13100.75, "lower": 10480.60, "upper": 15720.90, "confidence": 0.81 },
+    { "date": "2026-04-04", "predicted": 18750.25, "lower": 15000.20, "upper": 22500.30, "confidence": 0.85 },
+    { "date": "2026-04-05", "predicted": 16200.00, "lower": 12960.00, "upper": 19440.00, "confidence": 0.83 },
+    { "date": "2026-04-06", "predicted": 8900.50, "lower": 7120.40, "upper": 10680.60, "confidence": 0.78 },
+    { "date": "2026-04-07", "predicted": 11800.00, "lower": 9440.00, "upper": 14160.00, "confidence": 0.80 }
+  ],
+  "drivers": [
+    { "factor": "Strong Friday demand pattern", "impact": "positive", "weight": 0.35 },
+    { "factor": "7-day demand trend increasing", "impact": "positive", "weight": 0.28 },
+    { "factor": "Weekend seasonal uplift", "impact": "positive", "weight": 0.19 },
+    { "factor": "Recent rolling average above historical mean", "impact": "positive", "weight": 0.11 },
+    { "factor": "Sunday typically low traffic", "impact": "negative", "weight": 0.07 }
+  ],
+  "scenarios": {
+    "best": { "total": 110401.80, "confidence": 0.70 },
+    "expected": { "total": 92402.00, "confidence": 0.82 },
+    "worst": { "total": 74001.60, "confidence": 0.70 }
+  },
+  "baselineCostDkk": 6967146.0,
+  "forecastCostDkk": 5133764.0,
+  "costReductionPct": 26.3
+}

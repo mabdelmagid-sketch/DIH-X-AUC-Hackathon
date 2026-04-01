@@ -1,0 +1,29 @@
+{
+  "model_name": "LinearSVR_default",
+  "metrics": {
+    "mae": 1.692,
+    "rmse": 5.9081,
+    "wmape": 80.69,
+    "forecast_accuracy_pct": 19.31,
+    "waste_cost_dkk": 587382.0,
+    "stockout_cost_dkk": 5867547.0,
+    "total_business_cost_dkk": 9388702.0,
+    "overstock_units": 35936.0,
+    "understock_units": 130686.0,
+    "overstock_days_pct": 48.7,
+    "understock_days_pct": 31.1,
+    "n_samples": 98476
+  },
+  "timing": {
+    "data_prep_s": 29.9,
+    "train_s": 724.6,
+    "predict_s": 0.153
+  },
+  "config": {
+    "top_n_items": 30,
+    "test_days": 14,
+    "train_samples": 323564,
+    "test_samples": 98476,
+    "n_features": 40
+  }
+}

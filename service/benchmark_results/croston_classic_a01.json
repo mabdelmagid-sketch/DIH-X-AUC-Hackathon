@@ -1,0 +1,29 @@
+{
+  "model_name": "Croston_Classic_a01",
+  "metrics": {
+    "mae": 2.2946,
+    "rmse": 8.3913,
+    "wmape": 109.43,
+    "forecast_accuracy_pct": 0,
+    "waste_cost_dkk": 1194562.0,
+    "stockout_cost_dkk": 6812929.0,
+    "total_business_cost_dkk": 11413955.0,
+    "overstock_units": 61249.0,
+    "understock_units": 164712.0,
+    "overstock_days_pct": 74.7,
+    "understock_days_pct": 25.3,
+    "n_samples": 98476
+  },
+  "timing": {
+    "data_prep_s": 106.5,
+    "train_s": 0.0,
+    "predict_s": 0.006
+  },
+  "config": {
+    "top_n_items": 30,
+    "test_days": 14,
+    "train_samples": 323564,
+    "test_samples": 98476,
+    "n_features": 40
+  }
+}

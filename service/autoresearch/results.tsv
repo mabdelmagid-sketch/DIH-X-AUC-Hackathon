@@ -1,0 +1,102 @@
+commit	total_cost_dkk	waste_dkk	stockout_dkk	mae	status	description
+baseline	5984623.55	1739152.02	2830314.36	1.839868	keep	baseline RF default (100 trees, all data, no decay)
+f4e6af9	5570286.18	2092382.94	2318602.16	2.033170	keep	40% per-store + 60% global RF blend (all data)
+fb69ece	5616765.11	2082167.71	2356398.27	2.040127	discard	40/60 blend + 14d training window
+be6b998	5455894.43	2348633.19	2071507.50	2.174434	keep	40/60 blend + 8% safety buffer
+144b77c	5421427.89	2480546.54	1960587.57	2.251312	keep	40/60 blend + 12% safety buffer
+aee2fdf	5404141.72	2580908.83	1882155.26	2.311274	keep	40/60 blend + 15% safety buffer
+64494f2	5394508.25	2682546.58	1807974.44	2.373049	keep	40/60 blend + 18% safety buffer
+512cfd1	5393255.19	2819995.51	1715506.45	2.458445	keep	40/60 blend + 22% safety buffer
+72effbb	5399760.22	2924323.01	1650291.47	2.524530	discard	40/60 blend + 25% safety buffer
+95edfda	5644459.02	1992739.28	2434479.83	1.959292	discard	LightGBM quantile(0.65) global + RF per-store blend 60/40
+59ab2cf	5494516.25	2965669.93	1685897.54	2.572623	discard	50/50 blend + 22% safety buffer
+6f3498a	0.00	0.00	0.00	0.00	crash	XGBoost asymmetric loss global crash (get_label error)
+21256fd	5985608.96	2031225.60	2636255.57	2.048108	discard	XGBoost asymmetric loss (fixed) global + RF per-store 60/40 + 22% buffer
+aac89e8	5349347.45	2723249.62	1750731.88	2.389579	keep	RF(200,min_leaf=2) global + ExtraTrees(50) per-store 60/40 + 22% buffer
+4db1bcf	5501008.68	2788497.06	1808341.08	2.435791	discard	ExtraTrees(200,min_leaf=2) global + ExtraTrees(50) per-store 60/40 + 22% buffer
+194f963	5340551.29	2722959.95	1745060.89	2.386366	keep	RF(200,min_leaf=2) global + ExtraTrees(100) per-store 60/40 + 22% buffer
+2f030f7	5341547.01	2727103.85	1742962.11	2.387249	discard	RF(200,min_leaf=2) global + ExtraTrees(150) per-store 60/40 + 22% buffer
+0c830ba	5340523.01	2722972.62	1745033.59	2.386613	keep	Adaptive blend ratio by store data volume + RF global + ET per-store + 22% buffer
+94d0873	5359445.35	2741692.14	1745168.81	2.395849	discard	Adaptive blend + drop 7 stub zero features + 22% buffer
+0bd1850	5322364.59	2702911.25	1746302.22	2.385973	keep	Adaptive blend RF(300) global + ET(100) per-store 60/40 + decay hl=14d + 22% buffer
+97b5c53	5335792.73	2698535.67	1758171.37	2.392023	discard	Adaptive blend RF(300) global + ET(100) per-store + decay hl=7d + 22% buffer
+f295794	5334234.90	2701536.68	1755132.15	2.381920	discard	Adaptive blend RF(300) global + ET(100) per-store + decay hl=21d + 22% buffer
+213abb5	5324809.22	2636215.53	1792395.79	2.344394	discard	Adaptive blend RF(300) global + ET(100) per-store + decay hl=14d + 20% buffer
+4b28bbe	5519309.23	2860036.82	1772848.27	2.508465	discard	3-level blend: 40% global RF + 20% per-item ET + 40% per-store ET + decay hl=14d + 22% buffer
+6735235	5755609.68	2951726.31	1869255.58	2.525127	discard	LightGBM(500,lr=0.03,nl=127) global + ET(100) per-store 60/40 + decay hl=14d + 22% buffer
+a496e83	5546035.07	2802913.85	1828747.48	2.462757	discard	RF(400,min_leaf=2,max_feat=log2) global + ET(100) per-store + decay hl=14d + 22% buf
+21e4b62	5287411.90	2635132.78	1768186.08	2.335422	keep	Adaptive blend RF(300) global + ET(100) per-store 65/35 + decay hl=14d + 22% buffer
+cc0dd0f	5265987.43	2569609.02	1797585.61	2.288188	keep	Adaptive blend RF(300) global + ET(100) per-store 70/30 + decay hl=14d + 22% buffer
+4fe0d6d	5260180.13	2506688.11	1835661.34	2.244777	keep	Adaptive blend RF(300) global + ET(100) per-store 75/25 + decay hl=14d + 22% buffer
+35dc6a4	5272156.71	2446731.19	1883617.01	2.205592	discard	Adaptive blend RF(300) global + ET(100) per-store 80/20 + decay hl=14d + 22% buffer
+9f0bc25	6193110.57	1173618.31	3346328.17	1.571157	discard	log1p target transform + adaptive blend RF(300) global + ET(100) per-store 75/25 + decay hl=14d + 22% buffer
+846a94f	5658484.80	1456534.12	2801300.45	1.739900	discard	Two-stage: RF classifier + adaptive blend RF(300)+ET(100) 75/25 + decay hl=14d + 22% buffer
+8894968	5270530.77	2479838.17	1860461.74	2.228934	discard	Adaptive blend RF(300) global + RF(100,min_leaf=2) per-store 75/25 + decay hl=14d + 22% buffer
+55c1040	715580759.74	711384225.43	2797689.54	408.405854	discard	HistGradientBoosting Poisson global + ET(100) per-store 75/25 + decay hl=14d + 22% buffer
+3b9696d	5269005.50	2577748.51	1794171.33	2.293219	discard	RF(300,min_leaf=1) global + ET(100) per-store 75/25 + decay hl=14d + 22% buffer
+81d7a93	9694809.23	547362.48	6098297.83	1.777923	discard	GBM quantile(0.65) global + ET(100) per-store 75/25 + decay hl=14d + 22% buffer
+6864227	5343587.11	2571425.38	1848107.82	2.289518	discard	Asymmetric weights(3x nonzero) + adaptive blend RF(300)+ET(100) 75/25 + decay hl=14d + 22% buffer
+cda3856	5254187.89	2512889.99	1827531.94	2.251010	keep	Adaptive blend RF(300) global + ET(100) per-store 75/25 + decay hl=10d + 22% buffer
+5a254db	5262336.03	2517312.57	1830015.64	2.259595	discard	Adaptive blend RF(300) global + ET(100) per-store 75/25 + decay hl=8d + 22% buffer
+7d7ac66	5250272.15	2510725.47	1826364.45	2.249581	keep	Adaptive blend RF(300) global + ET(100) per-store 75/25 + decay hl=12d + 22% buffer
+ee926b1	5260465.79	2507928.43	1835024.91	2.247980	discard	Adaptive blend RF(300) global + ET(100) per-store 75/25 + decay hl=11d + 22% buffer
+c19e46e	5254603.64	2514344.21	1826839.62	2.245889	discard	Adaptive blend RF(300) global + ET(100) per-store 75/25 + decay hl=13d + 22% buffer
+e33d52f	5263366.61	2452063.26	1874202.24	2.211271	discard	Adaptive blend RF(300) global + ET(100) per-store 80/20 + decay hl=12d + 22% buffer
+d734287	5247667.12	2512279.97	1823591.44	2.249842	keep	Adaptive blend RF(300) global + ET(200) per-store 75/25 + decay hl=12d + 22% buffer
+df7636f	5242954.50	2510964.18	1821326.88	2.247644	keep	Adaptive blend RF(300) global + ET(400) per-store 75/25 + decay hl=12d + 22% buffer
+17ad7fd	5242695.97	2511307.23	1820925.83	2.248133	keep	Adaptive blend RF(300) global + ET(600) per-store 75/25 + decay hl=12d + 22% buffer
+0e09453	5241274.02	2509304.46	1821313.04	2.246820	keep	Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 22% buffer
+f2bd100	5242646.99	2509088.96	1822372.02	2.247058	discard	Adaptive blend RF(300) global + ET(1000) per-store 75/25 + decay hl=12d + 22% buffer
+db9d3b3	5243264.93	2511231.39	1821355.69	2.247269	discard	Adaptive blend RF(500) global + ET(800) per-store 75/25 + decay hl=12d + 22% buffer
+7a1098e	5245283.87	2477897.35	1844924.35	2.227781	discard	Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 21% buffer
+754f87e	5237887.97	2540815.54	1798048.29	2.266019	keep	Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 23% buffer
+fc0922c	5235216.63	2572445.73	1775180.60	2.285373	keep	Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 24% buffer
+feccc09	5233372.07	2604213.73	1752772.23	2.304926	keep	Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 25% buffer
+38ce3f7	5231713.91	2668088.20	1709083.80	2.344585	keep	Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 27% buffer
+f52a6d7	5234039.28	2764702.02	1646224.84	2.405482	discard	Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 30% buffer
+8d8866c	5231868.77	2700189.43	1687786.22	2.364663	discard	Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 28% buffer
+3745bae	5232195.49	2636093.05	1730734.96	2.324667	discard	Adaptive blend RF(300) global + ET(800) per-store 75/25 + decay hl=12d + 26% buffer
+272ffba	5234728.68	2706603.45	1685416.82	2.371299	discard	Adaptive blend RF(300) global + ET(800) per-store 72/28 + decay hl=12d + 27% buffer
+54a215e	5228622.53	2796102.01	1621680.34	2.419144	keep	Feature interactions (lag*dow, roll*wknd) + adaptive blend RF(300)+ET(800) 75/25 + hl=12d + 27% buffer
+167439d	5234540.30	2783779.73	1633840.38	2.406514	discard	More feature interactions (7 total) + RF(300)+ET(800) 75/25 + hl=12d + 27% buffer
+890dfd3	5225791.94	2729455.33	1664224.41	2.377057	keep	Feature interactions + RF(300)+ET(800) 75/25 + hl=12d + 25% buffer
+6aaedc4	5225379.29	2696299.09	1686053.47	2.356267	keep	Feature interactions + RF(300)+ET(800) 75/25 + hl=12d + 24% buffer
+2baa579	5226646.94	2630335.45	1730874.33	2.315266	discard	Feature interactions + RF(300)+ET(800) 75/25 + hl=12d + 22% buffer
+ac4849e	5225654.54	2663257.51	1708264.69	2.335682	discard	Feature interactions + RF(300)+ET(800) 75/25 + hl=12d + 23% buffer
+0feebdc	5809523.74	2947676.15	1907898.39	2.495531	discard	Feature interactions + LightGBM(500) global + ET(800) per-store 75/25 + hl=12d + 24% buffer
+2d89a8b	5225357.02	2696279.47	1686051.70	2.356277	keep	Feature interactions + RF(300)+ET(800) 75/25 min_store_samples=100 + hl=12d + 24% buffer
+c9a70a4	5225385.96	2696296.51	1686059.63	2.355817	discard	Feature interactions + RF(300)+ET(800) 75/25 min_store_samples=50 + hl=12d + 24% buffer
+ed64cf0	5231361.59	2703742.45	1685079.43	2.362647	discard	Feature interactions + RF(300)+ET(800) 75/25 + train_days=45 + hl=12d + 24% buffer
+860e689	5298786.00	2756723.51	1694708.32	2.395153	discard	6 interactions (add CoV + wow_growth*roll7) + RF(300)+ET(800) 75/25 + hl=12d + 24% buffer
+b4e45fe	5277436.62	2697786.09	1719767.02	2.357659	discard	Feature interactions + RF(300,min_leaf=3) global + ET(800) per-store 75/25 + hl=12d + 24% buffer
+75d1270	5429803.90	2815745.37	1742705.69	2.434432	discard	RF(300,min_leaf=2,max_feat=sqrt) global + ET(800) + interactions + hl=12d + 24% buffer
+98a1347	5245074.96	2697493.46	1698387.66	2.365600	discard	Feature interactions + RF(300)+ET(800) 75/25 min_samples=100 + hl=9d + 24% buffer
+06a4dc7	5267531.50	2717539.80	1699994.47	2.369634	discard	Nonzero 2x weight + feature interactions + RF(300)+ET(800) 75/25 + hl=12d + 24% buffer
+f72b719	5237293.54	2753683.88	1655739.77	2.397644	discard	Feature interactions + RF(300)+ET(800) 70/30 min_samples=100 + hl=12d + 24% buffer
+a0ac2b8	5373155.81	2747955.34	1750133.65	2.384248	discard	Feature interactions + ET(800,min_leaf=2) global + ET(800) per-store 75/25 + hl=12d + 24% buffer
+f75d5b9	5512764.24	2719852.63	1861941.08	2.365049	discard	Feature interactions + XGB(500,lr=0.05,d=6) global + ET(800) per-store 75/25 + hl=12d + 24% buffer
+6c10e5d	5231713.91	0.00	0.00	0.00	discard	feature interactions + RF(300)+ET(800) 75/25 min_samples=100 + hl=15d + 24% buffer (duplicate of 38ce3f7)
+f9dafa2	5222875.00	0.00	0.00	0.00	keep	Soft P^0.5 * RF(300)+ET(100) 75/25 hl=12d buf=1.40 RF classifier(50 trees)
+7c466b6	5198797.00	0.00	0.00	0.00	keep	Soft P^0.5 LGB clf(200) * RF(300)+ET(100) 75/25 hl=12d buf=1.40
+ea087bc	5194074.00	0.00	0.00	0.00	keep	Soft P^0.5 LGB clf(200) * RF(300)+ET(100) 75/25 hl=12d buf=1.35
+bb3eed4	5177385.00	0.00	0.00	0.00	keep	Soft P^0.4 LGB clf(200) * RF(300)+ET(100) 75/25 hl=12d buf=1.35
+d94f65b	5170934.00	0.00	0.00	0.00	keep	Soft P^0.3 LGB clf(200) * RF(300)+ET(100) 75/25 hl=12d buf=1.35
+96c6147	5169528.00	0.00	0.00	0.00	keep	Soft P^0.3 LGB clf(200) * RF(300)+ET(100) 75/25 hl=12d buf=1.30
+3dc2bf5	5168087.00	0.00	0.00	0.00	keep	Soft P^0.3 LGB clf(200) * RF(300)+ET(100) 75/25 hl=12d buf=1.32
+62489c4	5150958.00	0.00	0.00	0.00	keep	Soft P^0.3 LGB clf(500) * RF(300)+ET(100) 75/25 hl=12d buf=1.32
+9a50bce	5146852.00	0.00	0.00	0.00	keep	Soft P^0.25 LGB clf(500) * RF(300)+ET(100) 75/25 hl=12d buf=1.32
+2eb5aed	5147218.50	2467544.84	1786449.11	2.248382	discard	Soft P^0.25 LGB clf(500) * RF(500)+ET(400) 75/25 hl=12d buf=1.32
+0bf491d	5145817.00	2467118.28	1785802.64	2.244378	keep	Soft P^0.25 LGB clf(500) * RF(500)+ET(100) 75/25 hl=12d buf=1.32
+181c19c	5134633.42	2500158.50	1756316.61	2.270464	keep	Soft P^0.25 LGB clf(500) * RF(500)+ET(100) 70/30 hl=12d buf=1.32
+040bf8a	5137310.17	2535504.19	1734537.32	2.299591	discard	Soft P^0.25 LGB clf(500) * RF(500)+ET(100) 65/35 hl=12d buf=1.32
+001b407	5133972.17	2440626.65	1795563.68	2.231935	keep	Soft P^0.25 LGB clf(500) * RF(500)+ET(100) 70/30 hl=12d buf=1.30 (BEST)
+8aaf427	5135909.22	2381527.85	1836254.25	2.194089	discard	Soft P^0.25 LGB clf(500) * RF(500)+ET(100) 70/30 hl=12d buf=1.28
+ddb5211	5137379.58	2560037.84	1718227.83	2.309538	discard	Soft P^0.25 LGB clf(500) * RF(500)+ET(100) 70/30 hl=12d buf=1.34
+ee577a3	5138036.11	2437668.58	1800245.02	2.236590	discard	Soft P^0.25 LGB clf(500) * RF(500)+ET(100) 70/30 hl=10d buf=1.30
+90a2db0	5142638.58	2443988.33	1799100.17	2.237652	discard	Soft P^0.25 LGB clf(500) * RF(500)+ET(100) 70/30 hl=14d buf=1.30
+5048e95	5135688.84	2947738.95	1458633.26	2.555423	discard	Soft P^0.25 LGB clf(500) RF(500)+ET(100) 70/30 hl=12d dynamic buf CoV alpha=0.15
+30cdb1d	5439469.91	2496024.99	1962296.61	2.401145	discard	P as blend weight (P^1.0 * regressor) + RF(500)+ET(100) 70/30 hl=12d buf=1.60
+8abc834	5499337.30	2489270.49	2006711.21	2.300695	discard	Soft P^0.25 LGB clf(500) * LGB regressor(500)+ET(100) 70/30 hl=12d buf=1.30
+0719227	5138813.08	2518822.22	1746660.57	2.285760	discard	Soft P^0.25 LGB clf(500) * RF(700,leaf=1)+ET(100) 70/30 hl=12d buf=1.30
+5e5dcd9	5133763.51	2440576.33	1795458.12	2.234085	keep	Soft P^0.25 LGB clf(500) * RF(500)+ET(800) 70/30 hl=12d buf=1.30 (BEST)
+63fb244	5134294.13	2440718.83	1795716.87	2.234067	discard	Soft P^0.25 LGB clf(500) * RF(500)+ET(1000) 70/30 hl=12d buf=1.30
