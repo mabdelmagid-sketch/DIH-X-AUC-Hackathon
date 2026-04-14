@@ -1,0 +1,54 @@
+Loading all store time series...
+Building 4643 time series...
+Training series: 3245, avg len: 128d
+Data prep: 78s
+
+Loading Chronos-Bolt-Mini...
+Training samples: 68145
+Batches/epoch: 2129
+  Epoch 1, batch 200/2129, loss: 1.1809
+  Epoch 1, batch 400/2129, loss: 2.3252
+  Epoch 1, batch 600/2129, loss: 1.6130
+  Epoch 1, batch 800/2129, loss: 1.6191
+  Epoch 1, batch 1000/2129, loss: 140626.1406
+  Epoch 1, batch 1200/2129, loss: 1.4371
+  Epoch 1, batch 1400/2129, loss: 1.2278
+  Epoch 1, batch 1600/2129, loss: 9376.3525
+  Epoch 1, batch 1800/2129, loss: 1.7856
+  Epoch 1, batch 2000/2129, loss: 1.1890
+  Epoch 1: avg_loss=3762.1030, time=3740s
+  Epoch 2, batch 200/2129, loss: 1.2635
+  Epoch 2, batch 400/2129, loss: 1.4161
+  Epoch 2, batch 600/2129, loss: 1.7645
+  Epoch 2, batch 800/2129, loss: 1.1179
+  Epoch 2, batch 1000/2129, loss: 1.4348
+  Epoch 2, batch 1200/2129, loss: 1.8918
+  Epoch 2, batch 1400/2129, loss: 1.1471
+  Epoch 2, batch 1600/2129, loss: 1.7101
+  Epoch 2, batch 1800/2129, loss: 1.2001
+  Epoch 2, batch 2000/2129, loss: 1.2194
+  Epoch 2: avg_loss=3762.0446, time=4283s
+  Epoch 3, batch 200/2129, loss: 1.7775
+  Epoch 3, batch 400/2129, loss: 1.2860
+  Epoch 3, batch 600/2129, loss: 68751.4453
+  Epoch 3, batch 800/2129, loss: 2.0214
+  Epoch 3, batch 1000/2129, loss: 1.2890
+  Epoch 3, batch 1200/2129, loss: 3126.5125
+  Epoch 3, batch 1400/2129, loss: 1.5060
+  Epoch 3, batch 1600/2129, loss: 1.3965
+  Epoch 3, batch 1800/2129, loss: 2.4706
+  Epoch 3, batch 2000/2129, loss: 1.4310
+  Epoch 3: avg_loss=3762.0180, time=2955s
+Saved to /home/yahyahammoudeh/Documents/loving loyalty internship/notebooks/chronos-bolt-mini-finetuned
+
+Evaluating on Zeynos...
+
+Buffer sweep on fine-tuned model:
+  buf=1.00  MAE=7.089  Cost=   2,095,550  waste= 166,537  stockout=1,286,009
+  buf=1.10  MAE=7.344  Cost=   1,763,519  waste= 216,307  stockout=1,031,475
+  buf=1.20  MAE=7.862  Cost=   1,505,492  waste= 272,435  stockout= 822,038
+  buf=1.30  MAE=8.636  Cost=   1,319,548  waste= 335,128  stockout= 656,280
+  buf=1.40  MAE=9.645  Cost=   1,199,362  waste= 403,358  stockout= 530,669
+  buf=1.50  MAE=10.814  Cost=   1,123,558  waste= 474,907  stockout= 432,434
+
+Done!

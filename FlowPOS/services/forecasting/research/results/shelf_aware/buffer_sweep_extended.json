@@ -1,0 +1,434 @@
+[
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 1.4,
+    "mae": 9.8054,
+    "cost": 1020787.0,
+    "waste": 427631.4,
+    "stockout": 395437.07
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 1.45,
+    "mae": 10.4332,
+    "cost": 986794.64,
+    "waste": 464899.85,
+    "stockout": 347929.86
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 1.5,
+    "mae": 11.0947,
+    "cost": 962287.72,
+    "waste": 503013.64,
+    "stockout": 306182.72
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 1.55,
+    "mae": 11.7914,
+    "cost": 947630.88,
+    "waste": 541959.44,
+    "stockout": 270447.62
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 1.6,
+    "mae": 12.5281,
+    "cost": 944292.58,
+    "waste": 581981.86,
+    "stockout": 241540.49
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 1.65,
+    "mae": 13.2895,
+    "cost": 948133.06,
+    "waste": 622816.59,
+    "stockout": 216877.65
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 1.7,
+    "mae": 14.0711,
+    "cost": 957606.51,
+    "waste": 664123.6,
+    "stockout": 195655.27
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 1.75,
+    "mae": 14.8674,
+    "cost": 971218.36,
+    "waste": 705784.28,
+    "stockout": 176956.05
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 1.8,
+    "mae": 15.677,
+    "cost": 988706.0,
+    "waste": 747904.18,
+    "stockout": 160534.54
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 1.85,
+    "mae": 16.4994,
+    "cost": 1009730.46,
+    "waste": 790288.44,
+    "stockout": 146294.68
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 1.9,
+    "mae": 17.3329,
+    "cost": 1033835.71,
+    "waste": 832911.77,
+    "stockout": 133949.29
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 1.95,
+    "mae": 18.1745,
+    "cost": 1060187.5,
+    "waste": 875692.83,
+    "stockout": 122996.45
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 2.0,
+    "mae": 19.0227,
+    "cost": 1088375.53,
+    "waste": 918626.93,
+    "stockout": 113165.73
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 2.1,
+    "mae": 20.7325,
+    "cost": 1148536.01,
+    "waste": 1004842.23,
+    "stockout": 95795.86
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 2.2,
+    "mae": 22.4617,
+    "cost": 1214039.37,
+    "waste": 1091421.37,
+    "stockout": 81745.33
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 2.3,
+    "mae": 24.2057,
+    "cost": 1283718.49,
+    "waste": 1178378.69,
+    "stockout": 70226.53
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 2.4,
+    "mae": 25.9612,
+    "cost": 1356751.81,
+    "waste": 1265719.75,
+    "stockout": 60688.04
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "buffer": 2.5,
+    "mae": 27.7238,
+    "cost": 1431755.66,
+    "waste": 1353242.7,
+    "stockout": 52341.97
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 1.4,
+    "mae": 9.9543,
+    "cost": 1026804.72,
+    "waste": 428507.22,
+    "stockout": 398865.0
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 1.45,
+    "mae": 10.5734,
+    "cost": 988928.33,
+    "waste": 465324.4,
+    "stockout": 349069.29
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 1.5,
+    "mae": 11.2319,
+    "cost": 962313.28,
+    "waste": 503289.17,
+    "stockout": 306016.07
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 1.55,
+    "mae": 11.9285,
+    "cost": 946505.3,
+    "waste": 542292.0,
+    "stockout": 269475.54
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 1.6,
+    "mae": 12.6528,
+    "cost": 938500.57,
+    "waste": 581991.28,
+    "stockout": 237672.86
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 1.65,
+    "mae": 13.4009,
+    "cost": 937291.77,
+    "waste": 622384.18,
+    "stockout": 209938.39
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 1.7,
+    "mae": 14.1727,
+    "cost": 942806.32,
+    "waste": 663404.53,
+    "stockout": 186267.86
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 1.75,
+    "mae": 14.9609,
+    "cost": 952939.44,
+    "waste": 704848.82,
+    "stockout": 165393.75
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 1.8,
+    "mae": 15.7641,
+    "cost": 967265.22,
+    "waste": 746630.22,
+    "stockout": 147090.0
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 1.85,
+    "mae": 16.5808,
+    "cost": 985274.47,
+    "waste": 788642.95,
+    "stockout": 131087.68
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 1.9,
+    "mae": 17.411,
+    "cost": 1007067.34,
+    "waste": 830979.13,
+    "stockout": 117392.14
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 1.95,
+    "mae": 18.2504,
+    "cost": 1031470.27,
+    "waste": 873564.47,
+    "stockout": 105270.54
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 2.0,
+    "mae": 19.0975,
+    "cost": 1057970.84,
+    "waste": 916285.13,
+    "stockout": 94457.14
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 2.1,
+    "mae": 20.813,
+    "cost": 1117046.82,
+    "waste": 1002285.57,
+    "stockout": 76507.5
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 2.2,
+    "mae": 22.5516,
+    "cost": 1182637.41,
+    "waste": 1088902.41,
+    "stockout": 62490.0
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 2.3,
+    "mae": 24.3045,
+    "cost": 1252340.16,
+    "waste": 1175976.77,
+    "stockout": 50908.93
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 2.4,
+    "mae": 26.068,
+    "cost": 1325063.35,
+    "waste": 1263332.99,
+    "stockout": 41153.57
+  },
+  {
+    "model": "rolling_7d",
+    "buffer": 2.5,
+    "mae": 27.8444,
+    "cost": 1401305.41,
+    "waste": 1350889.34,
+    "stockout": 33610.71
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 1.4,
+    "mae": 10.5211,
+    "cost": 1038531.93,
+    "waste": 469290.31,
+    "stockout": 379494.42
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 1.45,
+    "mae": 11.184,
+    "cost": 1008136.21,
+    "waste": 508563.16,
+    "stockout": 333048.69
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 1.5,
+    "mae": 11.8779,
+    "cost": 986578.74,
+    "waste": 548738.25,
+    "stockout": 291893.66
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 1.55,
+    "mae": 12.6085,
+    "cost": 975518.28,
+    "waste": 590005.16,
+    "stockout": 257008.75
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 1.6,
+    "mae": 13.3716,
+    "cost": 973570.48,
+    "waste": 632018.34,
+    "stockout": 227701.43
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 1.65,
+    "mae": 14.1594,
+    "cost": 978471.69,
+    "waste": 674568.3,
+    "stockout": 202602.26
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 1.7,
+    "mae": 14.9643,
+    "cost": 988165.11,
+    "waste": 717537.9,
+    "stockout": 180418.14
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 1.75,
+    "mae": 15.7861,
+    "cost": 1002685.38,
+    "waste": 760982.09,
+    "stockout": 161135.52
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 1.8,
+    "mae": 16.6243,
+    "cost": 1021865.74,
+    "waste": 804866.82,
+    "stockout": 144665.95
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 1.85,
+    "mae": 17.4748,
+    "cost": 1044492.51,
+    "waste": 849056.18,
+    "stockout": 130290.89
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 1.9,
+    "mae": 18.3373,
+    "cost": 1070402.45,
+    "waste": 893458.51,
+    "stockout": 117962.63
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 1.95,
+    "mae": 19.2069,
+    "cost": 1098320.67,
+    "waste": 938027.5,
+    "stockout": 106862.12
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 2.0,
+    "mae": 20.0839,
+    "cost": 1128224.85,
+    "waste": 982700.03,
+    "stockout": 97016.55
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 2.1,
+    "mae": 21.8591,
+    "cost": 1193917.07,
+    "waste": 1072499.75,
+    "stockout": 80944.88
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 2.2,
+    "mae": 23.6495,
+    "cost": 1263942.92,
+    "waste": 1162716.42,
+    "stockout": 67484.33
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 2.3,
+    "mae": 25.4537,
+    "cost": 1337867.15,
+    "waste": 1253288.41,
+    "stockout": 56385.82
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 2.4,
+    "mae": 27.2731,
+    "cost": 1416079.5,
+    "waste": 1344258.21,
+    "stockout": 47880.86
+  },
+  {
+    "model": "same_dow_avg",
+    "buffer": 2.5,
+    "mae": 29.1022,
+    "cost": 1496924.96,
+    "waste": 1435372.84,
+    "stockout": 41034.75
+  }
+]

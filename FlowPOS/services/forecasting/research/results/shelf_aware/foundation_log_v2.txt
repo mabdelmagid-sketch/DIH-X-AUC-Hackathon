@@ -1,0 +1,120 @@
+Loading data...
+Data: 30 items, 182 days
+
+============================================================
+STATISTICAL BASELINES
+============================================================
+  same_dow_avg          MAE: 10.858  Cost:    1,058,330 DKK  Time: 1s
+  rolling_7d            MAE: 9.954  Cost:    1,026,805 DKK  Time: 1s
+  seasonal_naive        MAE: 12.331  Cost:    1,719,423 DKK  Time: 1s
+  ets_simple            MAE: 10.254  Cost:    1,112,838 DKK  Time: 1s
+
+============================================================
+LIGHTGBM
+============================================================
+  LightGBM-200         MAE: 10.529  Cost:    1,193,406 DKK  Time: 7s
+
+============================================================
+amazon/chronos-bolt-tiny
+============================================================
+
+Loading amazon/chronos-bolt-tiny...
+`torch_dtype` is deprecated! Use `dtype` instead!
+`torch_dtype` is deprecated! Use `dtype` instead!
+  Loaded in 0.8s
+  Round 10, 900 preds, 8s
+  Round 20, 1800 preds, 17s
+  Round 30, 2700 preds, 25s
+  Round 40, 3600 preds, 33s
+  Round 50, 4500 preds, 41s
+  Done: 51 rounds, 42s
+  MAE: 9.613  Cost:    1,039,857 DKK  Time: 42s
+
+============================================================
+amazon/chronos-bolt-mini
+============================================================
+
+Loading amazon/chronos-bolt-mini...
+  Loaded in 0.7s
+  Round 10, 900 preds, 16s
+  Round 20, 1800 preds, 33s
+  Round 30, 2700 preds, 50s
+  Round 40, 3600 preds, 67s
+  Round 50, 4500 preds, 84s
+  Done: 51 rounds, 86s
+  MAE: 9.805  Cost:    1,020,787 DKK  Time: 86s
+
+============================================================
+amazon/chronos-bolt-small
+============================================================
+
+Loading amazon/chronos-bolt-small...
+  Loaded in 0.7s
+  Round 10, 900 preds, 54s
+  Round 20, 1800 preds, 113s
+  Round 30, 2700 preds, 173s
+  Round 40, 3600 preds, 233s
+  Round 50, 4500 preds, 291s
+  Done: 51 rounds, 297s
+  MAE: 9.752  Cost:    1,023,852 DKK  Time: 297s
+
+============================================================
+amazon/chronos-t5-tiny
+============================================================
+
+Loading amazon/chronos-t5-tiny...
+  Loaded in 19.9s
+  Round 10, 900 preds, 113s
+  Round 20, 1800 preds, 235s
+  Round 30, 2700 preds, 355s
+  Round 40, 3600 preds, 529s
+  Round 50, 4500 preds, 688s
+  Done: 51 rounds, 699s
+  MAE: 9.624  Cost:    1,232,128 DKK  Time: 699s
+
+============================================================
+amazon/chronos-t5-mini
+============================================================
+
+Loading amazon/chronos-t5-mini...
+  Loaded in 49.3s
+  Round 10, 900 preds, 374s
+  Round 20, 1800 preds, 642s
+  Round 30, 2700 preds, 904s
+  Round 40, 3600 preds, 1118s
+  Round 50, 4500 preds, 1326s
+  Done: 51 rounds, 1344s
+  MAE: 9.582  Cost:    1,184,172 DKK  Time: 1344s
+
+============================================================
+amazon/chronos-t5-small
+============================================================
+
+Loading amazon/chronos-t5-small...
+  Loaded in 119.9s
+  Round 10, 900 preds, 419s
+  Round 20, 1800 preds, 827s
+  Round 30, 2700 preds, 1234s
+  Round 40, 3600 preds, 1780s
+  Round 50, 4500 preds, 2617s
+  Done: 51 rounds, 2687s
+  MAE: 9.382  Cost:    1,194,489 DKK  Time: 2687s
+
+======================================================================
+FINAL RANKING (buf=1.40, 60d window, Zeynos, 30 items)
+======================================================================
+Model                          MAE   Cost (DKK)      Waste   Stockout     Time
+---------------------------------------------------------------------------
+chronos-bolt-mini            9.805    1,020,787    427,631    395,437      86s
+chronos-bolt-small           9.752    1,023,852    423,201    400,434     297s
+rolling_7d                   9.954    1,026,805    428,507    398,865       1s
+chronos-bolt-tiny            9.613    1,039,857    414,307    417,033      42s
+same_dow_avg                10.858    1,058,330    487,654    380,451       1s
+ets_simple                  10.254    1,112,838    435,469    451,579       1s
+chronos-t5-mini              9.582    1,184,172    397,497    524,450    1344s
+LightGBM-200                10.529    1,193,406    447,846    497,040       7s
+chronos-t5-small             9.382    1,194,489    383,280    540,806    2687s
+chronos-t5-tiny              9.624    1,232,128    400,193    554,623     699s
+seasonal_naive              12.331    1,719,423    481,698    825,150       1s
+
+Saved.

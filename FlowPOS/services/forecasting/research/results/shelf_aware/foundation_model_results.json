@@ -1,0 +1,46 @@
+[
+  {
+    "model": "LightGBM-200",
+    "mae": 10.6299,
+    "cost": 4779437.93,
+    "waste": 73261.38,
+    "stockout": 3137451.04,
+    "n_predictions": 4560,
+    "n_rounds": 51,
+    "time_s": 17.7,
+    "buffer": 1.4
+  },
+  {
+    "model": "chronos-bolt-tiny",
+    "mae": 9.6129,
+    "cost": 4367245.15,
+    "waste": 61354.33,
+    "stockout": 2870593.88,
+    "n_predictions": 4560,
+    "n_rounds": 51,
+    "time_s": 70.4,
+    "buffer": 1.4
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "mae": 9.8054,
+    "cost": 4494782.42,
+    "waste": 57790.04,
+    "stockout": 2957994.93,
+    "n_predictions": 4560,
+    "n_rounds": 51,
+    "time_s": 125.1,
+    "buffer": 1.4
+  },
+  {
+    "model": "chronos-bolt-small",
+    "mae": 9.7515,
+    "cost": 4460267.75,
+    "waste": 58375.63,
+    "stockout": 2934594.74,
+    "n_predictions": 4560,
+    "n_rounds": 51,
+    "time_s": 395.6,
+    "buffer": 1.4
+  }
+]

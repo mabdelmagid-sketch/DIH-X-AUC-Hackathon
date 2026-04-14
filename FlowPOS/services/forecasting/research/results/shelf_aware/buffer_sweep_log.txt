@@ -1,0 +1,116 @@
+Loading data...
+
+============================================================
+Collecting raw predictions: chronos-bolt-mini
+============================================================
+`torch_dtype` is deprecated! Use `dtype` instead!
+`torch_dtype` is deprecated! Use `dtype` instead!
+  4560 predictions in 88s
+  Buffer sweep...
+  Best: buf=1.50  Cost=962,288 DKK  MAE=11.095
+    buf=0.90  Cost= 2,295,585  waste= 131,266  stockout=1,442,879
+    buf=0.95  Cost= 2,072,186  waste= 152,837  stockout=1,279,566
+    buf=1.00  Cost= 1,869,565  waste= 175,991  stockout=1,129,049
+    buf=1.05  Cost= 1,691,080  waste= 201,388  stockout= 993,128
+    buf=1.10  Cost= 1,536,047  waste= 228,853  stockout= 871,463
+    buf=1.15  Cost= 1,403,647  waste= 258,007  stockout= 763,760
+    buf=1.20  Cost= 1,290,391  waste= 288,783  stockout= 667,738
+    buf=1.25  Cost= 1,197,469  waste= 321,532  stockout= 583,958
+    buf=1.30  Cost= 1,123,203  waste= 355,731  stockout= 511,648
+    buf=1.35  Cost= 1,066,255  waste= 391,290  stockout= 449,977
+    buf=1.40  Cost= 1,020,787  waste= 427,631  stockout= 395,437
+    buf=1.45  Cost=   986,795  waste= 464,900  stockout= 347,930
+    buf=1.50  Cost=   962,288  waste= 503,014  stockout= 306,183
+
+============================================================
+Collecting raw predictions: chronos-bolt-tiny
+============================================================
+  4560 predictions in 37s
+  Buffer sweep...
+  Best: buf=1.50  Cost=973,436 DKK  MAE=10.856
+    buf=0.90  Cost= 2,359,891  waste= 127,897  stockout=1,487,996
+    buf=0.95  Cost= 2,134,828  waste= 148,742  stockout=1,324,057
+    buf=1.00  Cost= 1,930,556  waste= 171,226  stockout=1,172,887
+    buf=1.05  Cost= 1,747,494  waste= 195,369  stockout=1,034,750
+    buf=1.10  Cost= 1,586,796  waste= 221,503  stockout= 910,195
+    buf=1.15  Cost= 1,445,385  waste= 249,232  stockout= 797,435
+    buf=1.20  Cost= 1,326,107  waste= 279,051  stockout= 698,038
+    buf=1.25  Cost= 1,229,130  waste= 310,935  stockout= 612,130
+    buf=1.30  Cost= 1,151,530  waste= 344,326  stockout= 538,136
+    buf=1.35  Cost= 1,090,175  waste= 378,913  stockout= 474,175
+    buf=1.40  Cost= 1,039,857  waste= 414,307  stockout= 417,033
+    buf=1.45  Cost= 1,001,087  waste= 450,564  stockout= 367,015
+    buf=1.50  Cost=   973,436  waste= 487,825  stockout= 323,741
+
+============================================================
+Collecting raw predictions: rolling_7d
+============================================================
+  4560 predictions in 1s
+  Buffer sweep...
+  Best: buf=1.50  Cost=962,313 DKK  MAE=11.232
+    buf=0.90  Cost= 2,295,934  waste= 132,964  stockout=1,441,980
+    buf=0.95  Cost= 2,077,930  waste= 154,904  stockout=1,282,017
+    buf=1.00  Cost= 1,882,678  waste= 178,866  stockout=1,135,875
+    buf=1.05  Cost= 1,710,477  waste= 204,687  stockout=1,003,860
+    buf=1.10  Cost= 1,556,978  waste= 231,918  stockout= 883,374
+    buf=1.15  Cost= 1,423,097  waste= 260,958  stockout= 774,759
+    buf=1.20  Cost= 1,307,544  waste= 291,515  stockout= 677,353
+    buf=1.25  Cost= 1,210,519  waste= 323,585  stockout= 591,289
+    buf=1.30  Cost= 1,132,636  waste= 357,196  stockout= 516,960
+    buf=1.35  Cost= 1,074,095  waste= 392,394  stockout= 454,467
+    buf=1.40  Cost= 1,026,805  waste= 428,507  stockout= 398,865
+    buf=1.45  Cost=   988,928  waste= 465,324  stockout= 349,069
+    buf=1.50  Cost=   962,313  waste= 503,289  stockout= 306,016
+
+============================================================
+Collecting raw predictions: same_dow_avg
+============================================================
+  4560 predictions in 1s
+  Buffer sweep...
+  Best: buf=1.50  Cost=986,579 DKK  MAE=11.878
+    buf=0.90  Cost= 2,205,735  waste= 147,332  stockout=1,372,268
+    buf=0.95  Cost= 1,994,025  waste= 171,435  stockout=1,215,060
+    buf=1.00  Cost= 1,805,201  waste= 197,361  stockout=1,071,893
+    buf=1.05  Cost= 1,640,238  waste= 225,667  stockout= 943,048
+    buf=1.10  Cost= 1,498,158  waste= 256,063  stockout= 828,064
+    buf=1.15  Cost= 1,376,273  waste= 288,098  stockout= 725,450
+    buf=1.20  Cost= 1,273,975  waste= 321,555  stockout= 634,947
+    buf=1.25  Cost= 1,193,766  waste= 356,872  stockout= 557,930
+    buf=1.30  Cost= 1,128,398  waste= 393,285  stockout= 490,075
+    buf=1.35  Cost= 1,077,154  waste= 430,726  stockout= 430,952
+    buf=1.40  Cost= 1,038,532  waste= 469,290  stockout= 379,494
+    buf=1.45  Cost= 1,008,136  waste= 508,563  stockout= 333,049
+    buf=1.50  Cost=   986,579  waste= 548,738  stockout= 291,894
+
+============================================================
+Collecting raw predictions: LightGBM-200
+============================================================
+  4560 predictions in 10s
+  Buffer sweep...
+  Best: buf=1.50  Cost=1,118,496 DKK  MAE=11.768
+    buf=0.90  Cost= 2,379,451  waste= 140,617  stockout=1,492,556
+    buf=0.95  Cost= 2,170,249  waste= 163,616  stockout=1,337,755
+    buf=1.00  Cost= 1,989,169  waste= 189,200  stockout=1,199,979
+    buf=1.05  Cost= 1,832,743  waste= 216,859  stockout=1,077,256
+    buf=1.10  Cost= 1,695,068  waste= 246,148  stockout= 965,947
+    buf=1.15  Cost= 1,574,620  waste= 276,912  stockout= 865,138
+    buf=1.20  Cost= 1,469,878  waste= 308,913  stockout= 773,977
+    buf=1.25  Cost= 1,382,124  waste= 342,186  stockout= 693,292
+    buf=1.30  Cost= 1,307,257  waste= 376,518  stockout= 620,492
+    buf=1.35  Cost= 1,245,483  waste= 411,908  stockout= 555,716
+    buf=1.40  Cost= 1,193,406  waste= 447,846  stockout= 497,040
+    buf=1.45  Cost= 1,150,946  waste= 484,540  stockout= 444,271
+    buf=1.50  Cost= 1,118,496  waste= 522,196  stockout= 397,533
+
+======================================================================
+FINAL: EACH MODEL WITH ITS OPTIMAL BUFFER
+======================================================================
+Model                   Opt Buf   Cost (DKK)      Waste   Stockout      MAE
+------------------------------------------------------------------------
+chronos-bolt-mini          1.50      962,288    503,014    306,183   11.095
+chronos-bolt-tiny          1.50      973,436    487,825    323,741   10.856
+rolling_7d                 1.50      962,313    503,289    306,016   11.232
+same_dow_avg               1.50      986,579    548,738    291,894   11.878
+LightGBM-200               1.50    1,118,496    522,196    397,533   11.768
+
+Saved.

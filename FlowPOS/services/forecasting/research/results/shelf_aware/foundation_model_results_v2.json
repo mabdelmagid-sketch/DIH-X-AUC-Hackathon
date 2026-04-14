@@ -1,0 +1,112 @@
+[
+  {
+    "model": "same_dow_avg",
+    "mae": 10.8581,
+    "cost": 1058330.2,
+    "waste": 487654.14,
+    "stockout": 380450.71,
+    "n_predictions": 4560,
+    "buffer": 1.4,
+    "time_s": 1.0
+  },
+  {
+    "model": "rolling_7d",
+    "mae": 9.9543,
+    "cost": 1026804.72,
+    "waste": 428507.22,
+    "stockout": 398865.0,
+    "n_predictions": 4560,
+    "buffer": 1.4,
+    "time_s": 0.6
+  },
+  {
+    "model": "seasonal_naive",
+    "mae": 12.3307,
+    "cost": 1719422.78,
+    "waste": 481697.78,
+    "stockout": 825150.0,
+    "n_predictions": 4560,
+    "buffer": 1.4,
+    "time_s": 0.6
+  },
+  {
+    "model": "ets_simple",
+    "mae": 10.2535,
+    "cost": 1112838.25,
+    "waste": 435469.47,
+    "stockout": 451579.19,
+    "n_predictions": 4560,
+    "buffer": 1.4,
+    "time_s": 0.7
+  },
+  {
+    "model": "LightGBM-200",
+    "mae": 10.5294,
+    "cost": 1193405.9,
+    "waste": 447846.42,
+    "stockout": 497039.65,
+    "n_predictions": 4560,
+    "time_s": 6.6,
+    "buffer": 1.4
+  },
+  {
+    "model": "chronos-bolt-tiny",
+    "mae": 9.6129,
+    "cost": 1039857.14,
+    "waste": 414307.33,
+    "stockout": 417033.21,
+    "n_predictions": 4560,
+    "time_s": 42.3,
+    "buffer": 1.4
+  },
+  {
+    "model": "chronos-bolt-mini",
+    "mae": 9.8054,
+    "cost": 1020787.0,
+    "waste": 427631.38,
+    "stockout": 395437.08,
+    "n_predictions": 4560,
+    "time_s": 86.0,
+    "buffer": 1.4
+  },
+  {
+    "model": "chronos-bolt-small",
+    "mae": 9.7515,
+    "cost": 1023851.85,
+    "waste": 423200.65,
+    "stockout": 400434.13,
+    "n_predictions": 4560,
+    "time_s": 297.2,
+    "buffer": 1.4
+  },
+  {
+    "model": "chronos-t5-tiny",
+    "mae": 9.6243,
+    "cost": 1232127.51,
+    "waste": 400193.36,
+    "stockout": 554622.76,
+    "n_predictions": 4560,
+    "time_s": 698.8,
+    "buffer": 1.4
+  },
+  {
+    "model": "chronos-t5-mini",
+    "mae": 9.5816,
+    "cost": 1184172.1,
+    "waste": 397497.42,
+    "stockout": 524449.79,
+    "n_predictions": 4560,
+    "time_s": 1343.9,
+    "buffer": 1.4
+  },
+  {
+    "model": "chronos-t5-small",
+    "mae": 9.3819,
+    "cost": 1194489.33,
+    "waste": 383280.26,
+    "stockout": 540806.05,
+    "n_predictions": 4560,
+    "time_s": 2686.9,
+    "buffer": 1.4
+  }
+]

@@ -1,0 +1,1266 @@
+[
+  {
+    "total_business_cost_dkk": 12917846.76,
+    "waste_cost_dkk": 3157303.08,
+    "stockout_cost_dkk": 6507029.12,
+    "mae": 1.406514,
+    "rmse": 5.252127,
+    "wmape": 94.6277,
+    "forecast_accuracy_pct": 5.3723,
+    "overstock_pct": 80.5,
+    "understock_pct": 15.57,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LGB full-history no-decay",
+    "timing": {
+      "data_s": 4.07,
+      "train_s": 60.83,
+      "predict_s": 1.45,
+      "total_s": 66.35
+    },
+    "config": {
+      "train_rows": 2074464,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": null,
+      "decay_half_life": null
+    },
+    "phase": "recency"
+  },
+  {
+    "total_business_cost_dkk": 12904234.23,
+    "waste_cost_dkk": 3726257.32,
+    "stockout_cost_dkk": 6118651.27,
+    "mae": 1.53568,
+    "rmse": 6.086964,
+    "wmape": 103.3178,
+    "forecast_accuracy_pct": 0,
+    "overstock_pct": 73.92,
+    "understock_pct": 15.41,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LGB full-history decay=6d",
+    "timing": {
+      "data_s": 3.6,
+      "train_s": 61.95,
+      "predict_s": 1.65,
+      "total_s": 67.2
+    },
+    "config": {
+      "train_rows": 2074464,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": null,
+      "decay_half_life": 6
+    },
+    "phase": "recency"
+  },
+  {
+    "total_business_cost_dkk": 12889260.63,
+    "waste_cost_dkk": 3308825.39,
+    "stockout_cost_dkk": 6386956.83,
+    "mae": 1.439512,
+    "rmse": 5.595377,
+    "wmape": 96.8478,
+    "forecast_accuracy_pct": 3.1522,
+    "overstock_pct": 68.9,
+    "understock_pct": 15.93,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LGB full-history decay=12d",
+    "timing": {
+      "data_s": 3.01,
+      "train_s": 65.74,
+      "predict_s": 1.59,
+      "total_s": 70.34
+    },
+    "config": {
+      "train_rows": 2074464,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": null,
+      "decay_half_life": 12
+    },
+    "phase": "recency"
+  },
+  {
+    "total_business_cost_dkk": 12945515.78,
+    "waste_cost_dkk": 3136564.07,
+    "stockout_cost_dkk": 6539301.14,
+    "mae": 1.404659,
+    "rmse": 5.466644,
+    "wmape": 94.5029,
+    "forecast_accuracy_pct": 5.4971,
+    "overstock_pct": 67.23,
+    "understock_pct": 16.25,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LGB full-history decay=24d",
+    "timing": {
+      "data_s": 3.05,
+      "train_s": 67.24,
+      "predict_s": 1.49,
+      "total_s": 71.79
+    },
+    "config": {
+      "train_rows": 2074464,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": null,
+      "decay_half_life": 24
+    },
+    "phase": "recency"
+  },
+  {
+    "total_business_cost_dkk": 12902546.93,
+    "waste_cost_dkk": 3551402.39,
+    "stockout_cost_dkk": 6234096.36,
+    "mae": 1.495832,
+    "rmse": 5.953365,
+    "wmape": 100.6369,
+    "forecast_accuracy_pct": 0,
+    "overstock_pct": 69.28,
+    "understock_pct": 15.66,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LGB window=60d no-decay",
+    "timing": {
+      "data_s": 1.93,
+      "train_s": 27.82,
+      "predict_s": 2.22,
+      "total_s": 31.97
+    },
+    "config": {
+      "train_rows": 740880,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 60,
+      "decay_half_life": null
+    },
+    "phase": "recency"
+  },
+  {
+    "total_business_cost_dkk": 12996242.23,
+    "waste_cost_dkk": 3337384.29,
+    "stockout_cost_dkk": 6439238.63,
+    "mae": 1.452215,
+    "rmse": 5.508985,
+    "wmape": 97.7024,
+    "forecast_accuracy_pct": 2.2976,
+    "overstock_pct": 77.05,
+    "understock_pct": 15.96,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LGB window=90d no-decay",
+    "timing": {
+      "data_s": 2.23,
+      "train_s": 33.6,
+      "predict_s": 1.68,
+      "total_s": 37.51
+    },
+    "config": {
+      "train_rows": 1111320,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 90,
+      "decay_half_life": null
+    },
+    "phase": "recency"
+  },
+  {
+    "total_business_cost_dkk": 12976688.85,
+    "waste_cost_dkk": 2985788.48,
+    "stockout_cost_dkk": 6660600.25,
+    "mae": 1.371417,
+    "rmse": 5.229774,
+    "wmape": 92.2665,
+    "forecast_accuracy_pct": 7.7335,
+    "overstock_pct": 78.52,
+    "understock_pct": 16.19,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LGB window=120d no-decay",
+    "timing": {
+      "data_s": 2.5,
+      "train_s": 59.61,
+      "predict_s": 1.74,
+      "total_s": 63.85
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": null
+    },
+    "phase": "recency"
+  },
+  {
+    "total_business_cost_dkk": 12831308.46,
+    "waste_cost_dkk": 3231614.7,
+    "stockout_cost_dkk": 6399795.84,
+    "mae": 1.420502,
+    "rmse": 5.602162,
+    "wmape": 95.5688,
+    "forecast_accuracy_pct": 4.4312,
+    "overstock_pct": 66.58,
+    "understock_pct": 15.88,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LGB window=90d decay=12d",
+    "timing": {
+      "data_s": 1.95,
+      "train_s": 32.52,
+      "predict_s": 1.68,
+      "total_s": 36.16
+    },
+    "config": {
+      "train_rows": 1111320,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 90,
+      "decay_half_life": 12
+    },
+    "phase": "recency"
+  },
+  {
+    "total_business_cost_dkk": 12812760.23,
+    "waste_cost_dkk": 3178589.22,
+    "stockout_cost_dkk": 6422780.68,
+    "mae": 1.40719,
+    "rmse": 5.516628,
+    "wmape": 94.6732,
+    "forecast_accuracy_pct": 5.3268,
+    "overstock_pct": 69.88,
+    "understock_pct": 15.95,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LGB window=120d decay=12d",
+    "timing": {
+      "data_s": 2.18,
+      "train_s": 46.77,
+      "predict_s": 1.56,
+      "total_s": 50.5
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "recency"
+  },
+  {
+    "total_business_cost_dkk": 12966640.51,
+    "waste_cost_dkk": 3075396.3,
+    "stockout_cost_dkk": 6594162.81,
+    "mae": 1.392438,
+    "rmse": 5.380377,
+    "wmape": 93.6807,
+    "forecast_accuracy_pct": 6.3193,
+    "overstock_pct": 67.08,
+    "understock_pct": 16.26,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LGB window=120d decay=24d",
+    "timing": {
+      "data_s": 2.24,
+      "train_s": 44.88,
+      "predict_s": 1.51,
+      "total_s": 48.63
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 24
+    },
+    "phase": "recency"
+  },
+  {
+    "total_business_cost_dkk": 12812760.23,
+    "waste_cost_dkk": 3178589.22,
+    "stockout_cost_dkk": 6422780.68,
+    "mae": 1.40719,
+    "rmse": 5.516628,
+    "wmape": 94.6732,
+    "forecast_accuracy_pct": 5.3268,
+    "overstock_pct": 69.88,
+    "understock_pct": 15.95,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LightGBM td=120 hl=12",
+    "timing": {
+      "data_s": 2.17,
+      "train_s": 45.55,
+      "predict_s": 1.56,
+      "total_s": 49.29
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "model_comparison",
+    "model_name": "LightGBM"
+  },
+  {
+    "total_business_cost_dkk": 12706982.71,
+    "waste_cost_dkk": 3418547.62,
+    "stockout_cost_dkk": 6192290.06,
+    "mae": 1.455313,
+    "rmse": 5.654963,
+    "wmape": 97.9108,
+    "forecast_accuracy_pct": 2.0892,
+    "overstock_pct": 69.92,
+    "understock_pct": 15.61,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "XGBoost td=120 hl=12",
+    "timing": {
+      "data_s": 2.19,
+      "train_s": 69.32,
+      "predict_s": 0.59,
+      "total_s": 72.1
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "model_comparison",
+    "model_name": "XGBoost"
+  },
+  {
+    "total_business_cost_dkk": 13070233.67,
+    "waste_cost_dkk": 3121927.0,
+    "stockout_cost_dkk": 6632204.44,
+    "mae": 1.4076,
+    "rmse": 5.489661,
+    "wmape": 94.7008,
+    "forecast_accuracy_pct": 5.2992,
+    "overstock_pct": 64.07,
+    "understock_pct": 15.93,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "CatBoost td=120 hl=12",
+    "timing": {
+      "data_s": 2.2,
+      "train_s": 49.25,
+      "predict_s": 0.04,
+      "total_s": 51.49
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "model_comparison",
+    "model_name": "CatBoost"
+  },
+  {
+    "total_business_cost_dkk": 13228950.47,
+    "waste_cost_dkk": 3673258.99,
+    "stockout_cost_dkk": 6370460.99,
+    "mae": 1.539269,
+    "rmse": 5.793291,
+    "wmape": 103.5593,
+    "forecast_accuracy_pct": 0,
+    "overstock_pct": 72.43,
+    "understock_pct": 15.23,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "ElasticNet td=120 hl=12",
+    "timing": {
+      "data_s": 2.67,
+      "train_s": 65.06,
+      "predict_s": 0.02,
+      "total_s": 67.75
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "model_comparison",
+    "model_name": "ElasticNet"
+  },
+  {
+    "total_business_cost_dkk": 12827882.65,
+    "waste_cost_dkk": 3196305.91,
+    "stockout_cost_dkk": 6421051.16,
+    "mae": 1.410928,
+    "rmse": 5.478626,
+    "wmape": 94.9247,
+    "forecast_accuracy_pct": 5.0753,
+    "overstock_pct": 67.02,
+    "understock_pct": 15.93,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "Blend_LGB_XGB_CB td=120 hl=12",
+    "timing": {
+      "data_s": 2.94,
+      "train_s": 131.25,
+      "predict_s": 1.33,
+      "total_s": 135.52
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "model_comparison",
+    "model_name": "Blend_LGB_XGB_CB"
+  },
+  {
+    "total_business_cost_dkk": 12228236.34,
+    "waste_cost_dkk": 3545200.58,
+    "stockout_cost_dkk": 5788690.51,
+    "mae": 1.454931,
+    "rmse": 6.05723,
+    "wmape": 97.8851,
+    "forecast_accuracy_pct": 2.1149,
+    "overstock_pct": 72.77,
+    "understock_pct": 15.25,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "SoftProbV2_allLGB td=120 hl=12",
+    "timing": {
+      "data_s": 2.18,
+      "train_s": 155.61,
+      "predict_s": 4.2,
+      "total_s": 161.99
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "model_comparison",
+    "model_name": "SoftProbV2_allLGB"
+  },
+  {
+    "total_business_cost_dkk": 13422000.19,
+    "waste_cost_dkk": 2547767.03,
+    "stockout_cost_dkk": 7249488.77,
+    "mae": 1.300181,
+    "rmse": 5.473999,
+    "wmape": 87.4738,
+    "forecast_accuracy_pct": 12.5262,
+    "overstock_pct": 70.71,
+    "understock_pct": 17.3,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "SoftProbV2_allLGB buf=1.00 td=120 hl=12",
+    "timing": {
+      "data_s": 2.68,
+      "train_s": 157.65,
+      "predict_s": 4.35,
+      "total_s": 164.69
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "SoftProbV2_allLGB",
+    "buffer": 1.0
+  },
+  {
+    "total_business_cost_dkk": 13118753.06,
+    "waste_cost_dkk": 2736504.68,
+    "stockout_cost_dkk": 6921498.92,
+    "mae": 1.325031,
+    "rmse": 5.54966,
+    "wmape": 89.1457,
+    "forecast_accuracy_pct": 10.8543,
+    "overstock_pct": 71.12,
+    "understock_pct": 16.9,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "SoftProbV2_allLGB buf=1.05 td=120 hl=12",
+    "timing": {
+      "data_s": 2.45,
+      "train_s": 170.72,
+      "predict_s": 4.46,
+      "total_s": 177.63
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "SoftProbV2_allLGB",
+    "buffer": 1.05
+  },
+  {
+    "total_business_cost_dkk": 12850576.31,
+    "waste_cost_dkk": 2931087.39,
+    "stockout_cost_dkk": 6612992.61,
+    "mae": 1.353254,
+    "rmse": 5.646972,
+    "wmape": 91.0445,
+    "forecast_accuracy_pct": 8.9555,
+    "overstock_pct": 71.57,
+    "understock_pct": 16.45,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "SoftProbV2_allLGB buf=1.10 td=120 hl=12",
+    "timing": {
+      "data_s": 2.72,
+      "train_s": 177.41,
+      "predict_s": 4.47,
+      "total_s": 184.6
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "SoftProbV2_allLGB",
+    "buffer": 1.1
+  },
+  {
+    "total_business_cost_dkk": 12615441.1,
+    "waste_cost_dkk": 3131177.03,
+    "stockout_cost_dkk": 6322842.72,
+    "mae": 1.384533,
+    "rmse": 5.764839,
+    "wmape": 93.1489,
+    "forecast_accuracy_pct": 6.8511,
+    "overstock_pct": 71.97,
+    "understock_pct": 16.05,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "SoftProbV2_allLGB buf=1.15 td=120 hl=12",
+    "timing": {
+      "data_s": 2.52,
+      "train_s": 169.81,
+      "predict_s": 4.57,
+      "total_s": 176.89
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "SoftProbV2_allLGB",
+    "buffer": 1.15
+  },
+  {
+    "total_business_cost_dkk": 12407339.45,
+    "waste_cost_dkk": 3335772.26,
+    "stockout_cost_dkk": 6047711.46,
+    "mae": 1.41831,
+    "rmse": 5.902029,
+    "wmape": 95.4213,
+    "forecast_accuracy_pct": 4.5787,
+    "overstock_pct": 72.37,
+    "understock_pct": 15.65,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "SoftProbV2_allLGB buf=1.20 td=120 hl=12",
+    "timing": {
+      "data_s": 2.65,
+      "train_s": 172.48,
+      "predict_s": 4.49,
+      "total_s": 179.61
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "SoftProbV2_allLGB",
+    "buffer": 1.2
+  },
+  {
+    "total_business_cost_dkk": 12228236.34,
+    "waste_cost_dkk": 3545200.58,
+    "stockout_cost_dkk": 5788690.51,
+    "mae": 1.454931,
+    "rmse": 6.05723,
+    "wmape": 97.8851,
+    "forecast_accuracy_pct": 2.1149,
+    "overstock_pct": 72.77,
+    "understock_pct": 15.25,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "SoftProbV2_allLGB buf=1.25 td=120 hl=12",
+    "timing": {
+      "data_s": 2.71,
+      "train_s": 167.72,
+      "predict_s": 4.7,
+      "total_s": 175.12
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "SoftProbV2_allLGB",
+    "buffer": 1.25
+  },
+  {
+    "total_business_cost_dkk": 12080911.06,
+    "waste_cost_dkk": 3759925.2,
+    "stockout_cost_dkk": 5547323.91,
+    "mae": 1.494508,
+    "rmse": 6.229095,
+    "wmape": 100.5478,
+    "forecast_accuracy_pct": 0,
+    "overstock_pct": 73.14,
+    "understock_pct": 14.87,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "SoftProbV2_allLGB buf=1.30 td=120 hl=12",
+    "timing": {
+      "data_s": 2.57,
+      "train_s": 173.02,
+      "predict_s": 4.54,
+      "total_s": 180.13
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "SoftProbV2_allLGB",
+    "buffer": 1.3
+  },
+  {
+    "total_business_cost_dkk": 11961902.12,
+    "waste_cost_dkk": 3979369.21,
+    "stockout_cost_dkk": 5321688.6,
+    "mae": 1.536712,
+    "rmse": 6.416286,
+    "wmape": 103.3872,
+    "forecast_accuracy_pct": 0,
+    "overstock_pct": 73.53,
+    "understock_pct": 14.49,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "SoftProbV2_allLGB buf=1.35 td=120 hl=12",
+    "timing": {
+      "data_s": 2.93,
+      "train_s": 167.83,
+      "predict_s": 4.34,
+      "total_s": 175.09
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "SoftProbV2_allLGB",
+    "buffer": 1.35
+  },
+  {
+    "total_business_cost_dkk": 11868432.93,
+    "waste_cost_dkk": 4203069.86,
+    "stockout_cost_dkk": 5110242.05,
+    "mae": 1.581278,
+    "rmse": 6.617502,
+    "wmape": 106.3855,
+    "forecast_accuracy_pct": 0,
+    "overstock_pct": 73.89,
+    "understock_pct": 14.12,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "SoftProbV2_allLGB buf=1.40 td=120 hl=12",
+    "timing": {
+      "data_s": 2.68,
+      "train_s": 167.55,
+      "predict_s": 4.71,
+      "total_s": 174.95
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "SoftProbV2_allLGB",
+    "buffer": 1.4
+  },
+  {
+    "total_business_cost_dkk": 13501806.58,
+    "waste_cost_dkk": 2797688.77,
+    "stockout_cost_dkk": 7136078.54,
+    "mae": 1.361255,
+    "rmse": 5.398619,
+    "wmape": 91.5828,
+    "forecast_accuracy_pct": 8.4172,
+    "overstock_pct": 68.55,
+    "understock_pct": 16.98,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "XGBoost buf=1.00 td=120 hl=12",
+    "timing": {
+      "data_s": 2.83,
+      "train_s": 54.42,
+      "predict_s": 0.64,
+      "total_s": 57.88
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "XGBoost",
+    "buffer": 1.0
+  },
+  {
+    "total_business_cost_dkk": 13201725.53,
+    "waste_cost_dkk": 2998784.89,
+    "stockout_cost_dkk": 6801960.43,
+    "mae": 1.389212,
+    "rmse": 5.462887,
+    "wmape": 93.4637,
+    "forecast_accuracy_pct": 6.5363,
+    "overstock_pct": 69.02,
+    "understock_pct": 16.51,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "XGBoost buf=1.05 td=120 hl=12",
+    "timing": {
+      "data_s": 3.55,
+      "train_s": 54.71,
+      "predict_s": 0.7,
+      "total_s": 58.96
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "XGBoost",
+    "buffer": 1.05
+  },
+  {
+    "total_business_cost_dkk": 12937566.42,
+    "waste_cost_dkk": 3205868.61,
+    "stockout_cost_dkk": 6487798.54,
+    "mae": 1.420719,
+    "rmse": 5.548662,
+    "wmape": 95.5834,
+    "forecast_accuracy_pct": 4.4166,
+    "overstock_pct": 69.46,
+    "understock_pct": 16.07,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "XGBoost buf=1.10 td=120 hl=12",
+    "timing": {
+      "data_s": 3.26,
+      "train_s": 56.22,
+      "predict_s": 0.66,
+      "total_s": 60.14
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "XGBoost",
+    "buffer": 1.1
+  },
+  {
+    "total_business_cost_dkk": 12706982.71,
+    "waste_cost_dkk": 3418547.62,
+    "stockout_cost_dkk": 6192290.06,
+    "mae": 1.455313,
+    "rmse": 5.654963,
+    "wmape": 97.9108,
+    "forecast_accuracy_pct": 2.0892,
+    "overstock_pct": 69.92,
+    "understock_pct": 15.61,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "XGBoost buf=1.15 td=120 hl=12",
+    "timing": {
+      "data_s": 2.59,
+      "train_s": 53.5,
+      "predict_s": 0.81,
+      "total_s": 56.89
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "XGBoost",
+    "buffer": 1.15
+  },
+  {
+    "total_business_cost_dkk": 12509582.9,
+    "waste_cost_dkk": 3636757.88,
+    "stockout_cost_dkk": 5915216.68,
+    "mae": 1.492869,
+    "rmse": 5.78066,
+    "wmape": 100.4375,
+    "forecast_accuracy_pct": 0,
+    "overstock_pct": 70.37,
+    "understock_pct": 15.16,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "XGBoost buf=1.20 td=120 hl=12",
+    "timing": {
+      "data_s": 2.9,
+      "train_s": 55.75,
+      "predict_s": 0.66,
+      "total_s": 59.3
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "XGBoost",
+    "buffer": 1.2
+  },
+  {
+    "total_business_cost_dkk": 12341318.66,
+    "waste_cost_dkk": 3859823.47,
+    "stockout_cost_dkk": 5654330.12,
+    "mae": 1.533137,
+    "rmse": 5.924517,
+    "wmape": 103.1467,
+    "forecast_accuracy_pct": 0,
+    "overstock_pct": 70.79,
+    "understock_pct": 14.74,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "XGBoost buf=1.25 td=120 hl=12",
+    "timing": {
+      "data_s": 2.63,
+      "train_s": 56.51,
+      "predict_s": 0.74,
+      "total_s": 59.88
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "XGBoost",
+    "buffer": 1.25
+  },
+  {
+    "total_business_cost_dkk": 12199088.32,
+    "waste_cost_dkk": 4087228.05,
+    "stockout_cost_dkk": 5407906.85,
+    "mae": 1.57581,
+    "rmse": 6.085247,
+    "wmape": 106.0177,
+    "forecast_accuracy_pct": 0,
+    "overstock_pct": 71.21,
+    "understock_pct": 14.32,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "XGBoost buf=1.30 td=120 hl=12",
+    "timing": {
+      "data_s": 2.82,
+      "train_s": 59.1,
+      "predict_s": 0.71,
+      "total_s": 62.63
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "XGBoost",
+    "buffer": 1.3
+  },
+  {
+    "total_business_cost_dkk": 12085298.4,
+    "waste_cost_dkk": 4319373.3,
+    "stockout_cost_dkk": 5177283.41,
+    "mae": 1.621087,
+    "rmse": 6.261551,
+    "wmape": 109.0638,
+    "forecast_accuracy_pct": 0,
+    "overstock_pct": 71.6,
+    "understock_pct": 13.93,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "XGBoost buf=1.35 td=120 hl=12",
+    "timing": {
+      "data_s": 3.02,
+      "train_s": 53.75,
+      "predict_s": 0.64,
+      "total_s": 57.41
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "XGBoost",
+    "buffer": 1.35
+  },
+  {
+    "total_business_cost_dkk": 11997024.51,
+    "waste_cost_dkk": 4555770.62,
+    "stockout_cost_dkk": 4960835.92,
+    "mae": 1.668879,
+    "rmse": 6.452151,
+    "wmape": 112.2792,
+    "forecast_accuracy_pct": 0,
+    "overstock_pct": 71.99,
+    "understock_pct": 13.54,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "XGBoost buf=1.40 td=120 hl=12",
+    "timing": {
+      "data_s": 2.46,
+      "train_s": 52.81,
+      "predict_s": 0.65,
+      "total_s": 55.92
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "XGBoost",
+    "buffer": 1.4
+  },
+  {
+    "total_business_cost_dkk": 13674851.94,
+    "waste_cost_dkk": 2602540.0,
+    "stockout_cost_dkk": 7381541.29,
+    "mae": 1.327427,
+    "rmse": 5.338505,
+    "wmape": 89.3069,
+    "forecast_accuracy_pct": 10.6931,
+    "overstock_pct": 68.54,
+    "understock_pct": 17.29,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LightGBM buf=1.00 td=120 hl=12",
+    "timing": {
+      "data_s": 2.55,
+      "train_s": 51.46,
+      "predict_s": 1.72,
+      "total_s": 55.73
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "LightGBM",
+    "buffer": 1.0
+  },
+  {
+    "total_business_cost_dkk": 13357845.75,
+    "waste_cost_dkk": 2789616.03,
+    "stockout_cost_dkk": 7045486.48,
+    "mae": 1.351255,
+    "rmse": 5.377822,
+    "wmape": 90.91,
+    "forecast_accuracy_pct": 9.09,
+    "overstock_pct": 69.01,
+    "understock_pct": 16.81,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LightGBM buf=1.05 td=120 hl=12",
+    "timing": {
+      "data_s": 2.5,
+      "train_s": 51.29,
+      "predict_s": 1.78,
+      "total_s": 55.57
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "LightGBM",
+    "buffer": 1.05
+  },
+  {
+    "total_business_cost_dkk": 13070331.5,
+    "waste_cost_dkk": 2981607.37,
+    "stockout_cost_dkk": 6725816.09,
+    "mae": 1.377835,
+    "rmse": 5.437416,
+    "wmape": 92.6983,
+    "forecast_accuracy_pct": 7.3017,
+    "overstock_pct": 69.46,
+    "understock_pct": 16.37,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LightGBM buf=1.10 td=120 hl=12",
+    "timing": {
+      "data_s": 2.49,
+      "train_s": 51.21,
+      "predict_s": 1.74,
+      "total_s": 55.44
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "LightGBM",
+    "buffer": 1.1
+  },
+  {
+    "total_business_cost_dkk": 12812760.23,
+    "waste_cost_dkk": 3178589.22,
+    "stockout_cost_dkk": 6422780.68,
+    "mae": 1.40719,
+    "rmse": 5.516628,
+    "wmape": 94.6732,
+    "forecast_accuracy_pct": 5.3268,
+    "overstock_pct": 69.88,
+    "understock_pct": 15.95,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LightGBM buf=1.15 td=120 hl=12",
+    "timing": {
+      "data_s": 2.47,
+      "train_s": 51.63,
+      "predict_s": 1.8,
+      "total_s": 55.89
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "LightGBM",
+    "buffer": 1.15
+  },
+  {
+    "total_business_cost_dkk": 12581032.22,
+    "waste_cost_dkk": 3379878.27,
+    "stockout_cost_dkk": 6134102.63,
+    "mae": 1.438905,
+    "rmse": 5.614629,
+    "wmape": 96.807,
+    "forecast_accuracy_pct": 3.193,
+    "overstock_pct": 70.31,
+    "understock_pct": 15.52,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LightGBM buf=1.20 td=120 hl=12",
+    "timing": {
+      "data_s": 2.55,
+      "train_s": 51.18,
+      "predict_s": 1.68,
+      "total_s": 55.41
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "LightGBM",
+    "buffer": 1.2
+  },
+  {
+    "total_business_cost_dkk": 12376271.11,
+    "waste_cost_dkk": 3585661.81,
+    "stockout_cost_dkk": 5860406.2,
+    "mae": 1.473189,
+    "rmse": 5.730454,
+    "wmape": 99.1135,
+    "forecast_accuracy_pct": 0.8865,
+    "overstock_pct": 70.73,
+    "understock_pct": 15.1,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LightGBM buf=1.25 td=120 hl=12",
+    "timing": {
+      "data_s": 3.33,
+      "train_s": 52.05,
+      "predict_s": 1.67,
+      "total_s": 57.04
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "LightGBM",
+    "buffer": 1.25
+  },
+  {
+    "total_business_cost_dkk": 12198744.83,
+    "waste_cost_dkk": 3795984.48,
+    "stockout_cost_dkk": 5601840.23,
+    "mae": 1.510018,
+    "rmse": 5.863048,
+    "wmape": 101.5913,
+    "forecast_accuracy_pct": 0,
+    "overstock_pct": 71.15,
+    "understock_pct": 14.68,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LightGBM buf=1.30 td=120 hl=12",
+    "timing": {
+      "data_s": 2.4,
+      "train_s": 49.1,
+      "predict_s": 1.68,
+      "total_s": 53.18
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "LightGBM",
+    "buffer": 1.3
+  },
+  {
+    "total_business_cost_dkk": 12050844.68,
+    "waste_cost_dkk": 4011244.85,
+    "stockout_cost_dkk": 5359733.22,
+    "mae": 1.549624,
+    "rmse": 6.0113,
+    "wmape": 104.2559,
+    "forecast_accuracy_pct": 0,
+    "overstock_pct": 71.55,
+    "understock_pct": 14.27,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LightGBM buf=1.35 td=120 hl=12",
+    "timing": {
+      "data_s": 2.65,
+      "train_s": 48.76,
+      "predict_s": 1.62,
+      "total_s": 53.04
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "LightGBM",
+    "buffer": 1.35
+  },
+  {
+    "total_business_cost_dkk": 11928350.49,
+    "waste_cost_dkk": 4230739.54,
+    "stockout_cost_dkk": 5131740.63,
+    "mae": 1.59168,
+    "rmse": 6.174083,
+    "wmape": 107.0854,
+    "forecast_accuracy_pct": 0,
+    "overstock_pct": 71.93,
+    "understock_pct": 13.89,
+    "n_samples": 172872,
+    "status": "ok",
+    "description": "LightGBM buf=1.40 td=120 hl=12",
+    "timing": {
+      "data_s": 2.85,
+      "train_s": 53.25,
+      "predict_s": 1.69,
+      "total_s": 57.8
+    },
+    "config": {
+      "train_rows": 1481760,
+      "test_rows": 172872,
+      "n_features": 68,
+      "train_days": 120,
+      "decay_half_life": 12
+    },
+    "phase": "buffer_sweep",
+    "model_name": "LightGBM",
+    "buffer": 1.4
+  }
+]

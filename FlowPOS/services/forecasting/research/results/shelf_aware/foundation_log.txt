@@ -1,0 +1,63 @@
+Loading store data...
+Store data: 30 items, 182 days, 5460 rows
+
+============================================================
+LightGBM BASELINE (60d window, retrain/3d)
+============================================================
+  MAE: 10.630  Cost: 4,779,438 DKK  Time: 18s
+
+============================================================
+CHRONOS: amazon/chronos-bolt-tiny
+============================================================
+
+Loading amazon/chronos-bolt-tiny...
+`torch_dtype` is deprecated! Use `dtype` instead!
+`torch_dtype` is deprecated! Use `dtype` instead!
+  Loaded in 0.8s
+  Round 10, 900 predictions, 13s
+  Round 20, 1800 predictions, 27s
+  Round 30, 2700 predictions, 41s
+  Round 40, 3600 predictions, 55s
+  Round 50, 4500 predictions, 69s
+  Done: 51 rounds, 4560 predictions, 70s
+  MAE: 9.613  Cost: 4,367,245 DKK  Time: 70s
+
+============================================================
+CHRONOS: amazon/chronos-bolt-mini
+============================================================
+
+Loading amazon/chronos-bolt-mini...
+  Loaded in 0.8s
+  Round 10, 900 predictions, 22s
+  Round 20, 1800 predictions, 48s
+  Round 30, 2700 predictions, 72s
+  Round 40, 3600 predictions, 97s
+  Round 50, 4500 predictions, 122s
+  Done: 51 rounds, 4560 predictions, 125s
+  MAE: 9.805  Cost: 4,494,782 DKK  Time: 125s
+
+============================================================
+CHRONOS: amazon/chronos-bolt-small
+============================================================
+
+Loading amazon/chronos-bolt-small...
+  Loaded in 128.3s
+  Round 10, 900 predictions, 71s
+  Round 20, 1800 predictions, 150s
+  Round 30, 2700 predictions, 229s
+  Round 40, 3600 predictions, 309s
+  Round 50, 4500 predictions, 388s
+  Done: 51 rounds, 4560 predictions, 396s
+  MAE: 9.752  Cost: 4,460,268 DKK  Time: 396s
+
+============================================================
+FINAL COMPARISON (buf=1.40, 60d window, retrain/3d)
+============================================================
+Model                          MAE   Cost (DKK)      Waste   Stockout     Time
+---------------------------------------------------------------------------
+chronos-bolt-tiny            9.613    4,367,245     61,354  2,870,594      70s
+chronos-bolt-small           9.752    4,460,268     58,376  2,934,595     396s
+chronos-bolt-mini            9.805    4,494,782     57,790  2,957,995     125s
+LightGBM-200                10.630    4,779,438     73,261  3,137,451      18s
+
+Results saved.
