@@ -1,0 +1,23 @@
+{
+  "test_mae_mlp": 1.2252501249313354,
+  "group_buf_cap3": {
+    "ultra_fresh": 2.3022522839079427,
+    "fresh": 2.999996009801031,
+    "medium": 2.999996009801031,
+    "long_shelf": 2.999996009801031,
+    "non_perishable": 2.99999488456823
+  },
+  "test_cost_cap3": 7615921.060186489,
+  "group_buf_unc": {
+    "ultra_fresh": 2.30225255681515,
+    "fresh": 4.415061272486988,
+    "medium": 9.99999611312987,
+    "long_shelf": 9.999993277840918,
+    "non_perishable": 9.999996041195322
+  },
+  "test_cost_unconstrained": 5938694.838773219,
+  "test_cost_baseline_140": 11692943.874678621,
+  "xgb_cap3_ref": 6558810,
+  "xgb_unc_ref": 5906055,
+  "n_params": 540161
+}

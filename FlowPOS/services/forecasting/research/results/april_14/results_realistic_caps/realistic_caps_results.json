@@ -1,0 +1,81 @@
+{
+  "scenarios": [
+    {
+      "cap": 2.0,
+      "group_buf": {
+        "ultra_fresh": 1.9840264659047513,
+        "fresh": 1.9999940391390134,
+        "medium": 1.9999940391390134,
+        "long_shelf": 1.9999940391390134,
+        "non_perishable": 1.9999940391390134
+      },
+      "test_cost": 7646257.984712066
+    },
+    {
+      "cap": 2.5,
+      "group_buf": {
+        "ultra_fresh": 1.9840282291951654,
+        "fresh": 2.499994473977962,
+        "medium": 2.499994473977962,
+        "long_shelf": 2.499994473977962,
+        "non_perishable": 2.499994473977962
+      },
+      "test_cost": 6918901.813090861
+    },
+    {
+      "cap": 3.0,
+      "group_buf": {
+        "ultra_fresh": 1.9840286941255643,
+        "fresh": 2.99999351337559,
+        "medium": 2.999996009801031,
+        "long_shelf": 2.999996009801031,
+        "non_perishable": 2.999994856950866
+      },
+      "test_cost": 6558810.438597752
+    },
+    {
+      "cap": 4.0,
+      "group_buf": {
+        "ultra_fresh": 1.9840272212077021,
+        "fresh": 3.1889019308944127,
+        "medium": 3.9999965621239357,
+        "long_shelf": 3.9999964162740613,
+        "non_perishable": 3.9999936312703497
+      },
+      "test_cost": 6206701.655661089
+    },
+    {
+      "cap": 5.0,
+      "group_buf": {
+        "ultra_fresh": 1.9840253138920283,
+        "fresh": 3.188901454722347,
+        "medium": 4.9999943713264114,
+        "long_shelf": 4.9999943235995925,
+        "non_perishable": 4.999995741443417
+      },
+      "test_cost": 6053516.147349648
+    },
+    {
+      "cap": 10.0,
+      "group_buf": {
+        "ultra_fresh": 1.9840267998556596,
+        "fresh": 3.188900148158237,
+        "medium": 6.353381421727325,
+        "long_shelf": 9.999993770251127,
+        "non_perishable": 9.999993545237468
+      },
+      "test_cost": 5906054.647381753
+    }
+  ],
+  "recommended_cap": 3.0,
+  "recommended_group_buf": {
+    "ultra_fresh": 1.9840286941255643,
+    "fresh": 2.99999351337559,
+    "medium": 2.999996009801031,
+    "long_shelf": 2.999996009801031,
+    "non_perishable": 2.999994856950866
+  },
+  "test_cost_baseline_140": 9498367.217041982,
+  "test_cost_recommended": 6558810.438597752,
+  "test_cost_unconstrained_591M": 5906055.0
+}
