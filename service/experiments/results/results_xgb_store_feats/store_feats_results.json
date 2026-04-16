@@ -1,0 +1,178 @@
+{
+  "flat_buf": 3.2335755347179456,
+  "group_buf": {
+    "ultra_fresh": 2.00759613662303,
+    "fresh": 3.288150266352624,
+    "medium": 6.24325103379415,
+    "long_shelf": 9.999993054918917,
+    "non_perishable": 9.999994106975574
+  },
+  "test_cost_baseline_140": 9337633.266554112,
+  "test_cost_flat_tuned": 7174826.26080996,
+  "test_cost_per_group": 5924010.163298914,
+  "val_mae_base": 1.3705165386199951,
+  "test_mae_base": 1.4595931768417358,
+  "num_features": 37,
+  "store_features_added": [
+    "chain_id",
+    "area_id",
+    "type_id",
+    "primary_cuisine_id",
+    "seasonal",
+    "store_age_days",
+    "hours_per_week",
+    "days_open_per_week",
+    "weekend_open",
+    "closed_monday"
+  ],
+  "feature_importance": [
+    {
+      "feature": "rmean_7",
+      "importance": 0.2953161895275116
+    },
+    {
+      "feature": "rmean_14",
+      "importance": 0.1137356087565422
+    },
+    {
+      "feature": "rmean_28",
+      "importance": 0.09933445602655411
+    },
+    {
+      "feature": "lag_14",
+      "importance": 0.06211179867386818
+    },
+    {
+      "feature": "lag_7",
+      "importance": 0.04660066217184067
+    },
+    {
+      "feature": "logsl",
+      "importance": 0.0271347314119339
+    },
+    {
+      "feature": "lag_28",
+      "importance": 0.026777058839797974
+    },
+    {
+      "feature": "dow",
+      "importance": 0.017880136147141457
+    },
+    {
+      "feature": "month",
+      "importance": 0.01631619594991207
+    },
+    {
+      "feature": "closed_monday",
+      "importance": 0.015737095847725868
+    },
+    {
+      "feature": "lag_2",
+      "importance": 0.014945510774850845
+    },
+    {
+      "feature": "is_weekend",
+      "importance": 0.014693225733935833
+    },
+    {
+      "feature": "dom",
+      "importance": 0.014332586899399757
+    },
+    {
+      "feature": "lag_3",
+      "importance": 0.013935066759586334
+    },
+    {
+      "feature": "per_x_we",
+      "importance": 0.013590890914201736
+    },
+    {
+      "feature": "primary_cuisine_id",
+      "importance": 0.0132000632584095
+    },
+    {
+      "feature": "lag_1",
+      "importance": 0.012526378035545349
+    },
+    {
+      "feature": "area_id",
+      "importance": 0.012454137206077576
+    },
+    {
+      "feature": "hours_per_week",
+      "importance": 0.012425120919942856
+    },
+    {
+      "feature": "per",
+      "importance": 0.012357398867607117
+    },
+    {
+      "feature": "sl",
+      "importance": 0.0120017621666193
+    },
+    {
+      "feature": "days_open_per_week",
+      "importance": 0.011879118159413338
+    },
+    {
+      "feature": "rmean_3",
+      "importance": 0.011231525801122189
+    },
+    {
+      "feature": "ag",
+      "importance": 0.011167991906404495
+    },
+    {
+      "feature": "rstd_28",
+      "importance": 0.010417168959975243
+    },
+    {
+      "feature": "store_age_days",
+      "importance": 0.009697693400084972
+    },
+    {
+      "feature": "turn",
+      "importance": 0.009645747020840645
+    },
+    {
+      "feature": "weekend_open",
+      "importance": 0.00950239785015583
+    },
+    {
+      "feature": "rstd_7",
+      "importance": 0.00901623722165823
+    },
+    {
+      "feature": "effw",
+      "importance": 0.008990749716758728
+    },
+    {
+      "feature": "type_id",
+      "importance": 0.008700584061443806
+    },
+    {
+      "feature": "rstd_3",
+      "importance": 0.008241966366767883
+    },
+    {
+      "feature": "rstd_14",
+      "importance": 0.00767928222194314
+    },
+    {
+      "feature": "shelf_x_r7",
+      "importance": 0.007476583123207092
+    },
+    {
+      "feature": "seasonal",
+      "importance": 0.006213881075382233
+    },
+    {
+      "feature": "store_type",
+      "importance": 0.002733008936047554
+    },
+    {
+      "feature": "chain_id",
+      "importance": 0.0
+    }
+  ]
+}
