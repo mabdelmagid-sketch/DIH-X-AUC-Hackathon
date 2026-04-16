@@ -1,7 +1,31 @@
+# Python
 __pycache__/
 *.pyc
 *.pyo
-.env
+*.pyd
 .pytest_cache/
+
+# Env / secrets
+.env
+.env.local
+.mcp.json
+.claude/
+
+# Logs
 *.log
+
+# Large artifacts — kept local only
+*.db
+data/raw/production.db
+data/colab_results/
+notebooks/catboost_info/
+notebooks/chronos-bolt-mini-finetuned/
+notebooks/chronos-bolt-mini-finetuned-v2/
+service/autoresearch/.cache/
 autoresearch/.cache/
+
+# OS
+.DS_Store
+.ipynb_checkpoints/
+.idea/
+.vscode/
